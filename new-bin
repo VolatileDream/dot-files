@@ -10,7 +10,7 @@ shift
 
 editor $@ "$file"
 
-if [ -z "$file" ] ; then
+if [ -e "$file" ] ; then
     chmod +x "$file"
 fi
 
