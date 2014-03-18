@@ -8,6 +8,9 @@ fi
 file="$1"
 shift
 
-touch "$file"
-chmod +x "$file"
 editor $@ "$file"
+
+if [ -z "$file" ] ; then
+    chmod +x "$file"
+fi
+
