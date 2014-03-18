@@ -1,0 +1,8 @@
+[user]
+	name = Gianni Gambetti
+	email = jex.pwns@gmail.com
+	signingkey = 9C9F9B75
+[push]
+	default = simple
+[grep]
+	lineNumber = true
