@@ -1,34 +1,76 @@
 #!/bin/bash
-#    init-dot-files - creates hard links to all the dot files for us
+#    init-dot-files - creates hard links to dot files, and generates others
 
-SOURCE=".source"
+mirror-dir-structure(){
 
-linkFile(){
-    out="$HOME/${1}{$2}"
-    if [[ -f "$out" ]] ; then
-        rm "$out"
+    if [[ $# -lt 2 ]] ; then
+        echo "mirror-dir-structure requires input + output directories"
+        return
     fi
-    ln "$SOURCE/$1" "$out"
+
+    # first setup directories
+    for dir in ` cd $1 ; find . -type d ` ; do
+        if [[ ! -d "$2/$dir" ]]; then
+            # directory doesn't exist
+            mkdir -p "$2/$dir"
+        fi
+    done # directories
 }
 
-# first setup directories
-for dir in ` cd $SOURCE ; find . -type d ` ; do
-    if [[ ! -d "$HOME/$dir" ]]; then
-        # directory doesn't exist
-        mkdir -p "$HOME/$dir"
-    fi
-done # directories
-
-for file in ` cd $SOURCE ; find . -type f ` ; do
-
-    if [[ -f "$HOME/$file" ]]; then
-        if ! diff "$HOME/$file" "$SOURCE/$file" > /dev/null ; then
-            echo "$HOME/$file already exists and differs from $SOURCE/$file"
-            echo "linked source to $file.1 instead"
-            linkFile "$file" ".1"
+do-generate(){
+    SOURCE=".generate"
+    
+    generateFile(){
+        out="$HOME/${1}${2}"
+        if [[ -f "$out" ]] ; then
+            rm "$out"
         fi
-    else
-        # don't exist yet
-        linkFile "$file"
-    fi
-done
+        "$SOURCE/$1" "$PWD" > "$out"
+    }
+
+    mirror-dir-structure "$SOURCE" "$HOME"
+
+    for file in ` cd $SOURCE ; find . -type f ` ; do
+
+        if [[ -e "$HOME/$file" ]]; then
+            if ! diff "$HOME/$file" "$SOURCE/$file" > /dev/null ; then
+                echo "$HOME/$file already exists writing to $file.1 instead"
+                generateFile "$file" ".1"
+            fi
+        else
+            generateFile "$file"
+        fi
+    done
+}
+
+do-linking(){
+
+    SOURCE=".source"
+
+    linkFile(){
+        out="$HOME/${1}{$2}"
+        if [[ -f "$out" ]] ; then
+            rm "$out"
+        fi
+        ln "$SOURCE/$1" "$out"
+    }
+
+    mirror-dir-structure "$SOURCE" "$HOME"
+
+    for file in ` cd $SOURCE ; find . -type f ` ; do
+
+        if [[ -f "$HOME/$file" ]]; then
+            if ! diff "$HOME/$file" "$SOURCE/$file" > /dev/null ; then
+                echo "$HOME/$file already exists and differs from $SOURCE/$file"
+                echo "linked source to $file.1 instead"
+                linkFile "$file" ".1"
+            fi
+        else
+            # don't exist yet
+            linkFile "$file"
+        fi
+    done
+}
+
+do-generate
+do-linking
