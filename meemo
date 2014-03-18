@@ -1,0 +1,394 @@
+#!/usr/bin/env python3
+
+## Turns out you can do everything this does for std in/out with bash stuff (almost)
+##
+## ## unfortunately we do need to sort the input. :(
+## ## and uniq can't use anything other than \n or \0 delimiters
+## cat ${cache} ${cache} - | sort | uniq -u | tee -a ${cache} 
+##
+
+import pickle
+import sys
+
+debug = False
+
+if debug:
+	def debug(output):
+		sys.stderr.write(output)
+		sys.stderr.write(u"\n")
+		sys.stderr.flush()
+else:
+	def debug(output):
+		pass
+
+def onlyIf(cond):
+
+	def wrap(func):
+
+		def decorator(self, *args, **kvargs):
+			if not cond(self):
+				raise ValueError(u"meemo isn't setup for io");
+			return func(self, *args, **kvargs)
+
+		return decorator
+
+	return wrap
+
+
+def _writeall(stream, thing):
+	length = len(thing)
+	written = 0
+
+	while written < length:
+		read = stream.write(thing)
+		written += read
+		thing = thing[read:]
+
+	return length
+
+
+def writable(meemo):
+	return meemo.writable()
+
+
+def readable(meemo):
+	return meemo.readable()
+
+
+#
+# Meemo is an io wrapper that memoizes either input or output.
+#
+# it mostly adheres to the io.RawIOBase contract
+#
+# it requires that the streams it recieves are binary
+#
+class meemo(object):
+
+	file_loc = '.meemo.cache'
+	delimiter = b'\n'
+
+	# file: cache file on disk
+	# delim: bytes that delimit blocks
+	# ksize: max allowed size of cache file
+	def __init__(self, file_loc=None, delim=None, byPassCache=False):
+
+		self.delimiter = delim or meemo.delimiter
+
+		if type(self.delimiter) is not bytes:
+			# assume utf8
+			self.delimiter = bytes(self.delimiter, "utf-8")
+
+		self.file = file_loc or meemo.file_loc
+		self.byPassCache = byPassCache
+
+		debug("delimiter: " + str(self.delimiter))
+		debug("file: " + self.file)
+
+		# assuming sets have really fast
+		# contains checking
+		self.load_cache()
+
+		# we define a relationship between closed, and in
+		# if closed == True, then in == None
+		self.closed = True
+		self.io_in = None
+		self.io_out = None
+
+		self.ibuffer = b""
+		self.obuffer = b""
+
+
+	def __enter__(self, *args, **kvargs):
+		return self
+
+
+	def __exit__(self, *args, **kvargs):
+		self.close()
+
+
+	@staticmethod
+	def input(stream, file_loc=None, delim=None, byPassCache=False):
+
+		if not stream.readable():
+			raise IOError(u"input stream isn't readable")
+
+		m = meemo(file_loc, delim, byPassCache=byPassCache)
+		m.wrap(io_input=stream)
+
+		return m
+
+
+	@staticmethod
+	def output(stream, file_loc=None, delim=None, byPassCache=False):
+
+		if not stream.writable():
+			raise IOError(u"output steram isn't writeable")
+
+		m = meemo(file_loc, delim, byPassCache=byPassCache)
+		m.wrap(io_output=stream)
+
+		return m
+
+
+	# input: a readable iobase
+	# output: a writeable iobase
+	def wrap(self, io_input=None, io_output=None):
+		
+		if not self.closed:
+			raise IOError(u"meemo is already setup with a stream");
+
+		if io_input is None and io_output is None:
+			raise IOError(u"meemo needs a stream to work")
+
+		if io_input is not None and io_output is not None:
+			raise IOError(u"meemo can only memoize a single stream")
+
+		# if we end up with both input + output being not None
+		# assume they want us to memoize both input + output
+
+		# TODO: check that io_input + io_output are actually
+		# io things that support read + writing
+		self.io_in = io_input
+		self.io_out = io_output
+		self.closed = False
+
+		self.ibuffer = b""
+		self.obuffer = b""
+
+
+	@staticmethod
+	def loop(io_input, io_output, cache_loc=None, delimiter=None, nocache=False):
+
+		#with meemo.output(io_output, cache_loc, delimiter, byPassCache=nocache) as memoize:
+		with meemo.input(io_input, cache_loc, delimiter, byPassCache=nocache) as memoize:
+
+			read = b"\x00"
+
+			while len(read) > 0:
+
+				# if read is None, in non-blocking and
+				#read = io_input.read(1000)
+				read = memoize.read(1000)
+
+				if len(read) is 0:
+					break
+				
+				#written = memoize.write(read)
+				written = io_output.write(read)
+
+			#io_input.close()
+			io_output.close()
+
+
+	def in_cache(self, item):
+		return not self.byPassCache and item in self.cache
+
+
+	def add_to_cache(self, item):
+		if not item in self.cache:
+			self.cache.add(item)
+
+
+	def print_cache(self, io_output=None):
+		
+		if io_output is None:
+			io_output = sys.stdout
+
+		for x in self.cache:
+			io_output.write(x)
+			io_output.write(self.delimiter)
+
+
+	def load_cache(self):
+		cache = set()
+		try:
+			with open(self.file, 'rb') as cf:
+				cache = pickle.load(cf)
+		except IOError:
+			# swallow this, the file doesn't exist
+			# so we default to empty cache
+			pass
+		finally:
+			self.cache = cache
+
+
+	def store_cache(self):
+		with open(self.file, 'wb') as cf:
+			pickle.dump(self.cache, cf, pickle.HIGHEST_PROTOCOL)
+
+
+	def fileno(self):
+		raise IOError(u"meemo doesn't have a fileno");
+
+
+	def isatty(self):
+		return False
+
+
+	def close(self):
+		if not self.closed:
+			
+			if self.io_in is not None:
+				self.io_in.close()
+
+			if self.io_out is not None:
+				if len(self.obuffer) > 0:
+					self.io_out.write(self.obuffer)
+				self.io_out.close()
+
+			self.closed = True
+
+		self.store_cache()
+
+
+	# disable seeking
+	def seekable(self):
+		# io base probably throws errors when attempting to use seek...
+		return False
+
+
+	@onlyIf(writable)
+	def flush(self):
+		self.io_out.flush();
+
+
+	# can read if setup.
+	def readable(self):
+		return not self.closed and self.io_in is not None
+
+
+	@onlyIf(readable)
+	def read1(self, num):
+		raise NotImplementedError(u"meemo can't guarantee to only make a single OS call")
+
+
+	@onlyIf(readable)
+	def readall(self):
+		# read all is a bad idea
+		raise NotImplementedError(u"meemo doesn't support reading entire files since they may be large")
+
+
+	@onlyIf(readable)
+	def read(self, num=-1):
+		# we completely disregard the num parameter.
+		
+		# "123abc456abc789" - "0abc112abc134" - "56abc1789"
+		# > "123" - "456" - "7890" - "112" - "13456" - "1789"
+
+		buf = self.ibuffer + self.io_in.read(1000)
+
+		blocks = buf.split( self.delimiter )
+
+		self.ibuffer = blocks[-1]
+
+		blocks = blocks[:-1]
+
+		data = []
+
+		for b in blocks:
+			if not self.in_cache(b):
+				self.add_to_cache(b)
+				data.append(b)
+				data.append(self.delimiter)
+
+		return b''.join(data)
+
+
+	@onlyIf(readable)
+	def readinto(self, ba):
+		raise NotImplementedError("meemo can't guarantee read sizes")
+	
+	def writable(self):
+		return not self.closed and self.io_out is not None
+
+
+	@onlyIf(writable)
+	def _dowrite(self, thing):
+
+		# get the full output we want.
+		thing = self.obuffer + thing
+
+		blocks = thing.split(self.delimiter);
+
+		count = len(blocks) - 1
+		written = 0
+
+		while written < count:
+
+			# get a block to look at
+			block = blocks[0]
+
+			if not self.in_cache(block):
+				_writeall(self.io_out, block)
+				_writeall(self.io_out, self.delimiter)
+
+				self.add_to_cache(block);
+
+			# remove the block we looked at
+			blocks = blocks[1:]
+
+			written += 1
+
+		# "123abc456abc789" - "0abc112abc134" - "56abc1789"
+		# > "123" - "456" - "7890" - "112" - "13456" - "1789"
+
+		# we know that the last block either:
+		# * didn't have the delimiter after it (len > 0)
+		# * did have the delimiter after it (len == 0)
+		self.obuffer = blocks[-1]
+
+		return written
+
+
+	@onlyIf(writable)
+	def writelines(self, lines):
+		return self._dowrite( b"".join(lines) )
+
+
+	@onlyIf(writable)
+	def write(self, bytearray):
+		return self._dowrite(bytearray)
+
+
+# things to use this as a program.
+
+import argparse
+import sys
+
+def parser():
+	parse = argparse.ArgumentParser(description=u"memoize io")
+
+	parse.add_argument('-f', '--file', help=u"the file to use as the cache", type=str)
+
+	parse.add_argument('-n', '--nocache', help=u"bypass the cache, but populate it anyway", action='store_true', default=False)
+
+	parse.add_argument('-d', '--delimiter', help=u"set the file delimiter")
+
+	# mostly useful for printing out the cache + using a different delimiter
+	parse.add_argument('-p', '--print', help=u"print out the cache contents", action='store_true')
+
+	return parse
+
+
+def main(args):
+
+	# make std in/out binary.
+
+	sys.stdin = sys.stdin.detach()
+	sys.stdout = sys.stdout.detach()
+
+	if args.print: 
+		m = meemo(args.file, args.delimiter);
+
+		m.print_cache()
+	else:
+		meemo.loop(sys.stdin, sys.stdout, args.file, args.delimiter, nocache=args.nocache)
+
+
+if __name__ == "__main__":
+
+	parse = parser()
+
+	args = parse.parse_args()
+
+	main(args);

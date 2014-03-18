@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+BROWSER=w3m
+ARGS=""
+
+_app="$0"
+
+usage(){
+	echo "usage: ${_app} search goes here"
+}
+
+
+if [[ $# -lt 1 ]]; then
+	usage
+	exit
+else
+	QUERY=` echo $@ | tr ' ' '+' `
+	URL="http://google.ca/search?q=${QUERY}"
+	"$BROWSER" $ARGS "$URL"
+fi
+

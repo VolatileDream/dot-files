@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+# FROM: https://github.com/LuRsT/hr
+
+col="$(tput cols)"
+if [[ "$col" -lt 0 ]] ; then
+    col="$COLUMNS"
+fi
+
+function hr {
+    word="$1"
+    line=''
+    while [[ ${#line} -lt $col ]]; do
+        line="$line$word"
+    done
+    echo "${line:0:$col}"
+}
+
+if [[ $# -eq 0 ]]; then
+    hr "_"
+    hr " "
+else
+    for word in "$@" ; do
+        hr "$word"
+    done
+fi
