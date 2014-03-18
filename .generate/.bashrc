@@ -1,6 +1,0 @@
-echo "# Proxy file for $1/.bashrc"
-echo "if [ -f "$1/.bashrc" ]; then"
-echo "    source '$1/.bashrc'"
-echo "else"
-echo "    echo 'ERROR: could not find '$1/.bashrc' did you forget to setup your dot-files?"
-echo "fi"

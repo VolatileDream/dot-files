@@ -20,25 +20,22 @@ mirror-dir-structure(){
 do-generate(){
     SOURCE=".generate"
     
-    generateFile(){
-        out="$HOME/${1}${2}"
-        if [[ -f "$out" ]] ; then
-            rm "$out"
-        fi
-        "$SOURCE/$1" "$PWD" > "$out"
-    }
-
     mirror-dir-structure "$SOURCE" "$HOME"
 
     for file in ` cd $SOURCE ; find . -type f ` ; do
 
-        if [[ -e "$HOME/$file" ]]; then
-            if ! diff "$HOME/$file" "$SOURCE/$file" > /dev/null ; then
-                echo "$HOME/$file already exists writing to $file.1 instead"
-                generateFile "$file" ".1"
+        tmp=`mktemp`
+
+        "$SOURCE/$file" "$PWD" > "$tmp"
+
+        if [[ -f "$HOME/$file" ]]; then
+            if ! diff "$HOME/$file" "$tmp" > /dev/null ; then
+                echo "$HOME/$file already exists and differs from $SOURCE/$file output"
+                echo "generating to  $HOME/$file.1 instead"
+                mv "$tmp" "$HOME/${file}.1"
             fi
         else
-            generateFile "$file"
+            mv "$tmp" "$HOME/$file"
         fi
     done
 }
@@ -48,7 +45,7 @@ do-linking(){
     SOURCE=".source"
 
     linkFile(){
-        out="$HOME/${1}{$2}"
+        out="$HOME/${1}${2}"
         if [[ -f "$out" ]] ; then
             rm "$out"
         fi
@@ -72,5 +69,5 @@ do-linking(){
     done
 }
 
-do-generate
 do-linking
+do-generate
