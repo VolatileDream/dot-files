@@ -1,0 +1,13 @@
+#!/bin/sh
+
+if [ $# -lt 1 ]; then
+    echo "usage: $0 file [editor options]"
+    exit
+fi
+
+file="$1"
+shift
+
+touch "$file"
+chmod +x "$file"
+editor $@ "$file"
