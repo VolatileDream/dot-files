@@ -4,7 +4,21 @@
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
 # command aliases
-function ndir(){ mkdir -p "$1" ; cd "$1" ; }
+ndir(){
+    if [[ $# -eq 0 ]]; then
+        echo "Usage: $0 [dirs ...] last-dir"
+        echo " creates dirs, then creates and enters last-dir"
+        echo " uses -p on mkdir, so parents are implicitly created"
+        return
+    fi
+
+    for dir in $@ ; do
+        mkdir -p "$dir"
+        last="$dir"
+    done
+
+    cd "$last"
+}
 alias lsall='lshal ; lshw ; lspci ; lsusb'
 alias jar='java -jar'
 alias tail='tail -f'
