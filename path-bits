@@ -1,0 +1,37 @@
+#!/bin/bash
+
+read -d '' script <<- EOF
+
+    {
+        home = "$HOME" ;
+        sub("/", "", home) ;
+        # remove the leading / from the path
+        sub("/", "") ;
+    }
+
+    # Assume /media/$USER/drive path
+    ( \$1 ~ /media/ && NF > 2 ) \
+    {
+        if ( NF == 3 ) {
+            print "/ on " \$3
+        } else {
+            print \$NF " on " \$3 ;
+        }
+        next
+    }
+
+    \$0 == home { print "~" ; next }
+
+    {
+        if ( NF == 0 ){
+            print "/"
+        }else{
+            print \$NF
+        }
+    }
+
+EOF
+
+#echo "$script"
+
+echo -n "$PWD" | awk -F "/" -- "$script"
