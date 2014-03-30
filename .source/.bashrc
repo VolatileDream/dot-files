@@ -78,12 +78,18 @@ fi
 
 export PATH="$HOME/bin:$PATH"
 
+export BASH_CONF="$HOME/.config/bash"
+
 # Alias definitions.
 # You may want to put all your additions into a separate file like
 # ~/.bash_aliases, instead of adding them here directly.
 # See /usr/share/doc/bash-doc/examples in the bash-doc package.
 
-if [ -f "$HOME/.bash_aliases" ]; then
-    source "$HOME/.bash_aliases"
+if [ -f "$BASH_CONF/bash_aliases" ]; then
+    source "$BASH_CONF/bash_aliases"
 fi
 
+# extra bash completion stuff
+if [ -f "$BASH_CONF/bash_completion" ]; then
+    source "$BASH_CONF/bash_completion"
+fi

@@ -81,11 +81,16 @@ alias alog='arecord $date ; cp $date /media/Giannis\ Key/Journal/Audio\ Log/ ; s
 
 # variables 
 # SSH hosts
-if [[ $(cat /etc/hostname) -eq "Po" ]] ; then
+
+case `hostname` in
+	ashes)
 	PC='jex@null-pointer.local'
-else
-	PC='jex@Po.local'
-fi
+	;;
+	null-pointer)
+	PC='jex@ashes.local'
+	;;
+esac
+
 CS='glgambet@taurine.csclub.uwaterloo.ca'
 UW='glgambet@linux.student.cs.uwaterloo.ca'
 
