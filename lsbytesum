@@ -1,9 +1,17 @@
 #!/bin/bash
 #           lsbytesum - sum the number of bytes in a directory listing
 
-TotalBytes=0
-for Bytes in $(ls -al | grep -E "^-" | awk '{print $5}'); do
-    let TotalBytes=$TotalBytes+$Bytes
-done
-TotalMeg=$(echo -e "scale=3 \n ${TotalBytes}/(1024*1024) \n quit" | bc )
-echo -n $TotalMeg
+read -d '' script <<- EOF
+
+    BEGIN { size = 0.0 ; accuracy = 1 ;}
+    /^-/  { size = size + \$5 }
+    END   {
+            mib = size/(1024*1024) ;
+            print int(mib*accuracy)/accuracy ;
+          }
+
+EOF
+
+#echo "$script"
+
+echo -n `ls -al | awk -- "$script"`
