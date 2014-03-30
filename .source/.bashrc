@@ -75,10 +75,13 @@ if ! shopt -oq posix; then
     source /etc/bash_completion
   fi
 fi
-
+# important variables to have set
 export PATH="$HOME/bin:$PATH"
-
 export BASH_CONF="$HOME/.config/bash"
+
+# set pass(1) storage directory to current directory
+# much better for transporting password files around
+export PASSWORD_STORE_DIR='.'
 
 # Alias definitions.
 # You may want to put all your additions into a separate file like
