@@ -1,4 +1,1 @@
-
-# completion file for ~/bin/pass
-source "$BASH_CONF/password-store"
-
+# file for custom completions to add to bash
