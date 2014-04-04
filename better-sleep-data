@@ -1,0 +1,32 @@
+#!/usr/bin/env python
+
+import datetime as dt
+
+import sys
+
+def hours_to_seconds(hours):
+    return hours*60*60
+
+for line in sys.stdin:
+
+    # line format is: date, hour:min asleep, hour:min awake, time slept, notes
+
+    if 'Date' in line:
+        # first line has headers, skip
+        continue;
+
+    segments = line.split(',')
+
+    date_asleep = dt.datetime.strptime(segments[0] + " " + segments[1], '%y/%m/%d %H:%M')
+
+    # just use the time delta to get the right date, parse the 3rd segment to get the real time.
+    hours_sleep = float(segments[3])
+    time_asleep = dt.timedelta(0, hours_to_seconds(hours_sleep))
+    date_awake = date_asleep + time_asleep
+
+    time_awake = dt.datetime.strptime(segments[2], '%H:%M')
+
+    date_awake = dt.datetime(date_awake.year, date_awake.month, date_awake.day, time_awake.hour, time_awake.minute)
+
+    print date_asleep, " ", date_awake
+
