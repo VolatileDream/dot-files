@@ -16,6 +16,12 @@ usage(){
 add_file(){
     FILE="$1"
 
+    if [ ! -f "$FILE" ]; then
+        usage
+        error "$FILE is not a file"
+        return 1
+    fi
+
     # check if it's a relative/abs path
 
     if [ "${FILE:0:1}" != "/" ]; then
@@ -26,8 +32,13 @@ add_file(){
 
     if [ "$RELATIVE_TO_HOME" = "$FILE" ]; then
         usage
-        error path not under ~/
-        exit 2
+        error "path not under ~/"
+        return 2
+    fi
+
+    if [ "${FILE##$HOME/bin}" != $FILE ]; then
+        error "can't add files under ~/bin"
+        return 3
     fi
 
     # echo $RELATIVE_TO_HOME
@@ -39,16 +50,16 @@ add_file(){
 
     DOT="$DOT_SOURCE/$RELATIVE_TO_HOME"
 
-    mkdir -p "$DOT_SOURCE/$DIR"
-
     if [ -f "$DOT" ] && [ "$DOT" -ef "$FILE" ]; then
-        echo "$FILE has already been added."
+        echo "$1 has already been added."
         return
     fi
 
+    mkdir -p "$DOT_SOURCE/$DIR"
+
     ln -t "$DOT_SOURCE/$DIR" "$FILE"
     if [ $? -ne 0 ]; then
-        echo "error linking files"
+        echo "error linking $1"
     fi
 
 }
@@ -61,5 +72,9 @@ fi
 
 while [ $# -gt 0 ]; do
     add_file "$1"
+    return_value=$?
+    if [ $return_value -ne 0 ]; then
+        exit $return_value
+    fi
     shift
 done
