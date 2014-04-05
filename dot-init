@@ -29,7 +29,7 @@ do-generate(){
         "$SOURCE/$file" "$PWD" > "$tmp"
 
         if [[ -f "$HOME/$file" ]]; then
-            if ! diff "$HOME/$file" "$tmp" > /dev/null ; then
+            if [ ! diff "$HOME/$file" -ef "$tmp" ] ; then
                 echo "$HOME/$file already exists and differs from $SOURCE/$file output"
                 echo "generating to  $HOME/$file.1 instead"
                 mv "$tmp" "$HOME/${file}.1"
@@ -57,7 +57,7 @@ do-linking(){
     for file in ` cd $SOURCE ; find . -type f ` ; do
 
         if [[ -f "$HOME/$file" ]]; then
-            if ! diff "$HOME/$file" "$SOURCE/$file" > /dev/null ; then
+            if [ ! "$HOME/$file" -ef "$SOURCE/$file" ] ; then
                 echo "$HOME/$file already exists and differs from $SOURCE/$file"
                 echo "linked source to $file.1 instead"
                 linkFile "$file" ".1"
