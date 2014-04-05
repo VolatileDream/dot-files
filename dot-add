@@ -1,0 +1,65 @@
+#!/bin/bash
+
+DOT_SOURCE="$HOME/bin/.source"
+
+error(){
+    echo "error: $@"
+}
+
+usage(){
+    echo "usage: ${0##*/} <file> [<file>, ...]"
+    echo
+    echo " <file> is added to the dotfile repo under ~/bin"
+    echo "     files specified must live under \$HOME"
+}
+
+add_file(){
+    FILE="$1"
+
+    # check if it's a relative/abs path
+
+    if [ "${FILE:0:1}" != "/" ]; then
+        FILE="$PWD/$FILE"
+    fi
+
+    RELATIVE_TO_HOME="${FILE##$HOME/}"
+
+    if [ "$RELATIVE_TO_HOME" = "$FILE" ]; then
+        usage
+        error path not under ~/
+        exit 2
+    fi
+
+    # echo $RELATIVE_TO_HOME
+    # echo $FILE
+
+    # make parent directories
+    DIR="${RELATIVE_TO_HOME%/*}"
+    # echo $DIR
+
+    DOT="$DOT_SOURCE/$RELATIVE_TO_HOME"
+
+    mkdir -p "$DOT_SOURCE/$DIR"
+
+    if [ -f "$DOT" ] && [ "$DOT" -ef "$FILE" ]; then
+        echo "$FILE has already been added."
+        return
+    fi
+
+    ln -t "$DOT_SOURCE/$DIR" "$FILE"
+    if [ $? -ne 0 ]; then
+        echo "error linking files"
+    fi
+
+}
+
+if [ $# -lt 1 ]; then
+    usage
+    error no file specified
+    exit 1
+fi
+
+while [ $# -gt 0 ]; do
+    add_file "$1"
+    shift
+done
