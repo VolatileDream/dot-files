@@ -12,9 +12,10 @@ ndir(){
         return
     fi
 
-    for dir in $@ ; do
-        mkdir -p "$dir"
-        last="$dir"
+    while [ $# -gt 0 ]; do
+        mkdir -p "$1"
+        last="$1"
+        shift
     done
 
     cd "$last"
