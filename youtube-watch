@@ -1,0 +1,21 @@
+#!/bin/sh
+
+PLAYER=mplayer
+
+do_file(){
+	link="$1"
+	file="$(youtube-dl --get-filename "$link")"
+	youtube-dl "$link" 
+	"$PLAYER" "$file"
+}
+
+if [ $# -lt 1 ]; then
+	echo "$0 usage: link [link ...]"
+	echo "   link - a link understood by youtube-dl"
+	exit 1
+fi
+
+while [ $# -gt 0 ]; do
+	do_file "$1"
+	shift
+done
