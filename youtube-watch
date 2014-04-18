@@ -6,7 +6,12 @@ do_file(){
 	link="$1"
 	file="$(youtube-dl --get-filename "$link")"
 	youtube-dl "$link" 
-	"$PLAYER" "$file"
+	if [ $? -eq 0 ]; then
+		"$PLAYER" "$file"
+	else
+		echo "Unable to download $link"
+		return 1
+	fi
 }
 
 if [ $# -lt 1 ]; then
