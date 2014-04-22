@@ -1,1 +1,9 @@
 # file for custom completions to add to bash
+
+__pass_completion(){
+    local word="${COMP_WORDS[COMP_CWORD]}"
+    local IFS=$'\n'
+    COMPREPLY=($(compgen -o filenames -f -d -X '!*.gpg' -- "${word}" | sed 's/.gpg$//gi' ))
+}
+
+complete -d -X '.[^./]*' -F __pass_completion pass
