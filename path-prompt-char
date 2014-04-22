@@ -1,0 +1,5 @@
+#!/bin/bash
+radioactive="\u2622"
+[ "$PATH" != "$BASE_PATH" ] && echo -e "\e[0;31m${radioactive}\e[m" && exit
+
+echo "$"

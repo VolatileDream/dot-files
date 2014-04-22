@@ -30,29 +30,8 @@ shopt -s checkwinsize
 # make less more friendly for non-text input files, see lesspipe(1)
 [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
 
-# set variable identifying the chroot you work in (used in the prompt below)
-if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
-    debian_chroot=$(cat /etc/debian_chroot)
-fi
-
 # if we don't have awk, enable fast path
 [ -x /usr/bin/awk ] || FAST_PATH="yes"
-
-if [ ${#FAST_PATH} -gt 0 ]; then
-    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\W\$ '
-else
-    #note that we also set lsbytesum, to calculate the number of MiB in a directory
-    PS1='${debian_chroot:+($debian_chroot)}\u@\h:$(path-bits) ($(lsbytesum) MiB)\$ '
-fi
-
-# If this is an xterm set the title to user@host:dir
-case "$TERM" in
-xterm*|rxvt*)
-    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
-    ;;
-*)
-    ;;
-esac
 
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
@@ -63,7 +42,6 @@ if [ -x /usr/bin/dircolors ]; then
     alias fgrep='fgrep --color=auto'
     alias egrep='egrep --color=auto'
 fi
-
 
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
@@ -77,11 +55,17 @@ if ! shopt -oq posix; then
 fi
 # important variables to have set
 export PATH="$HOME/bin:$PATH"
+export BASE_PATH="$PATH"
 export BASH_CONF="$HOME/.config/bash"
 
 # set pass(1) storage directory to current directory
 # much better for transporting password files around
 export PASSWORD_STORE_DIR='.'
+
+# shell prompt
+if [ -f "$BASH_CONF/bash_ps1" ]; then
+    source "$BASH_CONF/bash_ps1"
+fi
 
 # Alias definitions.
 # You may want to put all your additions into a separate file like

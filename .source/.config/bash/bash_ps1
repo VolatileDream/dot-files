@@ -1,0 +1,26 @@
+# PS1 this file is for all things related to PS1 changes
+
+# set variable identifying the chroot you work in (used in the prompt below)
+if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
+    debian_chroot=$(cat /etc/debian_chroot)
+fi
+
+if [ ${#FAST_PATH} -gt 0 ]; then
+    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\W\$ '
+else
+    path_chroot='${debian_chroot:+(\$debian_chroot)}'
+    path_bits='$(path-bits)'
+    # note that we also set lsbytesum, to calculate the number of MiB in a directory
+    path_dir_bytes='($(lsbytesum) MiB)'
+    path_prompt_char='$(path-prompt-char)'
+    PS1="${path_chroot}\u@\h:${path_bits} ${path_dir_bytes}${path_prompt_char} "
+fi
+
+# If this is an xterm set the title to user@host:dir
+case "$TERM" in
+xterm*|rxvt*)
+    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
+    ;;
+*)
+    ;;
+esac
