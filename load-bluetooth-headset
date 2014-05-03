@@ -1,0 +1,5 @@
+#!/bin/sh
+
+pactl load-module module-bluetooth-discover
+pactl load-module module-bluetooth-device
+pactl load-module module-alsa-sink
