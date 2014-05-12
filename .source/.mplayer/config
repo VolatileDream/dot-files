@@ -4,5 +4,5 @@
 # and falls back to something else if it doesn't exist
 ao=alsa,
 
-vfm=ffmpeg
-lavdopts=lowres=1:fast:skiploopfilter=all
+#vfm=ffmpeg
+#lavdopts=lowres=1:fast:skiploopfilter=all
