@@ -72,8 +72,6 @@ alias mcheck='ffmpeg -i'
 
 alias randnum='cat /dev/urandom | g -Eo --binary-files=text "[0-9]"'
 
-alias jsync='cp -vu --preserve=timestamps ~/.bash_aliases /media/Giannis\ Key/sync/ ; cp -vu --preserve=timestamps /media/Giannis\ Key/sync/.bash_aliases ~/.bash_aliases'
-
 # Commands used for journal
 date=`date +%Y_%m_%d`
 alias rec='arecord'
@@ -83,16 +81,7 @@ alias alog='arecord $date ; cp $date /media/Giannis\ Key/Journal/Audio\ Log/ ; s
 # variables 
 # SSH hosts
 
-case `hostname` in
-	ashes)
-	PC='jex@null-pointer.local'
-	;;
-	null-pointer)
-	PC='jex@ashes.local'
-	;;
-esac
-
-CS='glgambet@taurine.csclub.uwaterloo.ca'
-UW='glgambet@linux.student.cs.uwaterloo.ca'
+CS='csclub.uwaterloo.ca'
+UW='linux.student.cs.uwaterloo.ca'
 
 #temporary variables
