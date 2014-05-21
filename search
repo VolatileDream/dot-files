@@ -8,7 +8,7 @@ if [[ $# -lt 1 ]]; then
 	exit
 else
 	QUERY=` echo $@ | tr ' ' '+' `
-	URL="http://google.ca/search?q=${QUERY}"
+	URL="https://google.ca/search?q=${QUERY}"
 	"$BROWSER" $ARGS "$URL"
 fi
 
