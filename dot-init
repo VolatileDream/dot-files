@@ -19,6 +19,7 @@ mirror-dir-structure(){
 
 do-generate(){
     SOURCE=".generate"
+    mkdir -p $SOURCE
     
     mirror-dir-structure "$SOURCE" "$HOME"
 
@@ -29,7 +30,7 @@ do-generate(){
         "$SOURCE/$file" "$PWD" > "$tmp"
 
         if [[ -f "$HOME/$file" ]]; then
-            if [ ! diff "$HOME/$file" -ef "$tmp" ] ; then
+            if [ ! "$HOME/$file" -ef "$tmp" ] ; then
                 echo "$HOME/$file already exists and differs from $SOURCE/$file output"
                 echo "generating to  $HOME/$file.1 instead"
                 mv "$tmp" "$HOME/${file}.1"
@@ -43,6 +44,7 @@ do-generate(){
 do-linking(){
 
     SOURCE=".source"
+    mkdir -p $SOURCE
 
     linkFile(){
         out="$HOME/${1}${2}"
