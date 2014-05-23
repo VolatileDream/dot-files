@@ -50,6 +50,11 @@ if [[ -n $(which sshfs) ]];then
 	function ssh-umount(){
 		fusermount -u ${1}
 	}
+else
+	function ssh-mount(){
+		echo "ssh-mount not supported (no ssh-fs)"
+		return
+	}
 fi
 
 # keyboard commands
@@ -77,10 +82,3 @@ alias rec='arecord'
 alias play='aplay'
 alias alog='arecord $date ; cp $date /media/Giannis\ Key/Journal/Audio\ Log/ ; shred -u $date'
 
-# variables 
-# SSH hosts
-
-CS='csclub.uwaterloo.ca'
-UW='linux.student.cs.uwaterloo.ca'
-
-#temporary variables

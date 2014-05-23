@@ -80,3 +80,9 @@ fi
 if [ -f "$BASH_CONF/bash_completion" ]; then
     source "$BASH_CONF/bash_completion"
 fi
+
+# variables that are nice to have around
+if [ -f "$BASH_CONF/bash_variables" ]; then
+    source "$BASH_CONF/bash_variables"
+fi
+

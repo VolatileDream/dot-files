@@ -1,0 +1,9 @@
+# source for extra variables
+source ~/.selected_editor
+export EDITOR=$SELECTED_EDITOR
+
+# SSH hosts
+
+CS='csclub.uwaterloo.ca'
+UW='linux.student.cs.uwaterloo.ca'
+
