@@ -20,6 +20,10 @@ ndir(){
 
     cd "$last"
 }
+restore-path(){
+	PATH=$BASE_PATH
+}
+
 alias lsall='lshal ; lshw ; lspci ; lsusb'
 alias jar='java -jar'
 alias tail='tail -f'
