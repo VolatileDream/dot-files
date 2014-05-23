@@ -24,6 +24,9 @@ restore-path(){
 	PATH=$BASE_PATH
 }
 
+alias aoeu='setxkbmap us'
+alias asdf='setxkbmap dvorak'
+
 alias lsall='lshal ; lshw ; lspci ; lsusb'
 alias jar='java -jar'
 alias tail='tail -f'
