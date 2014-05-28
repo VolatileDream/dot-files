@@ -1,0 +1,6 @@
+# This file isn't to be executed, but is to be sourced by other dot-* commands
+
+GEN_DIR=".generate"
+SRC_DIR=".source"
+
+BIN_DIR="$HOME/bin"
