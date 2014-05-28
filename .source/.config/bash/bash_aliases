@@ -43,7 +43,7 @@ if [[ -n $(which sshfs) ]];then
 	function ssh-mount(){
 		if [[ $# -lt 3 ]]; then
 			echo "Usage: ssh-mount host remote-dir local-dir";
-			exit;
+			return
 		fi
 		sshfs ${1}:${2} ${3}
 	}
