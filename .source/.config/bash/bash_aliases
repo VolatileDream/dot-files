@@ -66,9 +66,9 @@ alias bkj='time=`date +%Y_%m_%d` ; 7z a -r ~/Documents/${time}_Journal.7z /media
 
 # nav aliases
 alias .=ls
-alias .a='ls -a'
+alias .a='ls -A'
 alias .l='ls -l'
-alias .d='ls -al | grep drw'
+alias .d='ls -Al | grep "^d"'
 alias ..='cd ..'
 
 # custom command aliases
