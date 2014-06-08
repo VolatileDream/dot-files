@@ -20,8 +20,15 @@ ndir(){
 
     cd "$last"
 }
-restore-path(){
-	PATH=$BASE_PATH
+
+# path stuff
+path-reset(){
+	# reset the path to whatever it was before
+	PATH="$BASE_PATH"
+}
+path-include(){
+	# include the current directory in the path
+	PATH="$PWD:$PATH"
 }
 
 alias aoeu='setxkbmap us'
