@@ -4,7 +4,7 @@ PLAYER=mplayer
 
 do_file(){
 	link="$1"
-	file="$(youtube-dl --get-filename "$link")"
+	file="$(youtube-dl -v --get-filename "$link")"
 	youtube-dl "$link" 
 	if [ $? -eq 0 ]; then
 		"$PLAYER" "$file"
