@@ -10,6 +10,22 @@ INTERACT=''
 SHELL=`which sh`
 ECHO=`which echo`
 
+read -d '' SCRIPT <<- EOF
+	BEGIN { date=""; }
+	/$ENTRY_SEPERATOR/ {
+		gsub( /^$ENTRY_SEPERATOR/, "" );
+		date = \$0;
+	}
+	/^!/ {
+		# remove the ! and meta chars
+		gsub( /^![^ ]* */, "" );
+		com = \$1 ; // add the command
+		gsub( com, "" );
+		#print date, "--";
+		print com, date, \$0 ;
+	}
+EOF
+
 function usage(){
 	echo "Usage: ${NAME} [-d command-dir] [-o output-dir] [-p] files"
 	echo -e "\tParse plain text journal files to generate secondary data sources"
@@ -31,11 +47,12 @@ function parse-file(){
 		cat "$FILE" |
 		# get lines that start with commands or entry dates
 		grep -E "^(${ENTRY_SEPERATOR}|!)" |
-		grep -E "^!" |
+		awk "$SCRIPT" |
+		#grep -E "^!" |
 		# rewrite commands to remove meta characters
 		sed 's_^![^ ]* \+__' |
 		# rewrite line to escape characters for shell
-		sed "s_\([!@#$%^&*(){}'\"]\)_$ESC\1_g" |
+		sed "s_\([!@#$%^&*(){}'/\"]\)_$ESC\1_g" |
 		sed "s_\[_$ESC[_g" |
 		sed "s_\]_$ESC]_g" |
 		# run the commands one at a time with their arguments
