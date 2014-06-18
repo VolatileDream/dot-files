@@ -2,7 +2,7 @@
 
 read -d '' script <<- EOF
 
-    BEGIN {
+    {
         home = "$HOME" ;
         sub("/", "", home) ;
         # remove the leading / from the path
