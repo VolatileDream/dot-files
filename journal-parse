@@ -1,0 +1,91 @@
+#!/bin/bash
+
+# Global variables
+NAME="$0"
+DIR='.'
+OUTPUT_DIR='.'
+ENTRY_SEPERATOR='---------------'
+# interactive argument for xargs
+INTERACT=''
+SHELL=`which sh`
+ECHO=`which echo`
+
+function usage(){
+	echo "Usage: ${NAME} [-d command-dir] [-o output-dir] [-p] files"
+	echo -e "\tParse plain text journal files to generate secondary data sources"
+	echo
+	echo -e "\t-d command-dir: specificy the directory to find commands."
+	echo -e "\t-o output-dir: specificy the directory to output to."
+	echo -e "\t-p : get prompted before any command runs."
+	echo -e "\tfiles - journal files to parse"
+}
+
+function parse-file(){
+	FILE="$1"
+	if [[ -f "$1" ]]; then
+		echo "Parsing: '$FILE'"
+		ESC='\\\\'
+
+		# cd into the output directory
+		(echo "cd '$OUTPUT_DIR'" ;
+		cat "$FILE" |
+		# get lines that start with commands or entry dates
+		grep -E "^(${ENTRY_SEPERATOR}|!)" |
+		grep -E "^!" |
+		# rewrite commands to remove meta characters
+		sed 's_^![^ ]* \+__' |
+		# rewrite line to escape characters for shell
+		sed "s_\([!@#$%^&*(){}'\"]\)_$ESC\1_g" |
+		sed "s_\[_$ESC[_g" |
+		sed "s_\]_$ESC]_g" |
+		# run the commands one at a time with their arguments
+		xargs --max-lines=1 $INTERACT -I '{}' -- "$ECHO" "$DIR/{}") |
+		# and send them to a shell
+		sh
+	else
+		echo "Not found: $FILE" >> /dev/stderr
+	fi
+}
+
+function parse-dir(){
+	if [[ -d "$1" ]]; then
+		echo "$1"
+	else
+		usage >> /dev/stderr
+		exit 1
+	fi
+}
+
+#program start
+
+if [[ $# -lt 1 ]]; then
+	usage
+	exit 1
+fi
+
+while [[ $# -gt 0 ]]; do
+	case "$1" in
+	-p)
+		INTERACT="-p"
+		;;
+	-d)
+		shift
+		DIR=`parse-dir $1`
+		;;
+	-o)
+		shift
+		if [[ ! -d "$1" ]]; then
+			mkdir -p "$1"
+		fi
+		OUTPUT_DIR="$1"
+		;;
+	*)
+		parse-file "$1"
+		;;
+	esac
+
+	# shift the args
+	shift
+done
+
+exit 
