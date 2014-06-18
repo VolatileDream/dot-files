@@ -30,9 +30,9 @@ function usage(){
 	echo "Usage: ${NAME} [-d command-dir] [-o output-dir] [-p] files"
 	echo -e "\tParse plain text journal files to generate secondary data sources"
 	echo
-	echo -e "\t-d command-dir: specificy the directory to find commands."
-	echo -e "\t-o output-dir: specificy the directory to output to."
-	echo -e "\t-p : get prompted before any command runs."
+	echo -e "\t-d command-dir: specificy the directory to find commands. default=."
+	echo -e "\t-o output-dir: specificy the directory to output to. default=."
+	echo -e "\t-p : get prompted before each command runs."
 	echo -e "\tfiles - journal files to parse"
 }
 
