@@ -36,10 +36,21 @@ function usage(){
 	echo -e "\tfiles - journal files to parse"
 }
 
+function absolute-dir(){
+	# check the first character
+	if [ "${1:0:1}" = "/" ]; then
+		echo "$1"
+	else
+		echo "${PWD}/${1}"
+	fi
+}
+
 function parse-file(){
 	FILE="$1"
-	if [[ -f "$1" ]]; then
+	COM="$(absolute-dir "$DIR")"
+	if [ -f "$1" ]; then
 		echo "Parsing: '$FILE'"
+		#echo $COM
 		ESC='\\\\'
 
 		# cd into the output directory
@@ -56,7 +67,7 @@ function parse-file(){
 		sed "s_\[_$ESC[_g" |
 		sed "s_\]_$ESC]_g" |
 		# run the commands one at a time with their arguments
-		xargs --max-lines=1 $INTERACT -I '{}' -- "$ECHO" "$DIR/{}") |
+		xargs --max-lines=1 $INTERACT -I '{}' -- "$ECHO" "$COM/{}") |
 		# and send them to a shell
 		sh
 	else
@@ -65,7 +76,7 @@ function parse-file(){
 }
 
 function parse-dir(){
-	if [[ -d "$1" ]]; then
+	if [ -d "$1" ]; then
 		echo "$1"
 	else
 		usage >> /dev/stderr
@@ -75,23 +86,23 @@ function parse-dir(){
 
 #program start
 
-if [[ $# -lt 1 ]]; then
+if [ $# -lt 1 ]; then
 	usage
 	exit 1
 fi
 
-while [[ $# -gt 0 ]]; do
+while [ $# -gt 0 ]; do
 	case "$1" in
 	-p)
 		INTERACT="-p"
 		;;
 	-d)
 		shift
-		DIR=`parse-dir $1`
+		DIR=`parse-dir "$1"`
 		;;
 	-o)
 		shift
-		if [[ ! -d "$1" ]]; then
+		if [ ! -d "$1" ]; then
 			mkdir -p "$1"
 		fi
 		OUTPUT_DIR="$1"
