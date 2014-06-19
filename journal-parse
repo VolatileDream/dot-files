@@ -62,10 +62,14 @@ function parse-file(){
 		#grep -E "^!" |
 		# rewrite commands to remove meta characters
 		sed 's_^![^ ]* \+__' |
+		# rewrite \ to multiple so that it gets to the shell properly
+		sed 's_\\_\\\\\\\\_g' |
 		# rewrite line to escape characters for shell
 		sed "s_\([!@#$%^&*(){}'/\"]\)_$ESC\1_g" |
 		sed "s_\[_$ESC[_g" |
 		sed "s_\]_$ESC]_g" |
+		# unfortunately there is not a very nice way to escape '\' characters,
+		# they are kind of eaten by xargs. 
 		# run the commands one at a time with their arguments
 		xargs --max-lines=1 $INTERACT -I '{}' -- "$ECHO" "$COM/{}") |
 		# and send them to a shell
