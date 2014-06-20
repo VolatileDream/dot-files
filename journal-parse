@@ -107,6 +107,7 @@ while [ $# -gt 0 ]; do
 	-d)
 		shift
 		DIR=`parse-dir "$1"`
+		echo "Changing command directory to $DIR"
 		;;
 	-o)
 		shift
@@ -114,6 +115,7 @@ while [ $# -gt 0 ]; do
 			mkdir -p "$1"
 		fi
 		OUTPUT_DIR="$1"
+		echo "Changing output directory to $OUTPUT_DIR"
 		;;
 	*)
 		parse-file "$1"
