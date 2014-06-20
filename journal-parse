@@ -16,13 +16,15 @@ read -d '' SCRIPT <<- EOF
 		gsub( /^$ENTRY_SEPERATOR/, "" );
 		date = \$0;
 	}
+	/^![^ ]*d/ {
+		# bump all of the arguments and insert
+		# the date as the 1st argument
+		gsub( /^![^ ]* +[^ ]+/, "& " date );
+	}
 	/^!/ {
 		# remove the ! and meta chars
-		gsub( /^![^ ]* */, "" );
-		com = \$1 ; // add the command
-		gsub( com, "" );
-		#print date, "--";
-		print com, date, \$0 ;
+		gsub( /^![^ ]* +/, "" );
+		print \$0 ;
 	}
 EOF
 
