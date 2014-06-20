@@ -1,0 +1,12 @@
+#!/bin/bash
+
+function absolute-path(){
+	# check the first character
+	if [ "${1:0:1}" = "/" ]; then
+		echo "$1"
+	else
+		echo "${PWD}/${1}"
+	fi
+}
+
+pcmanfm -w "`absolute-path "$1"`"
