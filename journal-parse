@@ -56,8 +56,9 @@ function parse-file(){
 		#echo "Parsing: '$FILE' ($COM) => $OUT"
 		ESC='\\\\'
 
-		# cd into the output directory
-		(echo "cd '$OUT'" ;
+		# cd into the output directory, modify path to not grab a bunch of stuff
+		# add /bin and /usr/bin to give the shell most of the commands people expect
+		(echo "cd '$OUT' ; PATH='$DIR:/bin:/usr/bin'" ;
 		cat "$FILE" |
 		# get lines that start with commands or entry dates
 		grep -E "^(${ENTRY_SEPERATOR}|!)" |
