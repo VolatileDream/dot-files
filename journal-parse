@@ -38,7 +38,7 @@ function usage(){
 	echo -e "\tfiles - journal files to parse"
 }
 
-function absolute-dir(){
+function absolute-path(){
 	# check the first character
 	if [ "${1:0:1}" = "/" ]; then
 		echo "$1"
@@ -48,15 +48,16 @@ function absolute-dir(){
 }
 
 function parse-file(){
-	FILE="$1"
-	COM="$(absolute-dir "$DIR")"
+	FILE="$(absolute-path "$1")"
+	COM="$(absolute-path "$DIR")"
+	OUT="$(absolute-path "$OUTPUT_DIR")"
 	if [ -f "$1" ]; then
-		echo "Parsing: '$FILE'"
-		#echo $COM
+		echo "Parsing: '$1'"
+		#echo "Parsing: '$FILE' ($COM) => $OUT"
 		ESC='\\\\'
 
 		# cd into the output directory
-		(echo "cd '$OUTPUT_DIR'" ;
+		(echo "cd '$OUT'" ;
 		cat "$FILE" |
 		# get lines that start with commands or entry dates
 		grep -E "^(${ENTRY_SEPERATOR}|!)" |
