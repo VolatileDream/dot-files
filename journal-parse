@@ -7,9 +7,13 @@ OUTPUT_DIR='.'
 ENTRY_SEPERATOR='---------------'
 # interactive argument for xargs
 INTERACT=''
+ECHO_FIRST=0
 SHELL=`which sh`
 ECHO=`which echo`
 
+
+function get-commands(){
+	# script for doing meta-data command modification
 read -d '' SCRIPT <<- EOF
 	BEGIN { date=""; }
 	/$ENTRY_SEPERATOR/ {
@@ -27,15 +31,41 @@ read -d '' SCRIPT <<- EOF
 		print \$0 ;
 	}
 EOF
+	cat "$1" |
+	# get lines that start with commands or entry dates
+	grep -E "^(${ENTRY_SEPERATOR}|!)" |
+	# rewrite commands to remove meta characters
+	awk "$SCRIPT" | sed 's_^![^ ]* \+__'
+}
 
 function usage(){
-	echo "Usage: ${NAME} [-d command-dir] [-o output-dir] [-p] files"
+	echo "Usage: ${NAME} [-d command-dir] [-o output-dir] [-p] [-e] files"
 	echo -e "\tParse plain text journal files to generate secondary data sources"
 	echo
 	echo -e "\t-d command-dir: specificy the directory to find commands. default=."
 	echo -e "\t-o output-dir: specificy the directory to output to. default=."
 	echo -e "\t-p : get prompted before each command runs."
+	echo -e "\t-e : write the commands run to stdout."
 	echo -e "\tfiles - journal files to parse"
+}
+
+function escape-args(){
+read -d '' SCRIPT <<- EOF
+	{
+		printf( "%s", \$1 );
+		# group each argument on the line in single quotes (except the first)
+		for( i=2 ; i <= NF ; i++ ) {
+			printf( "%s\\\\"%s\\\\"", OFS, \$i );
+		}
+		# print the record seperator
+		printf( ORS );
+	}
+EOF
+	awk "$SCRIPT"
+}
+
+function null-term-lines(){
+	awk '{ printf( "%s%c", $0, 0 ); }'
 }
 
 function absolute-path(){
@@ -51,33 +81,23 @@ function parse-file(){
 	FILE="$(absolute-path "$1")"
 	COM="$(absolute-path "$DIR")"
 	OUT="$(absolute-path "$OUTPUT_DIR")"
+
 	if [ -f "$1" ]; then
 		echo "Parsing: '$1'"
 		#echo "Parsing: '$FILE' ($COM) => $OUT"
-		ESC='\\\\'
+
+		# use a temporary input file to get nice command echoing
+		INPUT=`mktemp`
+		get-commands "$FILE" >> "$INPUT"
+		if [ $ECHO_FIRST -ne 0 ]; then
+			cat "$INPUT"
+		fi
 
 		# cd into the output directory, modify path to not grab a bunch of stuff
 		# add /bin and /usr/bin to give the shell most of the commands people expect
-		(echo "cd '$OUT' ; PATH='$DIR:/bin:/usr/bin'" ;
-		cat "$FILE" |
-		# get lines that start with commands or entry dates
-		grep -E "^(${ENTRY_SEPERATOR}|!)" |
-		awk "$SCRIPT" |
-		#grep -E "^!" |
-		# rewrite commands to remove meta characters
-		sed 's_^![^ ]* \+__' |
-		# rewrite \ to multiple so that it gets to the shell properly
-		sed 's_\\_\\\\\\\\_g' |
-		# rewrite line to escape characters for shell
-		sed "s_\([!@#$%^&*(){}'/\"]\)_$ESC\1_g" |
-		sed "s_\[_$ESC[_g" |
-		sed "s_\]_$ESC]_g" |
-		# unfortunately there is not a very nice way to escape '\' characters,
-		# they are kind of eaten by xargs. 
-		# run the commands one at a time with their arguments
-		xargs --max-lines=1 $INTERACT -I '{}' -- "$ECHO" "$COM/{}") |
-		# and send them to a shell
-		sh
+		(echo "cd $OUT ; PATH='$DIR:/bin:/usr/bin'" ; cat "$INPUT" | escape-args ) |
+		sh >> /dev/stderr
+		rm "$INPUT"
 	else
 		echo "Not found: $FILE" >> /dev/stderr
 	fi
@@ -101,6 +121,9 @@ fi
 
 while [ $# -gt 0 ]; do
 	case "$1" in
+	-e)
+		ECHO_FIRST=1
+		;;
 	-p)
 		INTERACT="-p"
 		;;

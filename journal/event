@@ -7,7 +7,6 @@
 if [ $# -eq 0 ]; then
 	# exit if we have no args
 	echo "Usage: $0 <date> event ..."
-	echo ""
 	exit 0
 fi
 
@@ -63,7 +62,7 @@ case $COM in
 		MATCH=$(cat "$FILE" | grep -En -e "-~ $(echo $EVENT | sed 's/ /\ /g')\$" )
 		# check if we got a match
 		if [ -z "$MATCH" ]; then
-			echo "No matching event found for: '$EVENT'"
+			echo "No matching event found for: '$EVENT' @$END_DATE"
 			exit 1
 		# TODO check for multiple matches
 		fi
