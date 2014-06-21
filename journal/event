@@ -59,7 +59,7 @@ case $COM in
 		END_DATE="$DATE"
 
 		# have to escape spaces
-		MATCH=$(cat "$FILE" | grep -En -e "-~ $(echo $EVENT | sed 's/ /\ /g')\$" )
+		MATCH=$(cat "$FILE" | grep -n -e "-~ $(echo $EVENT | sed 's/ /\ /g')" )
 		# check if we got a match
 		if [ -z "$MATCH" ]; then
 			echo "No matching event found for: '$EVENT' @$END_DATE"
