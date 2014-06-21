@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Creates a database of quotes that can be listed
+
+DB="$PWD/quote.db"
+
+# ensure the DB exists
+if [ ! -f "$DB" ]; then
+	echo "CREATE TABLE quotes ( quote TEXT );" | sqlite "$DB"
+fi
+
+case $0 in
+	*quotes)
+		if [ $# -eq 0 ]; then
+			exit
+		fi
+		INSERT="INSERT INTO quotes VALUES( \"$@\" );"
+		echo "$INSERT" | sqlite "$DB"
+		;;
+	*quotes-list)
+		if [ $# -gt 0 ]; then
+			# SQL injection for flexibility. lol
+			SELECT="SELECT * FROM quotes WHERE $@;"
+		else
+			SELECT="SELECT * FROM quotes;"
+		fi
+		echo "$SELECT" | sqlite "$DB"
+		;;
+esac
