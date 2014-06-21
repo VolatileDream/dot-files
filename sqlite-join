@@ -1,0 +1,14 @@
+#!/bin/sh
+
+if [ $# -lt 2 ]; then
+	echo "Usage: $0 <new-db> <existing-db> ..."
+	echo "\tGiven multiple SQLITE databases, join them into a single database."
+	exit 1
+fi
+
+NEW="$1" ; shift ;
+
+while [ $# -gt 0 ]; do
+	echo .dump | sqlite "$1" | sqlite "$NEW"
+	shift
+done
