@@ -1,0 +1,17 @@
+#!/bin/bash
+
+if [ $# -lt 2 ]; then
+	echo "Usage: $0 <from> <to>"
+	echo "  Prints starting at lines that match <from>"
+	echo "  and continues to print until a line matches <to>"
+	echo "  Prints non-inclusively."
+fi
+
+read -d '' SCRIPT <<- EOF
+	BEGIN { matching = 0; }
+	/$2/ { matching = 0; }
+	{ if(matching > 0){ print } }
+	/$1/ { matching = 1; }
+EOF
+
+awk "$SCRIPT"
