@@ -53,8 +53,12 @@ if [ $FULL -ne 0 -a $INCR -ne 0 ]; then
 	exit 1
 fi
 
+# were to put all the files we generate
+GENERATED="$(journal config journal generated)"
+
 if [ $CLEAN -ne 0 ]; then
 	echo "$0 CLEANING"
+	# Clean up anything that wasn't placed in $GENERATED
 fi
 
 if [ $FULL -ne 0 ]; then

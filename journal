@@ -84,8 +84,10 @@ build(){
 
 	for SRC in $SOURCES ; do
 		COM="${BIN}/${BUILD_PREFIX}${SRC}"
-		if [ -e "$COM" -a -x "$COM" ]; then
-			"$COM" $ARGS
+		if [ -e "$COM" ]; then
+			if [ -x "$COM" ]; then
+				"$COM" $ARGS
+			fi
 		else
 			err "Unable to build $SRC: could not find/execute $BIN/${QUERY_PREFIX}${SRC}"
 		fi
@@ -140,7 +142,10 @@ else
 		build)
 			build --full "$JOURNAL_PATH/archive" -- $@ ;;
 		clean)
-			build --clean -- $@ ;;
+			build --clean -- $@
+			echo rm -r "$(config journal generated)"
+			rm --recursive --verbose --one-file-system --interactive=once "$(config journal generated)"
+			;;
 		config)
 			config $@ ;;
 		query)
