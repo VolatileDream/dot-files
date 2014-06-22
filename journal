@@ -1,0 +1,119 @@
+#!/bin/bash
+
+# configuration file
+CONFIG="$HOME/.config/journal-config"
+
+# stuff that should be in configs
+BIN="$HOME/bin/journal-bin"
+BUILD_PREFIX="build-"
+QUERY_PREFIX="query-"
+
+err(){
+	echo $@ >> /dev/stderr
+}
+
+query(){
+	SOURCE="$1" ; shift
+	if [ -e "$BIN/${QUERY_PREFIX}${SOURCE}" ]; then
+		# pass the query along
+		"$BIN/${QUERY_PREFIX}${SOURCE}" $@
+	else
+		err "Cannot query source '$SOURCE': not found"
+		exit 1
+	fi
+}
+
+build(){
+	# Args are laid out in 2 groups:
+	#  pass along flags
+	# --
+	#  sources
+	ARGS=""
+	while [ $# -gt 0 ]; do
+		last_arg="$1" ; shift
+		if [ "$last_arg" = "--" ]; then
+			break
+		fi
+		ARGS="$ARGS $last_arg"
+	done
+
+	if [ $# -gt 0 ]; then
+		SOURCES="$@"
+	else
+		SOURCES=$(ls "${BIN}/${BUILD_PREFIX}"* 2> /dev/null | sed "s_${BIN}/${BUILD_PREFIX}__")
+
+		if [ $? -ne 0 -o -z "$SOURCES" ]; then
+			# nothing to build
+			return
+		fi
+		echo "Building sources: $SOURCES"
+	fi
+
+	for SRC in $SOURCES ; do
+		if [ -e "${BIN}/${BUILD_PREFIX}${SRC}" ]; then
+			"${BIN}/${BUILD_PREFIX}${SRC}" $ARGS
+		else
+			err "Unable to build $SRC: not found"
+		fi
+	done
+}
+
+# TODO do option parsing here
+
+if [ $# -eq 0 -o "$1" = "edit" ]; then
+	# invoke update first
+	$0 update
+	edit
+else
+COMMAND="$1" ; shift
+	case $COMMAND in
+		view)
+			view $@
+			;;
+		update)
+			# TODO get journal file
+			build --incremental --
+			;;
+		build)
+			# TODO get journal directory/files
+			build --clean --full -- $@
+			;;
+		query)
+			query $@
+			;;
+		search)
+			query index $@
+			;;
+		help|-h|--help)
+			echo "Usage: $0 [options] <command>"
+			echo "  Update a users private journal"
+			echo
+			echo "Available commands are:"
+			echo "- edit"
+			echo "    edit the most recent journal entry (default)"
+			echo
+			echo "- view [date]* [date-range]*"
+			echo "    view a particular set of date entries or range of entries"
+			echo
+			echo "- update"
+			echo "    updates the LATEST entry to point to the current date then"
+			echo "    runs an incremental update of all generated data sources"
+			echo
+			echo "- build [source]"
+			echo "    rebuilds the generated files for the specified source, defaults"
+			echo "    to rebuilding all data sources"
+			echo
+			echo "- query <source> query*"
+			echo "    query the generated data from the specific source"
+			echo
+			echo "- search query"
+			echo "    shortcut for 'query index'"
+			echo
+			;;
+		*)
+			err "Journal command $COMMAND not found"
+			exit 1
+			;;
+	esac
+fi
+
