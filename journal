@@ -105,14 +105,15 @@ update(){
 			# make sure there's a newline at the end
 			echo >> "$FILE"
 
-			build --incremental "$FILE" --
-
 			# make sure the archive directory exists
 			mkdir -p "${JOURNAL_PATH}/archive/"
 			# figure out the file name
 			NEW_FILE="${JOURNAL_PATH}/archive/$(echo "$LAST_ENTRY_DATE" | sed 's_/_-_g')"
 			# move the file
 			mv "$FILE" "${NEW_FILE}"
+
+			# because some things record file names + stuff
+			build --incremental "$NEW_FILE" --
 
 			# permission stuff to make it read only
 			chmod a-wx "$NEW_FILE" ; chmod og-r "$NEW_FILE"
