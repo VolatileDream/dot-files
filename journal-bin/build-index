@@ -2,4 +2,4 @@
 
 # TODO placeholder so that '~/bin/journal build' ~does stuff
 
-echo "INDEX: $@"
+echo "BUILD INDEX: $@"

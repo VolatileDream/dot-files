@@ -9,16 +9,23 @@ BUILD_PREFIX="build-"
 QUERY_PREFIX="query-"
 
 err(){
+	echo -ne "\e[31m"
 	echo $@ >> /dev/stderr
+	echo -ne "\e[0m"
 }
 
 query(){
-	SOURCE="$1" ; shift
-	if [ -e "$BIN/${QUERY_PREFIX}${SOURCE}" ]; then
+	if [ $# -eq 0 ]; then
+		err "query requires a data source and query be specified"
+		exit 1
+	fi
+
+	SRC="$1" ; shift
+	if [ -e "$BIN/${QUERY_PREFIX}${SRC}" ]; then
 		# pass the query along
-		"$BIN/${QUERY_PREFIX}${SOURCE}" $@
+		"$BIN/${QUERY_PREFIX}${SRC}" $@
 	else
-		err "Cannot query source '$SOURCE': not found"
+		err "Cannot query source '$SRC': could not find $BIN/${QUERY_PREFIX}${SRC}"
 		exit 1
 	fi
 }
@@ -53,7 +60,7 @@ build(){
 		if [ -e "${BIN}/${BUILD_PREFIX}${SRC}" ]; then
 			"${BIN}/${BUILD_PREFIX}${SRC}" $ARGS
 		else
-			err "Unable to build $SRC: not found"
+			err "Unable to build $SRC: could not find $BIN/${QUERY_PREFIX}${SRC}"
 		fi
 	done
 }
