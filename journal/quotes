@@ -9,17 +9,19 @@ if [ ! -f "$DB" ]; then
 	echo "CREATE TABLE quotes ( quote TEXT );" | sqlite "$DB"
 fi
 
+ARGS="$@"
+
 case $0 in
 	*quotes)
 		if [ $# -eq 0 ]; then
 			exit
 		fi
-		sqlite-insert quotes "\"$@\"" | sqlite "$DB"
+		sqlite-insert quotes "\"$ARGS\"" | sqlite "$DB"
 		;;
 	*quotes-list)
 		if [ $# -gt 0 ]; then
 			# SQL injection for flexibility. lol
-			sqlite-select quotes \* "$@" | sqlite "$DB"
+			sqlite-select quotes \* quote LIKE "$ARGS" | sqlite "$DB"
 		else
 			sqlite-select quotes \* | sqlite "$DB"
 		fi
