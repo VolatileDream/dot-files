@@ -3,17 +3,6 @@
 # configuration file
 CONFIG="$HOME/.config/journal-config.ini"
 
-# stuff that should be in configs
-BIN="$HOME/bin/journal-bin"
-BUILD_PREFIX="build-"
-QUERY_PREFIX="query-"
-
-err(){
-	echo -ne "\e[31m"
-	echo $@ >> /dev/stderr
-	echo -ne "\e[0m"
-}
-
 config(){
 	if [ $# -eq 0 ]; then
 		if [ -e "$CONFIG" ]; then
@@ -26,8 +15,23 @@ config(){
 	if [ $# -gt 0 ]; then
 		inifile -f "$CONFIG" -c -s "$SECTION" -k "$KEY" -v "$@"
 	else
-		inifile -f "$CONFIG" -n -s "$SECTION" -k "$KEY"
+		# double evalute the line
+		# this allows for variable expansion of things in the config file.
+		# which is only really useful for things like $HOME
+		# TODO restrict it to $HOME/~?
+		echo `eval echo "$(inifile -f "$CONFIG" -n -s "$SECTION" -k "$KEY")"`
 	fi
+}
+
+# stuff that should be in configs
+BIN="$(config journal bin)"
+BUILD_PREFIX="$(config journal build-prefix)"
+QUERY_PREFIX="$(config journal query-prefix)"
+
+err(){
+	echo -ne "\e[31m"
+	echo $@ >> /dev/stderr
+	echo -ne "\e[0m"
 }
 
 query(){
