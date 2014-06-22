@@ -134,7 +134,7 @@ edit(){
 
 # TODO do option parsing here
 
-if [ $# -eq 0 -o "$1" = "edit" ]; then
+if [ $# -eq 0 ]; then
 	# invoke update first
 	"$0" update
 	edit
@@ -150,6 +150,9 @@ else
 			;;
 		config)
 			config $@ ;;
+		edit)
+			# the only way to edit yesterdays entry
+			edit ;;
 		query)
 			query $@ ;;
 		search)
