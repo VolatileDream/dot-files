@@ -53,7 +53,7 @@ if [ $FULL -ne 0 -a $INCR -ne 0 ]; then
 	echo "$0: --full and --incremental are exclusive, only one can be specified at a time" >> /dev/stderr
 	exit 1
 fi
-if [ $CLEAN -ne 0 ]; then
+if [ $CLEAN -ne 0 -a -d "$GEN_OUTPUT" ]; then
 	echo rm "$GEN_OUTPUT"
 	rm --recursive --interactive=once "$GEN_OUTPUT"
 fi

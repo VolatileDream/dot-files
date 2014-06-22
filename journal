@@ -44,9 +44,10 @@ query(){
 	fi
 
 	SRC="$1" ; shift
-	if [ -e "$BIN/${QUERY_PREFIX}${SRC}" ]; then
+	COM="$BIN/${QUERY_PREFIX}${SRC}"
+	if [ -e "$COM" -a -x "$COM" ]; then
 		# pass the query along
-		"$BIN/${QUERY_PREFIX}${SRC}" $@
+		"$COM" $@
 	else
 		err "Cannot query source '$SRC': could not find $BIN/${QUERY_PREFIX}${SRC}"
 		exit 1
@@ -82,10 +83,11 @@ build(){
 	fi
 
 	for SRC in $SOURCES ; do
-		if [ -e "${BIN}/${BUILD_PREFIX}${SRC}" ]; then
-			"${BIN}/${BUILD_PREFIX}${SRC}" $ARGS
+		COM="${BIN}/${BUILD_PREFIX}${SRC}"
+		if [ -e "$COM" -a -x "$COM" ]; then
+			"$COM" $ARGS
 		else
-			err "Unable to build $SRC: could not find $BIN/${QUERY_PREFIX}${SRC}"
+			err "Unable to build $SRC: could not find/execute $BIN/${QUERY_PREFIX}${SRC}"
 		fi
 	done
 }
@@ -96,10 +98,19 @@ update(){
 	if [ "$NOW" != "$LAST_ENTRY_DATE" ]; then
 		# we need to do an update if the file exists, and has size > 0
 		if [ -f "$FILE" -a -s "$FILE" ]; then
+
+			# make sure there's a newline at the end
+			echo >> "$FILE"
+
 			build --incremental "$FILE" --
+
+			# make sure the archive directory exists
 			mkdir -p "${JOURNAL_PATH}/archive/"
+			# figure out the file name
 			NEW_FILE="${JOURNAL_PATH}/archive/$(echo "$LAST_ENTRY_DATE" | sed 's_/_-_g')"
+			# move the file
 			mv "$FILE" "${NEW_FILE}"
+
 			# permission stuff to make it read only
 			chmod a-wx "$NEW_FILE" ; chmod og-r "$NEW_FILE"
 		fi

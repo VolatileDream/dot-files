@@ -11,6 +11,12 @@ ECHO_FIRST=0
 SHELL=`which sh`
 ECHO=`which echo`
 
+VERBOSE=""
+verbose(){
+	if [ ! -z "$VERBOSE" ]; then
+		echo
+	fi
+}
 
 read -d '' GET_COMMANDS_SCRIPT <<- EOF
 	BEGIN { date=""; }
@@ -86,7 +92,7 @@ function parse-file(){
 	fi
 
 	if [ -f "$FILE" -o -e "$FILE" ]; then
-		echo "Parsing: '$1'"
+		verbose "$1"
 
 		# use a temporary input file to get nice command echoing
 		INPUT=`mktemp`
@@ -121,6 +127,9 @@ fi
 
 while [ $# -gt 0 ]; do
 	case "$1" in
+	-v|--verbose)
+		VERBOSE="1"
+		;;
 	-e|--echo)
 		ECHO_FIRST=1
 		;;
@@ -130,7 +139,7 @@ while [ $# -gt 0 ]; do
 	-p|--path)
 		shift
 		USE_PATH="$1"
-		echo "PATH changed to $USE_PATH"
+		verbose "PATH changed to $USE_PATH"
 		;;
 	-o|--output)
 		shift
@@ -138,7 +147,7 @@ while [ $# -gt 0 ]; do
 			mkdir -p "$1"
 		fi
 		OUTPUT_DIR="$(absolute-path "$1")"
-		echo "Changing output directory to $OUTPUT_DIR"
+		verbose "Changing output directory to $OUTPUT_DIR"
 		;;
 	-s|--stdin)
 		parse-file # implicitly stdin
