@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# TODO placeholder so that '~/bin/journal build' ~does stuff
+
+echo "INDEX: $@"

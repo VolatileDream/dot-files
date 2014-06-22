@@ -1,0 +1,24 @@
+#!/bin/bash
+
+ENTRY_SEPERATOR='---------------'
+
+read -d '' GET_COMMANDS_SCRIPT <<- EOF
+	BEGIN { file = "" }
+        /$ENTRY_SEPERATOR/ {
+		if( file != "" ){
+			print file
+		}
+                line = \$0 ;
+                gsub( "$ENTRY_SEPERATOR", "", line );
+                len = split( line, A, "/" );
+                name=A[1];
+                for(i=2; i <= len; i++){
+                        name = A[i] "-" name;
+                }
+                file = name ".txt";
+        }
+        { print \$0 >> file }
+	END { print file }
+EOF
+
+awk "$SCRIPT"
