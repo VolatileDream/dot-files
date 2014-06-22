@@ -26,6 +26,7 @@ ensure-config(){
 # stuff that should be in config
 PATH_AUGMENT="$(ensure-config augment-path '$HOME/bin/journal-bin/commands')"
 GEN_OUTPUT="$(ensure-config generated-output '.')"
+ECHO_COMMANDS="$(ensure-config echo '')"
 
 CLEAN=0
 FULL=0
@@ -53,16 +54,27 @@ if [ $FULL -ne 0 -a $INCR -ne 0 ]; then
 	exit 1
 fi
 if [ $CLEAN -ne 0 ]; then
-	echo "$0 CLEANING"
+	echo rm "$GEN_OUTPUT"
+	rm --recursive --interactive=once "$GEN_OUTPUT"
 fi
 
-# as far as journal-parse is concerned, there's no difference
-# between full and incremental, except for the files that get
-# passed to it
+if [ $INCR -ne 0 -o $FULL -ne 0 ]; then
 
-cat $@ |
-"$HOME/bin/journal-bin/journal-parse"	\
-	--path "$PATH_AUGMENT:$PATH"	\
-	--output "$GEN_OUTPUT"		\
-	--stdin
+	ARGS="$@"
+	if [ $FULL -ne 0 ]; then
+		ARGS="$( echo ${ARGS}/* )"
+	fi
+
+	# as far as journal-parse is concerned, there's no difference
+	# between full and incremental, except for the files that get
+	# passed to it
+
+	cat $ARGS |
+	"$HOME/bin/journal-bin/journal-parse"	\
+		--path "$PATH_AUGMENT:$PATH"	\
+		--output "$GEN_OUTPUT"		\
+		$ECHO_COMMANDS			\
+		--stdin
+
+fi
 

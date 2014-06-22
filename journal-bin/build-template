@@ -29,6 +29,10 @@ if [ $# -eq 0 ]; then
 	exit 1
 fi
 
+FULL=0
+CLEAN=0
+INCR=0
+
 while [ $# -gt 0 ]; do
 	case $1 in
 		# in most cases full implies clean

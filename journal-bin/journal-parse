@@ -4,7 +4,7 @@
 NAME="$0"
 USE_PATH='$PATH'
 OUTPUT_DIR='.'
-ENTRY_SEPERATOR='---------------'
+ENTRY_SEPERATOR="$(journal config journal entry-seperator)"
 # interactive argument for xargs
 INTERACT=''
 ECHO_FIRST=0
