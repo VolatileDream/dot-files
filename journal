@@ -86,6 +86,7 @@ build(){
 		COM="${BIN}/${BUILD_PREFIX}${SRC}"
 		if [ -e "$COM" ]; then
 			if [ -x "$COM" ]; then
+				mkdir -p "$(config journal generated)"
 				"$COM" $ARGS
 			fi
 		else

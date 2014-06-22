@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# were to put all the files we generate
+GENERATED="$(journal config journal generated)"
+
+cd "$GENERATED"
+
+if [ $? -ne 0 ]; then
+	echo "Unable to find index file run 'journal build index'" >> /dev/stderr
+	exit 1
+fi
+
+# all of our arguments get passed to search++
+search++ $@
