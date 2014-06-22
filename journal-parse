@@ -2,7 +2,7 @@
 
 # Global variables
 NAME="$0"
-DIR='.'
+DIR='$PATH'
 OUTPUT_DIR='.'
 ENTRY_SEPERATOR='---------------'
 # interactive argument for xargs
@@ -39,13 +39,13 @@ EOF
 }
 
 function usage(){
-	echo "Usage: ${NAME} [-d command-dir] [-o output-dir] [-p] [-e] files"
+	echo "Usage: ${NAME} [-p|--path path] [-o|--output output-dir] [-P|--prompt] [-e|--echo] files"
 	echo -e "\tParse plain text journal files to generate secondary data sources"
 	echo
-	echo -e "\t-d command-dir: specificy the directory to find commands. default=."
-	echo -e "\t-o output-dir: specificy the directory to output to. default=."
-	echo -e "\t-p : get prompted before each command runs."
-	echo -e "\t-e : write the commands run to stdout."
+	echo -e "\t-p, --path  : the PATH to use default=\$PATH"
+	echo -e "\t-o, --output: output-dir: specificy the directory to output to. default=."
+	echo -e "\t-P, --prompt: get prompted before each command runs."
+	echo -e "\t-e, --echo  : write the commands run to stdout."
 	echo -e "\tfiles - journal files to parse"
 }
 
@@ -79,7 +79,7 @@ function absolute-path(){
 
 function parse-file(){
 	FILE="$(absolute-path "$1")"
-	COM="$(absolute-path "$DIR")"
+	COM="$DIR"
 	OUT="$(absolute-path "$OUTPUT_DIR")"
 
 	if [ -f "$1" ]; then
@@ -95,7 +95,7 @@ function parse-file(){
 
 		# cd into the output directory, modify path to not grab a bunch of stuff
 		# add /bin and /usr/bin to give the shell most of the commands people expect
-		(echo "cd $OUT ; PATH='$DIR:/bin:/usr/bin'" ; cat "$INPUT" | escape-args ) |
+		(echo "cd $OUT ; PATH='$DIR'" ; cat "$INPUT" | escape-args ) |
 		sh >> /dev/stderr
 		rm "$INPUT"
 	else
@@ -121,18 +121,18 @@ fi
 
 while [ $# -gt 0 ]; do
 	case "$1" in
-	-e)
+	-e|--echo)
 		ECHO_FIRST=1
 		;;
-	-p)
+	-P|--prompt)
 		INTERACT="-p"
 		;;
-	-d)
+	-p|--path)
 		shift
-		DIR=`parse-dir "$1"`
-		echo "Changing command directory to $DIR"
+		DIR="$1"
+		echo "PATH changed to $DIR"
 		;;
-	-o)
+	-o|--output)
 		shift
 		if [ ! -d "$1" ]; then
 			mkdir -p "$1"
