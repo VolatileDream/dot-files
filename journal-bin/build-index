@@ -61,8 +61,6 @@ if [ $CLEAN -ne 0 ]; then
 	echo -n
 fi
 
-OPTS=""
-
 if [ $FULL -ne 0 ]; then
 	# all of the arguments passed were directories
 	cd "$GENERATED"
@@ -72,5 +70,9 @@ fi
 if [ $INCR -ne 0 ]; then
 	# all of the arguments passed were files
 	cd "$GENERATED"
-	index++ -e text:* "$@"
+	index++ --incremental -e text:* "$@"
+	# swish++ creates a new index that is the old one
+	# with the incremental changes, so we have to replace
+	# the old index with the new one
+	mv swish++.index.new swish++.index
 fi
