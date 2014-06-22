@@ -1,24 +1,28 @@
 #!/bin/bash
 
-ENTRY_SEPERATOR='---------------'
+ENTRY_SEPERATOR="$(journal config journal entry-seperator)"
 
-read -d '' GET_COMMANDS_SCRIPT <<- EOF
+read -d '' SCRIPT <<- EOF
 	BEGIN { file = "" }
-        /$ENTRY_SEPERATOR/ {
+        /^$ENTRY_SEPERATOR/ {
 		if( file != "" ){
 			print file
 		}
-                line = \$0 ;
+                # strip out any extra date information that
+                # might have been put in the entry date line
+                line = \$1 ;
                 gsub( "$ENTRY_SEPERATOR", "", line );
                 len = split( line, A, "/" );
                 name=A[1];
                 for(i=2; i <= len; i++){
                         name = A[i] "-" name;
                 }
-                file = name ".txt";
+                file = name
+                gsub( "-", "/", name )
+                \$0 = "$ENTRY_SEPERATOR" name ;
         }
         { print \$0 >> file }
 	END { print file }
 EOF
 
-awk "$SCRIPT"
+awk "$SCRIPT" < /dev/stdin > /dev/stdout

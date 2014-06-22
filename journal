@@ -126,7 +126,7 @@ edit(){
 	config journal last-date "$NOW"
 	if [ ! -f "$FILE" ]; then
 		mkdir -p "$JOURNAL_PATH"
-		echo "$ENTRY_SEPERATOR" "$NOW" >> "$FILE"
+		echo "${ENTRY_SEPERATOR}${NOW}" >> "$FILE"
 	fi
 	sensible-editor "$FILE"
 }
