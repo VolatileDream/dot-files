@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # configuration file
-CONFIG="$HOME/.config/journal-config"
+CONFIG="$HOME/.config/journal-config.ini"
 
 # stuff that should be in configs
 BIN="$HOME/bin/journal-bin"
@@ -12,6 +12,22 @@ err(){
 	echo -ne "\e[31m"
 	echo $@ >> /dev/stderr
 	echo -ne "\e[0m"
+}
+
+config(){
+	if [ $# -eq 0 ]; then
+		if [ -e "$CONFIG" ]; then
+			cat "$CONFIG"
+		fi
+		return
+	fi
+	# update the config
+	SECTION="$1" ; shift ; KEY="$1" ; shift
+	if [ $# -gt 0 ]; then
+		inifile -f "$CONFIG" -c -s "$SECTION" -k "$KEY" -v "$@"
+	else
+		inifile -f "$CONFIG" -n -s "$SECTION" -k "$KEY"
+	fi
 }
 
 query(){
@@ -53,7 +69,9 @@ build(){
 			# nothing to build
 			return
 		fi
-		echo "Building sources: $SOURCES"
+		echo -n "Building sources: "
+		echo -n "$SOURCES" | tr '\n' ' '
+		echo
 	fi
 
 	for SRC in $SOURCES ; do
@@ -74,8 +92,14 @@ if [ $# -eq 0 -o "$1" = "edit" ]; then
 else
 COMMAND="$1" ; shift
 	case $COMMAND in
+		config)
+			config $@
+			;;
 		view)
 			view $@
+			;;
+		clean)
+			build --clean -- $@
 			;;
 		update)
 			# TODO get journal file
@@ -96,25 +120,33 @@ COMMAND="$1" ; shift
 			echo "  Update a users private journal"
 			echo
 			echo "Available commands are:"
+			echo "- build [source]*"
+			echo "    rebuilds the generated files for the specified sources, defaults"
+			echo "    to rebuilding all data sources"
+			echo
+			echo "- clean [source]*"
+			echo "    removes all generated files for the specified sources, defaults"
+			echo "    to removing files for all sources"
+			echo
+			echo "- config <source> <key> [value]"
+			echo "    reads or writes the config for the specified source variable."
+			echo "    without arguments it dumps the config"
+			echo
 			echo "- edit"
 			echo "    edit the most recent journal entry (default)"
-			echo
-			echo "- view [date]* [date-range]*"
-			echo "    view a particular set of date entries or range of entries"
-			echo
-			echo "- update"
-			echo "    updates the LATEST entry to point to the current date then"
-			echo "    runs an incremental update of all generated data sources"
-			echo
-			echo "- build [source]"
-			echo "    rebuilds the generated files for the specified source, defaults"
-			echo "    to rebuilding all data sources"
 			echo
 			echo "- query <source> query*"
 			echo "    query the generated data from the specific source"
 			echo
 			echo "- search query"
 			echo "    shortcut for 'query index'"
+			echo
+			echo "- update"
+			echo "    updates the LATEST entry to point to the current date then"
+			echo "    runs an incremental update of all generated data sources"
+			echo
+			echo "- view [date]* [date-range]*"
+			echo "    view a particular set of date entries or range of entries"
 			echo
 			;;
 		*)

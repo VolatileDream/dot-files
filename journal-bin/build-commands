@@ -1,0 +1,46 @@
+#!/bin/bash
+
+CONFIG="$HOME/.config/journal-config.ini"
+# stuff that should be in config
+PATH_AUGMENT="$HOME/bin/journal-bin/commands"
+GEN_OUTPUT="generated"
+
+CLEAN=0
+FULL=0
+INCR=0
+
+if [ $# -eq 0 ]; then
+	echo "$0: [--clean] [--full] [--incremental] file+"
+	exit 1
+fi
+
+while [ $# -gt 0 ]; do
+	case $1 in
+		--full) FULL=1 ; CLEAN=1 ;;
+		--clean) CLEAN=1 ;;
+		--incremental) INCR=1 ;;
+		*) # This is the start of the files/dirs for update/build
+			break ;;
+	esac
+	shift
+done
+
+if [ $FULL -ne 0 -a $INCR -ne 0 ]; then
+	# this should never happen
+	echo "$0: --full and --incremental are exclusive, only one can be specified at a time" >> /dev/stderr
+	exit 1
+fi
+if [ $CLEAN -ne 0 ]; then
+	echo "$0 CLEANING"
+fi
+
+# as far as journal-parse is concerned, there's no difference
+# between full and incremental, except for the files that get
+# passed to it
+
+cat $@ |
+"$HOME/bin/journal-bin/journal-parse"	\
+	--path "$PATH_AUGMENT:$PATH"	\
+	--output "$GEN_OUTPUT"		\
+	--stdin
+

@@ -1,0 +1,40 @@
+#!/bin/bash
+
+if [ $# -eq 0 ]; then
+	echo "$0: [--clean] [--full] [--incremental] file*"
+	exit 1
+fi
+
+while [ $# -gt 0 ]; do
+	case $1 in
+		# in most cases full implies clean
+		--full) FULL=1 ; CLEAN=1 ;;
+		--clean) CLEAN=1 ;;
+		# full and incremental will never
+		# be specified at the same time
+		--incremental) INCR=1 ;;
+		*) # This is the start of the files/dirs for update/build
+			break ;;
+	esac
+	shift
+done
+
+if [ $FULL -ne 0 -a $INCR -ne 0 ]; then
+	# this should never happen
+	echo "$0: --full and --incremental are exclusive, only one can be specified at a time" >> /dev/stderr
+	exit 1
+fi
+
+if [ $CLEAN -ne 0 ]; then
+	echo "$0 CLEANING"
+fi
+
+if [ $FULL -ne 0 ]; then
+	# all of the arguments passed were directories
+	echo "$0 FULL: $@"
+fi
+
+if [ $INCR -ne 0 ]; then
+	# all of the arguments passed were files
+	echo "$0 INCR: $@"
+fi
