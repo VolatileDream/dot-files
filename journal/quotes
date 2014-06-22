@@ -14,16 +14,14 @@ case $0 in
 		if [ $# -eq 0 ]; then
 			exit
 		fi
-		INSERT="INSERT INTO quotes VALUES( \"$@\" );"
-		echo "$INSERT" | sqlite "$DB"
+		sqlite-insert quotes "\"$@\"" | sqlite "$DB"
 		;;
 	*quotes-list)
 		if [ $# -gt 0 ]; then
 			# SQL injection for flexibility. lol
-			SELECT="SELECT * FROM quotes WHERE $@;"
+			sqlite-select quotes \* "$@" | sqlite "$DB"
 		else
-			SELECT="SELECT * FROM quotes;"
+			sqlite-select quotes \* | sqlite "$DB"
 		fi
-		echo "$SELECT" | sqlite "$DB"
 		;;
 esac

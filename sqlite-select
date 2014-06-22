@@ -1,0 +1,34 @@
+#!/bin/sh
+
+if [ $# -lt 2 ]; then
+	echo "Usage: $0 <table-name> <column names> ... [-w where-clauses ...]" >> /dev/stderr
+	echo "\tGiven a set of column values and a table name" >> /dev/stderr
+	echo "\t generates a sqlite INSERT command." >> /dev/stderr
+	exit 1
+fi
+SELECT=1
+TABLE="$1" ; shift
+
+echo -n "SELECT"
+
+while [ $# -gt 0 ]; do
+	if [ "$1" = "-w" ]; then
+		shift ; echo -n "FROM $TABLE WHERE $@ "
+		SELECT=0
+		break 
+	else
+		if [ $SELECT -eq 1 ]; then
+			SELECT=$((SELECT+1))
+		else
+			echo -n ","
+		fi
+		echo -n " $1 "
+	fi
+	shift
+done
+
+if [ $SELECT -ne 0 ]; then
+	echo -n " FROM $TABLE"
+fi
+
+echo ";"
