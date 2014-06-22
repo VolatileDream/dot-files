@@ -16,7 +16,8 @@ config(){
 		inifile -f "$CONFIG" -c -s "$SECTION" -k "$KEY" -v "$@"
 	else
 		# TODO allow dependent config variables
-		echo `eval echo "$(inifile -f "$CONFIG" -n -s "$SECTION" -k "$KEY")"`
+		VALUE="$(inifile -f "$CONFIG" -n -s "$SECTION" -k "$KEY")"
+		echo $VALUE | sed "s_\${HOME}_${HOME}_"
 	fi
 }
 
