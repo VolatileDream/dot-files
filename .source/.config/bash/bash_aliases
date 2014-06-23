@@ -74,7 +74,7 @@ alias asdf='setxkbmap dvorak'
 alias aoeu='setxkbmap us'
 
 
-alias bkj='time=`date +%Y_%m_%d` ; 7z a -r ~/Documents/${time}_Journal.7z /media/jex/simulacrum/* ; gpg --default-recipient jex --encrypt-files ~/Journal\ Back\ Up/${time}_Journal.7z ; shred --remove --zero --iterations 17 ~/Documents/${time}_Journal.7z ; echo "Saved to: ${time}"'
+alias bkj='time=`date +%Y_%m_%d` ; 7z a -r ~/Documents/${time}_Journal.7z /media/jex/simulacrum/* ; gpg --default-recipient jex --encrypt-files ~/Documents/${time}_Journal.7z ; shred --remove --zero --iterations 17 ~/Documents/${time}_Journal.7z ; echo "Saved to: ${time}"'
 
 # nav aliases
 alias .=ls
