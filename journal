@@ -36,8 +36,17 @@ err(){
 	echo $@ >> /dev/stderr
 	echo -ne "\e[0m"
 }
+require-journal(){
+	# check if the journal is available
+	if [ ! -d "$JOURNAL_PATH" ]; then
+		err "Unable to locate journal ($JOURNAL_PATH)."
+		err "Does the directory exist?"
+		exit 1
+	fi
+}
 
 query(){
+	require-journal
 	if [ $# -eq 0 ]; then
 		err "query requires a data source and query be specified"
 		exit 1
@@ -55,6 +64,7 @@ query(){
 }
 
 build(){
+	require-journal
 	# Args are laid out in 2 groups:
 	#  pass along flags
 	# --
@@ -96,6 +106,7 @@ build(){
 }
 
 update(){
+	require-journal
 	FILE="${JOURNAL_PATH}/${LATEST}"
 	
 	if [ "$NOW" != "$LAST_ENTRY_DATE" ]; then
@@ -123,6 +134,7 @@ update(){
 }
 
 edit(){
+	require-journal
 	FILE="${JOURNAL_PATH}/${LATEST}"
 	config journal last-date "$NOW"
 	if [ ! -f "$FILE" ]; then
@@ -133,6 +145,7 @@ edit(){
 }
 
 view(){
+	require-journal
 	# turn specified inputs into file sets
 	# then display them one group at a time
 
