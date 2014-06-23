@@ -54,9 +54,11 @@ query(){
 
 	SRC="$1" ; shift
 	COM="$BIN/${QUERY_PREFIX}${SRC}"
-	if [ -e "$COM" -a -x "$COM" ]; then
-		# pass the query along
-		"$COM" $@
+	if [ -e "$COM" ]; then
+		if [ -x "$COM" ]; then
+			# pass the query along
+			"$COM" $@
+		fi
 	else
 		err "Cannot query source '$SRC': could not find $BIN/${QUERY_PREFIX}${SRC}"
 		exit 1
