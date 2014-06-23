@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# Query for build-commands, so this has to switch between all of it's input sources
+
+usage(){
+	echo "Usage: $0 <command>"
+	echo "  Query generated files from build-commands"
+	echo
+	echo "Commands are:"
+	echo " - events"
+	echo " - quotes"
+}
+
+if [ $# -eq 0 ]; then
+	usage
+	exit 1
+fi
+
+while [ $# -gt 0 ]; do
+
+	case $1 in
+		events)
+			cat "$(journal config journal generated)/life.md"
+			;;
+		quotes)
+			( echo .mode lines ; sqlite-select quotes \*) |
+				sqlite  "$(journal config journal generated)/quote.db"
+			;;
+		*)
+			usage
+			exit 1
+			;;
+	esac
+	shift
+done
+
