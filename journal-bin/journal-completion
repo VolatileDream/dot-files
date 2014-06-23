@@ -43,6 +43,9 @@ __journal(){
 		config)
 			__journal_config
 			;;
+		view)
+			opts="`ls $(journal config journal path)/archive/ | sed 's_-_/_g'`"
+			;;
 		*)
 			opts="build clean config edit query search update view"
 			;;
