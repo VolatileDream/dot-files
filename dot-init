@@ -35,18 +35,20 @@ do-generate(){
 
         tmp=`mktemp`
 
-        "$GEN_DIR/$file" "$PWD" > "$tmp"
+	if [ -x "$GEN_DIR/$file" ]; then
+	        "$GEN_DIR/$file" "$PWD" > "$tmp"
 
-        if [[ -f "$HOME/$file" ]]; then
-            # use diff because this file was generated
-            if [ ! diff "$HOME/$file" "$tmp" ] ; then
-                echo "$HOME/$file already exists and differs from $SOURCE/$file output"
-                echo "generating to  $HOME/$file.1 instead"
-                mv "$tmp" "$HOME/${file}.1"
-            fi
-        else
-            mv "$tmp" "$HOME/$file"
-        fi
+	        if [[ -f "$HOME/$file" ]]; then
+	            # use diff because this file was generated
+	            if [ ! diff "$HOME/$file" "$tmp" ] ; then
+	                echo "$HOME/$file already exists and differs from $SOURCE/$file output"
+	                echo "generating to  $HOME/$file.1 instead"
+	                mv "$tmp" "$HOME/${file}.1"
+	            fi
+	        else
+	            mv "$tmp" "$HOME/$file"
+	        fi
+	fi # executable
     done
 }
 
