@@ -10,5 +10,20 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
+# temporary storage file for index thing to show the user,
+tmp=`mktemp`
+
 # all of our arguments get passed to search++
-search++ $@
+search++ $@ > "$tmp"
+
+dates=$(cat "$tmp" | awk '{ print $4 }' | tr '\n' ' ' )
+
+# display the results before the actual entries
+sensible-pager "$tmp"
+
+# delete the temporary file, asap
+rm "$tmp"
+
+# display the entries
+journal view $dates
+

@@ -151,28 +151,22 @@ edit(){
 
 view(){
 	require-journal
-	# turn specified inputs into file sets
-	# then display them one group at a time
 
-	for file_set in $@; do
-		# there are a few ways to interpret the file set it can be any one of:
-		# * date: year[/month[/day]]
-		# * date-date
-		# some are equivalent:
-		# * 2013 -> 2013/01-2013/12 -> 2013/01/01-2013/12/31
-		# note that they are ALWAYS inclusive
-		# * 2013-2014 takes all of both 2013 + 2014
-		if [[ "$file_set" == *-* ]]; then
-			# fancy thing with dashes
-			echo SET: $file_set
-			echo Sets not supported yet.
-		else
-			# undo the / -> - conversion that completion does
-			file_set=$(echo $file_set | sed 's_/_-_g' )
-			# not a range, simple to deal with
-			sensible-pager "$(journal config journal path)/archive/${file_set}"*
-		fi
+	ARCHIVE="$(journal config journal path)/archive"
+
+	ARGS=""
+	# all dates have the format:
+	# year[/month[/day]]
+	for query in $@; do
+		ARGS="$ARGS $ARCHIVE/${query}*"
 	done
+
+	# all entries must be shown with a single command invocation
+	# this prevents the user from having to exit the pager
+	# again and again and again, and get really frustrated
+	if [ ! -z "$ARGS" ]; then
+		sensible-pager $ARGS
+	fi
 }
 
 
