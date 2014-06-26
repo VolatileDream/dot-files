@@ -1,5 +1,25 @@
 #!/bin/bash
 
+
+__journal_view(){
+	local cur base opts
+	COMPREPLY=()
+	cur="${COMP_WORDS[COMP_CWORD]}"
+	prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+	# this disgusting shell line
+	COMPREPLY=( $(ls $(journal config journal path)/archive/* |
+		# strip out the file path
+		grep -Eo "[^/]*$" |
+		# get only the next chunk of the date
+		# TODO relies on file date stamp encoding
+		grep -o "^${cur}[^-]*-" |
+		# grab unique entries
+		uniq ) )
+
+	return 0
+}
+
 __journal_config(){
 	local cur base opts
 	COMPREPLY=()
@@ -44,10 +64,7 @@ __journal(){
 			__journal_config
 			;;
 		view)
-			# TODO this should be shortened to next set of dates
-			# ie, if you put in '2014-0' it should return only the months
-			# and not populate with extra days and such (they're not relevant)
-			opts="`ls $(journal config journal path)/archive/ `"
+			__journal_view
 			;;
 		*)
 			opts="build clean config edit query search update view"
