@@ -229,8 +229,8 @@ else
 			echo "    updates the LATEST entry to point to the current date then"
 			echo "    runs an incremental update of all generated data sources"
 			echo
-			echo "- view [date]* [date-range]*"
-			echo "    view a particular set of date entries or range of entries"
+			echo "- view [year[-month[-day]]]*"
+			echo "    view a particular set of date entries, or range of dates"
 			echo
 			;;
 		*)
