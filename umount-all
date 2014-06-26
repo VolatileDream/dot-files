@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# assumes /media/user mount point,
+# not all distros have this setup.
+
+umount "/media/$USER/"*
