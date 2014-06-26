@@ -44,7 +44,10 @@ __journal(){
 			__journal_config
 			;;
 		view)
-			opts="`ls $(journal config journal path)/archive/ | sed 's_-_/_g'`"
+			# TODO this should be shortened to next set of dates
+			# ie, if you put in '2014-0' it should return only the months
+			# and not populate with extra days and such (they're not relevant)
+			opts="`ls $(journal config journal path)/archive/ | sed 's_-_/_g' `"
 			;;
 		*)
 			opts="build clean config edit query search update view"
