@@ -13,7 +13,7 @@ __journal_view(){
 		grep -Eo "[^/]*$" |
 		# get only the next chunk of the date
 		# TODO relies on file date stamp encoding
-		grep -o "^${cur}[^-]*-" |
+		grep -Eo "^${cur}[^-]*(-|$)" |
 		# grab unique entries
 		uniq ) )
 
