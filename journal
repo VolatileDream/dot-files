@@ -53,7 +53,7 @@ query(){
 	if [ -e "$COM" ]; then
 		if [ -x "$COM" ]; then
 			# pass the query along
-			"$COM" $@
+			"$COM" "$@"
 		fi
 	else
 		err "Cannot query source '$SRC': could not find ${QUERY_PREFIX}${SRC}"
@@ -86,8 +86,7 @@ build(){
 			# nothing to build
 			return
 		fi
-		echo -n "Building sources: "
-		echo -n "$SOURCES" | tr '\n' ' '
+		echo -n "Building sources: $SOURCES" | tr '\n' ' '
 		echo
 	fi
 
@@ -156,7 +155,7 @@ view(){
 	ARGS=""
 	# all dates have the format:
 	# year[/month[/day]]
-	for query in $@; do
+	for query in "$@"; do
 		ARGS="$ARGS $ARCHIVE/${query}*"
 	done
 
@@ -179,25 +178,25 @@ else
 	COMMAND="$1" ; shift
 	case $COMMAND in
 		build)
-			build --full "$JOURNAL_PATH/archive" -- $@ ;;
+			build --full "$JOURNAL_PATH/archive" -- "$@" ;;
 		clean)
-			build --clean -- $@
+			build --clean -- "$@"
 			echo rm -r "$(config journal generated)"
 			rm --recursive --verbose --one-file-system --interactive=once "$(config journal generated)"
 			;;
 		config)
-			config $@ ;;
+			config "$@" ;;
 		edit)
 			# the only way to edit yesterdays entry
 			edit ;;
 		query)
-			query $@ ;;
+			query "$@" ;;
 		search)
-			query index $@ ;;
+			query index "$@" ;;
 		update)
 			update ;;
 		view)
-			view $@ ;;
+			view "$@" ;;
 		help|-h|--help)
 			echo "Usage: $0 [options] <command>"
 			echo "  Update your private journal"
