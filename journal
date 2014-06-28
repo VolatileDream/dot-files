@@ -22,13 +22,8 @@ config(){
 }
 
 # stuff that should be in configs
-BIN="$(config journal bin)"
-BUILD_PREFIX="$(config journal build-prefix)"
-QUERY_PREFIX="$(config journal query-prefix)"
 JOURNAL_PATH="$(config journal path)"		# stored path
-LAST_ENTRY_DATE="$(config journal last-date)"	# last entry date
 LATEST="$(config journal latest)"		# file that contains the latest entry
-ENTRY_SEPERATOR="$(config journal entry-seperator)"	# entry seperators
 NOW="$(date '+%Y/%m/%d')"			# current date
 
 err(){
@@ -51,16 +46,17 @@ query(){
 		err "query requires a data source and query be specified"
 		exit 1
 	fi
+	QUERY_PREFIX="$(config journal bin)/$(config journal query-prefix)"
 
 	SRC="$1" ; shift
-	COM="$BIN/${QUERY_PREFIX}${SRC}"
+	COM="${QUERY_PREFIX}${SRC}"
 	if [ -e "$COM" ]; then
 		if [ -x "$COM" ]; then
 			# pass the query along
 			"$COM" $@
 		fi
 	else
-		err "Cannot query source '$SRC': could not find $BIN/${QUERY_PREFIX}${SRC}"
+		err "Cannot query source '$SRC': could not find ${QUERY_PREFIX}${SRC}"
 		exit 1
 	fi
 }
@@ -72,6 +68,7 @@ build(){
 	# --
 	#  sources
 	ARGS=""
+	BUILD_PREFIX="$(config journal bin)/$(config journal build-prefix)"
 	while [ $# -gt 0 ]; do
 		last_arg="$1" ; shift
 		if [ "$last_arg" = "--" ]; then
@@ -83,7 +80,7 @@ build(){
 	if [ $# -gt 0 ]; then
 		SOURCES="$@"
 	else
-		SOURCES=$(ls "${BIN}/${BUILD_PREFIX}"* 2> /dev/null | sed "s_${BIN}/${BUILD_PREFIX}__")
+		SOURCES=$(ls "${BUILD_PREFIX}"* 2> /dev/null | sed "s_${BUILD_PREFIX}__")
 
 		if [ $? -ne 0 -o -z "$SOURCES" ]; then
 			# nothing to build
@@ -95,14 +92,14 @@ build(){
 	fi
 
 	for SRC in $SOURCES ; do
-		COM="${BIN}/${BUILD_PREFIX}${SRC}"
+		COM="${BUILD_PREFIX}${SRC}"
 		if [ -e "$COM" ]; then
 			if [ -x "$COM" ]; then
 				mkdir -p "$(config journal generated)"
 				"$COM" $ARGS
 			fi
 		else
-			err "Unable to build $SRC: could not find/execute $BIN/${QUERY_PREFIX}${SRC}"
+			err "Unable to build $SRC: could not find/execute ${BUILD_PREFIX}${SRC}"
 		fi
 	done
 }
@@ -110,6 +107,7 @@ build(){
 update(){
 	require-journal
 	FILE="${JOURNAL_PATH}/${LATEST}"
+	LAST_ENTRY_DATE="$(config journal last-date)"
 	
 	if [ "$NOW" != "$LAST_ENTRY_DATE" ]; then
 		# we need to do an update if the file exists, and has size > 0
@@ -139,6 +137,7 @@ edit(){
 	require-journal
 	FILE="${JOURNAL_PATH}/${LATEST}"
 	if [ ! -f "$FILE" ]; then
+		ENTRY_SEPERATOR="$(config journal entry-seperator)"
 		# only set the date if we make the file
 		# otherwise this will cause conflicts with update
 		config journal last-date "$NOW"
