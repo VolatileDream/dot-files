@@ -67,7 +67,7 @@ __journal(){
 			__journal_view
 			;;
 		*)
-			opts="build clean config edit query search update view"
+			opts="build clean config edit help query search update view"
 			;;
 	esac
 

@@ -25,7 +25,6 @@ config(){
 
 # stuff that should be in configs
 JOURNAL_PATH="$(config journal path)"		# stored path
-LATEST="$(config journal latest)"		# file that contains the latest entry
 NOW="$(date '+%Y/%m/%d')"			# current date
 
 err(){
@@ -107,7 +106,7 @@ build(){
 
 update(){
 	require-journal
-	FILE="${JOURNAL_PATH}/${LATEST}"
+	FILE="${JOURNAL_PATH}/journal-latest"
 	LAST_ENTRY_DATE="$(config journal last-date)"
 	
 	if [ "$NOW" != "$LAST_ENTRY_DATE" ]; then
@@ -136,7 +135,7 @@ update(){
 
 edit(){
 	require-journal
-	FILE="${JOURNAL_PATH}/${LATEST}"
+	FILE="${JOURNAL_PATH}/journal-latest"
 	if [ ! -f "$FILE" ]; then
 		ENTRY_SEPERATOR="$(config journal entry-seperator)"
 		# only set the date if we make the file
