@@ -8,16 +8,18 @@ config(){
 		if [ -e "$CONFIG" ]; then
 			cat "$CONFIG"
 		fi
-		return
-	fi
-	# update the config
-	SECTION="$1" ; shift ; KEY="$1" ; shift
-	if [ $# -gt 0 ]; then
-		inifile -f "$CONFIG" -c -s "$SECTION" -k "$KEY" -v "$@"
 	else
-		# TODO allow dependent config variables
-		VALUE="$(inifile -f "$CONFIG" -n -s "$SECTION" -k "$KEY")"
-		echo $VALUE | sed "s_\${HOME}_${HOME}_"
+		# update the config
+		SECTION="$1" ; shift ; KEY="$1" ; shift
+		if [ $# -gt 0 ]; then
+			inifile -f "$CONFIG" -c -s "$SECTION" -k "$KEY" -v "$@"
+		else
+			# this kind of automatically takes care of the case that
+			# not enough arguments are passed.
+			# TODO allow dependent config variables
+			VALUE="$(inifile -f "$CONFIG" -n -s "$SECTION" -k "$KEY")"
+			echo $VALUE | sed "s_\${HOME}_${HOME}_"
+		fi
 	fi
 }
 
