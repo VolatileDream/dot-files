@@ -21,6 +21,7 @@ function ensure-file(){
 
 # given $LINE $FILE $CONTENT
 function replace-line(){
+	# this is really slow...
 	line=$1
 	file="$2"
 	content="$3"
@@ -32,6 +33,10 @@ function replace-line(){
 	tail -n $((count-line)) "$file"
 }
 
+function reverse-date(){
+	echo "$1" | sed 's_/_ _g' | awk '{  printf($NF); for(i=NF -1; i > 0; i-- ){ printf("/%s", $i); } printf("\n"); }'
+}
+
 # diagnostic output
 #echo $0 $@
 
@@ -40,7 +45,7 @@ COM=$0
 ensure-file
 
 # always the same format
-DATE="$1" ; shift ; EVENT="$@"
+DATE="$(reverse-date $1)" ; shift ; EVENT="$@"
 
 case $COM in
 	*event)

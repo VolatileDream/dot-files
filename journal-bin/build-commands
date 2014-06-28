@@ -25,8 +25,8 @@ ensure-config(){
 
 # stuff that should be in config
 PATH_AUGMENT="$(ensure-config augment-path '$HOME/bin/journal-bin/commands')"
-GEN_OUTPUT="$(journal config journal generated)"
 ECHO_COMMANDS="$(ensure-config echo '')"
+GEN_OUTPUT="$(journal config journal generated)"
 
 CLEAN=0
 FULL=0
