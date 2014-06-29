@@ -61,18 +61,25 @@ if [ $CLEAN -ne 0 ]; then
 	echo -n
 fi
 
+cd "$GENERATED"
+
+if [ $INCR -ne 0 ]; then
+	if [ -f 'swish++.index' ]; then
+		# all of the arguments passed were files
+		index++ --incremental -e text:* "$@"
+		# swish++ creates a new index that is the old one
+		# with the incremental changes, so we have to replace
+		# the old index with the new one
+		mv swish++.index.new swish++.index
+	else
+		# index didn't exist so we error
+		echo "swish++.index doesn't exist" >> /dev/err
+		echo "$0 can't update the index" >> /dev/err
+	fi
+fi
+
 if [ $FULL -ne 0 ]; then
 	# all of the arguments passed were directories
-	cd "$GENERATED"
 	index++ -e text:* "$@"
 fi
 
-if [ $INCR -ne 0 ]; then
-	# all of the arguments passed were files
-	cd "$GENERATED"
-	index++ --incremental -e text:* "$@"
-	# swish++ creates a new index that is the old one
-	# with the incremental changes, so we have to replace
-	# the old index with the new one
-	mv swish++.index.new swish++.index
-fi

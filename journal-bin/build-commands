@@ -24,6 +24,8 @@ ensure-config(){
 }
 
 # stuff that should be in config
+# this doesn't auto expand to $HOME, but embeds the string '$HOME' in the config
+# it gets auto expanded when we read it.
 PATH_AUGMENT="$(ensure-config augment-path '$HOME/bin/journal-bin/commands')"
 ECHO_COMMANDS="$(ensure-config echo '')"
 GEN_OUTPUT="$(journal config journal generated)"
