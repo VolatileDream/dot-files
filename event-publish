@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+if [ $# -ne 1 ]; then
+	echo "Usage: $0 event"
+	echo "event-publish is one of two parts of a simple command line pub/sub mechanism"
+	echo
+	echo "It takes 1 parameter, which is the event "name" that is wanted."
+	echo "It takes it's data from stdin, and sends it to a temporary file."
+	echo "And then notifies all tasks that have setup to recieve notifications."
+	exit 1
+fi
+
+FILE_BASE="$1" ; shift
+
+# make file base absolute
+if [ "${FILE_BASE:0:1}" != "/" ]; then
+	FILE_BASE="${PWD}/${FILE_BASE}"
+fi
+
+tmp=`mktemp`
+cat - > "$tmp"
+
+for file in "$FILE_BASE"* ; do
+	if [ -p "$file" ]; then
+		echo "Notified: $file"
+		cat "$tmp" >> $file
+	fi
+done
+
+rm "$tmp"
+

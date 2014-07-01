@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+if [ $# -ne 1 -a $# -ne 2 ]; then
+	echo "Usage: $0 event [-c|--continue]"
+	echo "event-subscribe is one of two parts of a simple ommand line pub/sub mechanism"
+	echo
+	echo "It takes 1 parameter, which is the event "name" that is wanted,"
+	echo " and outputs it's update(s) to stdout"
+	echo "It optionally takes a '-c' to stay alive and wait for more updates."
+	echo "By default it only waits for a single update and then exits"
+	exit 1
+fi
+
+FILE_BASE="$1" ; shift
+
+# make file base absolute
+if [ "${FILE_BASE:0:1}" != "/" ]; then
+	FILE_BASE="${PWD}/${FILE_BASE}"
+fi
+
+# add out pid to the file name
+FILE="$FILE_BASE-$$"
+
+# check if we're supposed to continue
+if [ "$2" = "-c" -o "$2" = "--continue" ]; then
+	CONTINUE=1
+else
+	CONTINUE=0
+fi
+
+mkfifo "$FILE"
+
+while true; do
+
+	cat "$FILE"
+
+	if [ $CONTINUE -eq 0 ]; then
+		break
+	fi
+done
+
+rm "$FILE"
+
