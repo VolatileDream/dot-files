@@ -8,6 +8,8 @@ usage(){
 	echo "Commands available:"
 	echo " get - retrieve the value of the specified key, prints to stdout"
 	echo " put - store the value to the specified key, reads from stdin"
+	echo " match - retrieves all matching keys, prints keys to stdout"
+	echo " remove - removes the specified key, prints the old value to stdout"
 	echo
 	echo "Storage: optionally '-s <file>' can be supplied which specifies the"
 	echo " storage file for kiwi to use. Otherwise kiwi defaults to ./kiwi.kv"
@@ -42,6 +44,13 @@ case $COM in
 		# sqlite escaping
 		DATA=$( sed "s_'_''_" )
 		echo -n "INSERT INTO kiwi_store(key,value) VALUES ( '$KEY', '$DATA');" | sqlite "$STORE" 
+	;;
+	match)
+		echo -n "SELECT key FROM kiwi_store WHERE key LIKE '$KEY';" | sqlite "$STORE"
+	;;
+	remove)
+		echo -n "SELECT value FROM kiwi_store WHERE key = '$KEY';" | sqlite "$STORE"
+		echo -n "DELETE FROM kiwi_store WHERE key = '$KEY';" | sqlite "$STORE"
 	;;
 	*)
 		usage
