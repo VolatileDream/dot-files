@@ -22,11 +22,19 @@ fi
 FILE="$FILE_BASE-$$"
 
 # check if we're supposed to continue
-if [ "$2" = "-c" -o "$2" = "--continue" ]; then
+if [ "$1" = "-c" -o "$1" = "--continue" ]; then
 	CONTINUE=1
 else
 	CONTINUE=0
 fi
+
+cleanup(){
+	rm "$FILE"
+	exit $?
+}
+
+# trap control-c to cleanup
+trap cleanup SIGINT
 
 mkfifo "$FILE"
 
@@ -39,5 +47,6 @@ while true; do
 	fi
 done
 
-rm "$FILE"
+# run cleanup
+cleanup
 
