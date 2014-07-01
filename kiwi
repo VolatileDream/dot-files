@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+
+usage(){
+	echo "Usage: kiwi <command> [-s storage] <key>"
+	echo " Kiwi is a simple command line key value store,"
+	echo " that only supports simple text data."
+	echo
+	echo "Commands available:"
+	echo " get - retrieve the value of the specified key, prints to stdout"
+	echo " put - store the value to the specified key, reads from stdin"
+	echo
+	echo "Storage: optionally '-s <file>' can be supplied which specifies the"
+	echo " storage file for kiwi to use. Otherwise kiwi defaults to ./kiwi.kv"
+}
+
+COM=$1; shift
+
+if [ "-s" = "$1" ]; then
+	STORE="$2"
+	shift ; shift # take off the storage args
+else
+	STORE="$PWD/kiwi.kv"
+fi
+
+KEY="$1" ; shift
+
+if [ $# -gt 0 ]; then
+	echo "Error kiwi currently only supports a single key being specified" >> /dev/stderr
+	exit 1
+fi
+
+if [ ! -f "$STORE" ]; then
+	# create db if required
+	echo "CREATE TABLE kiwi_store ( key text PRIMARY KEY ON CONFLICT REPLACE, value text );" | sqlite "$STORE"
+fi
+
+case $COM in
+	get)
+		echo -n "SELECT value FROM kiwi_store WHERE key = '$KEY';" | sqlite "$STORE"
+	;;
+	put)
+		# sqlite escaping
+		DATA=$( sed "s_'_''_" )
+		echo -n "INSERT INTO kiwi_store(key,value) VALUES ( '$KEY', '$DATA');" | sqlite "$STORE" 
+	;;
+	*)
+		usage
+		exit 2
+	;;
+esac
