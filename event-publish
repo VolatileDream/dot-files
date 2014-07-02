@@ -5,16 +5,25 @@ if [ $# -ne 1 ]; then
 	echo "event-publish is one of two parts of a simple command line pub/sub mechanism"
 	echo
 	echo "It takes 1 parameter, which is the event "name" that is wanted."
+	echo "The event name must be a legal file name, and will get created under /tmp."
 	echo "It takes it's data from stdin, and sends it to a temporary file."
 	echo "And then notifies all tasks that have setup to recieve notifications."
 	exit 1
 fi
 
+DIR_BASE=/tmp/events
 FILE_BASE="$1" ; shift
 
-# make file base absolute
+# make the file path absolute, off /tmp
 if [ "${FILE_BASE:0:1}" != "/" ]; then
-	FILE_BASE="${PWD}/${FILE_BASE}"
+	mkdir "$DIR_BASE" > /dev/null 2> /dev/null
+	FILE_BASE="${DIR_BASE}/${FILE_BASE}"
+else
+	echo "Warning: Event is already has an absolute path."
+	echo "EVENT: $FILE_BASE"
+	echo "This should be avoided because it has the possibility"
+	echo " of creating PIPE files that don't get cleaned up"
+	echo " across system shutdown."
 fi
 
 tmp=`mktemp`
