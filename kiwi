@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 usage(){
-	echo "Usage: kiwi <command> [-s storage] <key>"
+	echo "Usage: kiwi <storage-file> <command> <key>"
 	echo " Kiwi is a simple command line key value store,"
 	echo " that only supports simple text data."
 	echo
@@ -10,20 +10,10 @@ usage(){
 	echo " put - store the value to the specified key, reads from stdin"
 	echo " match - retrieves all matching keys, prints keys to stdout"
 	echo " remove - removes the specified key, prints the old value to stdout"
-	echo
-	echo "Storage: optionally '-s <file>' can be supplied which specifies the"
-	echo " storage file for kiwi to use. Otherwise kiwi defaults to ./kiwi.kv"
 }
 
+STORE="$1" ; shift
 COM=$1; shift
-
-if [ "-s" = "$1" ]; then
-	STORE="$2"
-	shift ; shift # take off the storage args
-else
-	STORE="$PWD/kiwi.kv"
-fi
-
 KEY="$1" ; shift
 
 if [ $# -gt 0 ]; then
