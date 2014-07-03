@@ -30,9 +30,14 @@ tmp=`mktemp`
 cat - > "$tmp"
 
 for file in "$FILE_BASE"* ; do
+	# it needs to be a pipe file
 	if [ -p "$file" ]; then
-		echo "Notified: $file"
+		# TODO deal with race conditions here
+		# A process might exit and delete it's pipe
+		# after we've starting writing to it, which
+		# would leave us in an awkward blocked state.
 		cat "$tmp" >> $file
+		echo "Notified: $file"
 	fi
 done
 
