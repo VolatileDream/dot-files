@@ -1,0 +1,163 @@
+#!/bin/bash
+
+# CONFIG stuff
+SEPERATOR="--------------- "
+# date format shouldn't contain spaces, because otherwise
+# it causes problems with the various things that attempt
+# to query it. Woo bash strings and whitespace...
+# due to limitations of kiwi we also want to avoid underscores
+DATE_FORMAT="%Y/%m/%d-%H:%M:%S"
+
+# tiny utility function to print out the seperator and key
+seperate(){
+	echo "${SEPERATOR}${1}"
+}
+
+submit(){
+	IN="/dev/stdin"
+	DATE="$(date "+$DATE_FORMAT")"
+
+	if [ $# -gt 0 ]; then
+		# TODO parse date input using 'date --date=$in'
+		# ideally we'd use the date commands date parsing
+		# for the date string that we're taking in, but that
+		# has the slightly annoying effect that we should
+		# handle a date that spans multiple arguments
+		case $# in
+			1) # date
+				DATE="$1" ; shift
+			;;
+			2) # -f file
+				IN="$2" ; shift ; shift
+			;;
+			3) # date -f file
+				DATE="$1" ; shift
+				IN="$2" ; shift ; shift
+			;;
+			*)
+				echo "Error in the number of params for submit"
+				exit 2
+			;;
+		esac
+	fi
+
+	tmp=`mktemp`
+	cat "$IN" > "$tmp"
+
+	cat "$tmp" | kiwi "$ARCHIVE" put "$DATE"
+	echo "$DATE" | kiwi "$ARCHIVE" put LAST
+
+	# put the entry seperator + contents
+	(seperate "${DATE}" ; cat "$tmp") | event-publish "$EVENT"
+
+	rm "$tmp"
+}
+
+show(){
+	# do we put extra new lines around the content?
+	seperate "$1"
+	#echo
+	kiwi "$ARCHIVE" get "$1"
+	#echo
+}
+
+view(){
+	# conveniently we use the fact that kiwi provides key match
+	# functionality to find and display matching keys
+	for entry in "$@"; do
+		#echo "ENTRY: $entry"
+		for key in `kiwi "$ARCHIVE" match "${entry}%" | sort`; do
+			#echo "MATCH: '$key' matches '$entry%'"
+			show "$key"
+		done
+	done
+}
+
+replay(){
+	# (ab)use the way view works.
+	# there should only be 2 types of keys:
+	# * LAST
+	# * keys matching DATE_FORMAT
+	# So we pass something that will only
+	#  match the DATE_FORMAT entries.
+	view '%-' # remember that '%' gets appended to this
+}
+
+if [ "-a" = "$1" ]; then
+	ARCHIVE="$2"
+	shift ; shift ; # shift off the archive param
+else
+	mkdir "$HOME/.archivist" > /dev/null 2> /dev/null
+	ARCHIVE="$HOME/.archivist/archive"
+fi
+command="$1"; shift
+
+# strip out slashes from the name
+EVENT="$( echo -n $ARCHIVE | sed 's_/_-_g' )-event"
+
+case $command in
+	submit)
+		submit "$@"
+	;;
+	view)
+		view "$@"
+	;;
+	replay)
+		replay
+	;;
+	last)
+		entry="$(kiwi "$ARCHIVE" get LAST)"
+		if [ ! -z "$entry" ]; then
+			seperate "$entry"
+			kiwi "$ARCHIVE" get "$entry"
+		fi
+	;;
+	sub|subscribe)
+		ARG=""
+		if [ $# -gt 0 ]; then
+			ARG="-n $1"
+		fi
+		event-subscribe "$EVENT" $ARG
+	;;
+	*)
+read -d '' HELP <<- EOF
+
+archivist is a light weight event bus that supports a few simple operations:
+
+ submit [date-time] [-f file]
+ - add a new entry into the bus for the current date-time, or the one specified
+ - by default takes stdin, otherwise a file specified
+ - specifying a time does NOT update the value retrieved by 'last'
+
+ view [date-time]+
+ - lookup a bunch of entries by date-time
+ - simple wildcard-ing:
+   - 2004 implies the range 2004-01-01_00:00 to 2004-12-31_23:59 (inclusive both ends)
+   - more fields can be included for the wildcarding to get stricter
+ - dumps all entries out to stdout
+ - entries are seperated by:
+       "-"*15 + "\${date-time}"
+
+ replay
+ - show all entries
+ - equivalent to 'view date1 date2 ... daten' where date1-n are all the date-times that have data
+ - while equivalent to 'view ...' it is much faster if that is the desired result
+ - outputs in the same manner as view
+
+ last
+ - retreives the last event that occured
+
+ sub[scribe] [count]
+ - waits for other runs of archivist to update the archive, prints out the
+   new updates in the format of the replay/view command
+
+ as far as archivist is concerned, all events are simple text blobs, and none of them
+ is treated any differently than any other. archivist does not support any way to search
+ through the events other than by date-time. This is by design, it makes archivist very simple.
+ archivist take an optional [-a archive] first parameter to denote the archive being used.
+ otherwise the default \$HOME/.archivist/archive is used.
+EOF
+		echo "$HELP"
+	;;
+esac
+
