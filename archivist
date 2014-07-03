@@ -15,24 +15,16 @@ seperate(){
 
 submit(){
 	IN="/dev/stdin"
-	DATE="$(date "+$DATE_FORMAT")"
-	date_provided=0
+	DATE=""
 	if [ $# -gt 0 ]; then
-		# TODO parse date input using 'date --date=$in'
-		# ideally we'd use the date commands date parsing
-		# for the date string that we're taking in, but that
-		# has the slightly annoying effect that we should
-		# handle a date that spans multiple arguments
 		case $# in
 			1) # date
-				date_provided=1
 				DATE="$1" ; shift
 			;;
 			2) # -f file
 				IN="$2" ; shift ; shift
 			;;
 			3) # date -f file
-				date_provided=1
 				DATE="$1" ; shift
 				IN="$2" ; shift ; shift
 			;;
@@ -45,6 +37,18 @@ submit(){
 
 	tmp=`mktemp`
 	cat "$IN" > "$tmp"
+
+	date_provided=0
+	if [ -z "$DATE" ]; then
+		DATE="$(date "+$DATE_FORMAT")"
+	else
+		# use the provided date
+		DATE="$(date "+$DATE_FORMAT" --date="$DATE")"
+		if [ $? -ne 0 ]; then
+			exit 2
+		fi
+		date_provided=1
+	fi
 
 	cat "$tmp" | kiwi "$ARCHIVE" put "$DATE"
 	# only update the last pointer if a date wasn't provided
