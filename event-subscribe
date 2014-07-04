@@ -4,7 +4,7 @@ if [ $# -ne 1 -a $# -ne 3 ]; then
 	echo "Usage: $0 event [-n count]"
 	echo "event-subscribe is one of two parts of a simple command line pub/sub mechanism"
 	echo
-	echo "It takes 1 parameter, which is the event "name" that is wanted."
+	echo "It takes 1 parameter, which is the event 'name' that is wanted."
 	echo "The event name must be a legal file name, and will get created under /tmp."
 	echo "It prints events that arrive to stdout, defaulting to a continuous listening."
 	echo "Optionally provided a count for the number of events to receive."
