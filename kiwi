@@ -32,7 +32,7 @@ case $COM in
 	;;
 	put)
 		# sqlite escaping
-		DATA=$( sed "s_'_''_" )
+		DATA=$( sed "s_'_''_g" )
 		echo -n "INSERT INTO kiwi_store(key,value) VALUES ( '$KEY', '$DATA');" | sqlite "$STORE" 
 	;;
 	match)
