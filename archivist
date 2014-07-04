@@ -63,11 +63,8 @@ submit(){
 }
 
 show(){
-	# do we put extra new lines around the content?
 	seperate "$1"
-	#echo
 	kiwi "$ARCHIVE" get "$1"
-	#echo
 }
 
 view(){
@@ -152,11 +149,11 @@ archivist is a light weight event bus that supports a few simple operations:
  view [date-time]+
  - lookup a bunch of entries by date-time
  - simple wildcard-ing:
-   - 2004 implies the range 2004-01-01_00:00 to 2004-12-31_23:59 (inclusive both ends)
+   - 2004 implies the range '2004-01-01 00:00:00' to '2004-12-31 23:59:59' (inclusive both ends)
    - more fields can be included for the wildcarding to get stricter
  - dumps all entries out to stdout
  - entries are seperated by:
-       "-"*15 + "\${date-time}"
+       "-"*15 + " " + \${date} + " " + \${time}
 
  replay
  - show all entries
