@@ -1,12 +1,12 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # CONFIG stuff
 SEPERATOR="--------------- "
-# date format shouldn't contain spaces, because otherwise
-# it causes problems with the various things that attempt
-# to query it. Woo bash strings and whitespace...
-# due to limitations of kiwi we also want to avoid underscores
-DATE_FORMAT="%Y/%m/%d-%H:%M:%S"
+# * due to limitations of kiwi we also want to avoid underscores
+# * also need to make sure that we can take it as a parameter
+#   back in with the submit command
+# So this ends up being awkward with the number of constraints
+DATE_FORMAT="%Y-%m-%d %H:%M:%S"
 
 # tiny utility function to print out the seperator and key
 seperate(){
@@ -74,10 +74,12 @@ view(){
 	# conveniently we use the fact that kiwi provides key match
 	# functionality to find and display matching keys
 	for entry in "$@"; do
-		#echo "ENTRY: $entry"
-		for key in `kiwi "$ARCHIVE" match "${entry}%" | sort`; do
-			#echo "MATCH: '$key' matches '$entry%'"
-			show "$key"
+		
+		# Since we get a single entry per line we pipe and use
+		# read line to avoid whitespace across the line.
+		kiwi "$ARCHIVE" match "${entry}%" | 
+		while read key; do
+			show "$key" ;
 		done
 	done
 }
@@ -89,7 +91,14 @@ replay(){
 	# * keys matching DATE_FORMAT
 	# So we pass something that will only
 	#  match the DATE_FORMAT entries.
-	view '%-' # remember that '%' gets appended to this
+	view '% ' # remember that '%' gets appended to this
+}
+
+last-date(){
+	entry="$(kiwi "$ARCHIVE" get LAST)"
+	if [ ! -z "$entry" ]; then
+		echo "$entry"
+	fi
 }
 
 if [ "-a" = "$1" ]; then
@@ -114,12 +123,14 @@ case $command in
 	replay)
 		replay
 	;;
+	date)
+		last-date
+	;;
 	last)
-		entry="$(kiwi "$ARCHIVE" get LAST)"
-		if [ ! -z "$entry" ]; then
-			seperate "$entry"
-			kiwi "$ARCHIVE" get "$entry"
-		fi
+		# just dump the last entry out, and
+		# does not print out the entry seperator.
+		last="$(kiwi "$ARCHIVE" get LAST)"
+		kiwi "$ARCHIVE" get "$last"
 	;;
 	sub|subscribe)
 		ARG=""
@@ -154,11 +165,16 @@ archivist is a light weight event bus that supports a few simple operations:
  - outputs in the same manner as view
 
  last
- - retreives the last event that occured
+ - retrieves the last event that occured
+ - almost equivalent to 'archivist view \$(archivist date)'
+    except that this doesn't print the entry seperator.
 
  sub[scribe] [count]
  - waits for other runs of archivist to update the archive, prints out the
    new updates in the format of the replay/view command
+
+ date
+ - retrieves the date-time of the last entry
 
  as far as archivist is concerned, all events are simple text blobs, and none of them
  is treated any differently than any other. archivist does not support any way to search
