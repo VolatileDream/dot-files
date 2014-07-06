@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-ENTRY_SEPERATOR="$(journal config journal entry-seperator)"
+ENTRY_SEPERATOR="---------------"
 
 read -d '' SCRIPT <<- EOF
 	BEGIN { file = "" }
