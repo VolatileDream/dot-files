@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # configuration file
-CONFIG="$HOME/.config/journal-config.ini"
+CONFIG="$HOME/.config/journal2-config.ini"
 
 config(){
 	if [ $# -eq 0 ]; then
@@ -24,37 +24,33 @@ config(){
 }
 
 # stuff that should be in configs
-JOURNAL_PATH="$(config journal path)"		# stored path
-NOW="$(date '+%Y/%m/%d')"			# current date
+JOURNAL="$(config journal file)" 	# file for for archivist
 
 err(){
 	echo -ne "\e[31m"
 	echo $@ >> /dev/stderr
 	echo -ne "\e[0m"
 }
-require-journal(){
-	# check if the journal is available
-	if [ ! -d "$JOURNAL_PATH" ]; then
-		err "Unable to locate journal ($JOURNAL_PATH)."
-		err "Does the directory exist?"
-		exit 1
-	fi
+
+# takes the date-time as arg1
+temp-file(){
+	# no spaces or slashes in file name.
+	mktemp --tmpdir=/tmp "XXXXXXXX--$(echo $1 | tr '/ ' '--')"
 }
 
 query(){
-	require-journal
-	if [ $# -eq 0 ]; then
+	if [ $# -lt 1 ]; then
 		err "query requires a data source and query be specified"
 		exit 1
 	fi
-	QUERY_PREFIX="$(config journal bin)/$(config journal query-prefix)"
+	QUERY_PREFIX="$(config journal bin)/$(config journal source-prefix)"
 
 	SRC="$1" ; shift
 	COM="${QUERY_PREFIX}${SRC}"
 	if [ -e "$COM" ]; then
 		if [ -x "$COM" ]; then
 			# pass the query along
-			"$COM" "$@"
+			"$COM" --query "$@"
 		fi
 	else
 		err "Cannot query source '$SRC': could not find ${QUERY_PREFIX}${SRC}"
@@ -63,13 +59,12 @@ query(){
 }
 
 build(){
-	require-journal
 	# Args are laid out in 2 groups:
 	#  pass along flags
 	# --
 	#  sources
 	ARGS=""
-	BUILD_PREFIX="$(config journal bin)/$(config journal build-prefix)"
+	BUILD_PREFIX="$(config journal bin)/$(config journal source-prefix)"
 	while [ $# -gt 0 ]; do
 		last_arg="$1" ; shift
 		if [ "$last_arg" = "--" ]; then
@@ -105,66 +100,51 @@ build(){
 }
 
 update(){
-	require-journal
-	FILE="${JOURNAL_PATH}/journal-latest"
-	LAST_ENTRY_DATE="$(config journal last-date)"
+	FORMAT="%Y-%m-%d"
+	LAST="$(archivist -a "$JOURNAL" date)"
+
+	# unfortunately we have to know a bit about archivists' date format
+	LAST_ENTRY_DATE="`date --date="$(echo $LAST | sed 's/ .*//')" +$FORMAT `"
+	NOW="$(date +$FORMAT)"
 	
 	if [ "$NOW" != "$LAST_ENTRY_DATE" ]; then
-		# we need to do an update if the file exists, and has size > 0
-		if [ -f "$FILE" -a -s "$FILE" ]; then
 
-			# make sure there's a newline at the end
-			echo >> "$FILE"
+		# Update, creating a new latest file
+		echo | archivist -a "$JOURNAL" submit
 
-			# make sure the archive directory exists
-			mkdir -p "${JOURNAL_PATH}/archive/"
-			# figure out the file name
-			NEW_FILE="${JOURNAL_PATH}/archive/$(echo "$LAST_ENTRY_DATE" | sed 's_/_-_g')"
-			# move the file
-			mv "$FILE" "${NEW_FILE}"
+		# Now run an incremental update
+		tmp="$(temp-file "$LAST")"
 
-			# because some things record file names + stuff
-			build --incremental "$NEW_FILE" --
+		archivist -a "$JOURNAL" view "$LAST" > "$tmp"
 
-			# permission stuff to make it read only
-			chmod a-wx "$NEW_FILE" ; chmod og-r "$NEW_FILE"
-		fi
+		build --incremental "$tmp" --
+
+		rm "$tmp"
 	fi
 	
 }
 
 edit(){
-	require-journal
-	FILE="${JOURNAL_PATH}/journal-latest"
-	if [ ! -f "$FILE" ]; then
-		ENTRY_SEPERATOR="$(config journal entry-seperator)"
-		# only set the date if we make the file
-		# otherwise this will cause conflicts with update
-		config journal last-date "$NOW"
-		mkdir -p "$JOURNAL_PATH"
-		echo "${ENTRY_SEPERATOR}${NOW}" >> "$FILE"
-		echo >> "$FILE"
-	fi
-	sensible-editor "$FILE"
+	LAST="$(archivist -a "$JOURNAL" date)"
+
+	# unfortunately we're stuck putting this into a temporary file.
+	tmp="$(temp-file "$LAST")"
+	archivist -a "$JOURNAL" last > "$tmp"
+
+	sensible-editor "$tmp"
+
+	# send it back, this is very important
+	cat "$tmp" | archivist -a "$JOURNAL" submit "$LAST"
+
+	rm "$tmp"
 }
 
 view(){
-	require-journal
-
-	ARCHIVE="$(journal config journal path)/archive"
-
-	ARGS=""
-	# all dates have the format:
-	# year[/month[/day]]
-	for query in "$@"; do
-		ARGS="$ARGS $ARCHIVE/${query}*"
-	done
-
 	# all entries must be shown with a single command invocation
 	# this prevents the user from having to exit the pager
 	# again and again and again, and get really frustrated
-	if [ ! -z "$ARGS" ]; then
-		sensible-pager $ARGS
+	if [ ! -z "$*" ]; then
+		archivist -a "$JOURNAL" view "$@" | sensible-pager
 	fi
 }
 
@@ -179,11 +159,15 @@ else
 	COMMAND="$1" ; shift
 	case $COMMAND in
 		build)
-			build --full "$JOURNAL_PATH/archive" -- "$@" ;;
+			LAST=$(archivist -a "$JOURNAL" date)
+			tmp="$(mktemp "$LAST")"
+			archivist -a "$JOURNAL" replay > "$tmp"
+			build --full "$tmp" -- "$@"
+			rm "$tmp"
+			;;
 		clean)
+			# trust that each source will clean up after itself
 			build --clean -- "$@"
-			echo rm -r "$(config journal generated)"
-			rm --recursive --verbose --one-file-system --interactive=once "$(config journal generated)"
 			;;
 		config)
 			config "$@" ;;
@@ -205,7 +189,7 @@ else
 			echo "Available commands are:"
 			echo "- build [source]*"
 			echo "    rebuilds the generated files for the specified sources, defaults"
-			echo "    to rebuilding all data sources"
+			echo "    to rebuilding all data sources."
 			echo
 			echo "- clean [source]*"
 			echo "    removes all generated files for the specified sources, defaults"
@@ -225,15 +209,31 @@ else
 			echo "    shortcut for 'query index'"
 			echo
 			echo "- update"
+			echo "    if the LATEST entry is not for the current date it"
 			echo "    updates the LATEST entry to point to the current date then"
 			echo "    runs an incremental update of all generated data sources"
 			echo
-			echo "- view [year[-month[-day]]]*"
+			echo "- view [year[smonth[-day[ hour[:minute[:second]]]]]]*"
 			echo "    view a particular set of date entries, or range of dates"
 			echo
+			echo "Building your own source:"
+			echo " There is 2 necesarry things a source needs to work with journal."
+			echo " - The command must start with 'journal config journal source-prefix'"
+			echo " - It must be located in the folder: 'journal config journal bin'"
+			echo
+			echo "The source must accept a particular flag set:"
+			echo " * --full \$file : the source is given the entire journal and must"
+			echo "    recreate it's dataset from the source."
+			echo " * --clean : the source erases any generated files that are stored"
+			echo "    with the journal, is usually preceeded by a --full"
+			echo " * --incremental \$file : the source is given a single journal entry,"
+			echo "    and must update it's dataset using the entry."
+			echo " * --query a1 ... aN : the source is given a query that it must resolve"
+			echo "    for the user. The query is passed as is from 'journal query'."
+			echo "    The source is responsible for displaying the resultant data."
 			;;
 		*)
-			err "Journal command $COMMAND not found"
+			err "Journal command '$COMMAND' not found"
 			exit 1
 			;;
 	esac

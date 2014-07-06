@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+
+if [ $# -eq 0 ]; then
+	echo "$0: [--clean] [--full] [--incremental] file"
+	echo "$0: --query ..."
+	exit 1
+fi
+
+# were to put all the files we generate
+GENERATED="$(journal config journal generated)"
+
+require-index(){
+	if [ ! -f "$GENERATED/swish++.index" ]; then
+		echo "Unable to find index file run 'journal build index'" >> /dev/stderr
+		exit 1
+	fi
+}
+
+build(){
+	BIN="$(journal config journal bin)"
+	# the argument passed is a file, unfortunately index++
+	# doesn't like to index this, and just returns the one
+	# file for any query. So first we have to break up the
+	# one file, and then index a bunch of files seperately.
+
+	tmp="$(mktemp --directory)" ; cd "$tmp"
+	cat "$1" | "$BIN/journal-split"
+
+	# after splitting the file we can index it properly
+	cd "$GENERATED" ; index++ -e text:* "$tmp"
+
+	# cleanup after ourselves.
+	rm -r "$tmp"
+}
+
+build-incr(){
+	require-index ; cd "$GENERATED"
+
+	# the argument passed is a file
+	index++ --incremental -e text:* "$1"
+
+	# swish++ creates a new index that is the old one with
+	# the incremental changes, so we have to replace the
+	# old index with the new one
+	mv swish++.index.new swish++.index
+}
+
+clean(){
+	rm "$GENERATED/swish++.index"
+}
+
+query(){
+	if [ $# -eq 0 ]; then
+		man search++
+		exit
+	fi
+
+	require-index ; cd "$GENERATED"
+	# temporary storage file for index thing to show the user,
+	tmp=`mktemp`
+
+	# all of our arguments get passed to search++, since
+	# the user should know how to query us.
+	search++ "$@" > "$tmp"
+
+	dates=$(cat "$tmp" | awk '{ print $4 }' | tr '\n' ' ' )
+
+	# display the results before the actual entries
+	sensible-pager "$tmp"
+
+	# delete the temporary file, asap
+	rm "$tmp"
+
+	# display the entries
+	journal view $dates
+}
+
+# Only one of these will ever be specified,
+#  and they all have slightly different syntax.
+COM=$1 ; shift
+case $COM in
+	# $0 --full <file>
+	--full)
+		build "$1" ;;
+	# $0 --incremental <file>
+	--incremental)
+		build-incr "$1" ;;
+	# $0 --clean
+	--clean)
+		clean ;; # $# == 0
+	# $0 --query args*
+	--query)
+		query "$@" ;; # $# >= 0
+	*)
+		echo "Unknown command specified to source: $COM" ;;
+esac
+

@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+if [ $# -eq 0 ]; then
+	echo "$0: [--clean] [--full] [--incremental] file"
+	echo "$0: --query ..."
+	exit 1
+fi
+
+# were to put all the files we generate
+GENERATED="$(journal config journal generated)"
+
+build(){
+	echo "Building with file $1"
+}
+
+build-incr(){
+	echo "Incremental update using $1"
+}
+
+clean(){
+	echo "Cleaning up..."
+}
+
+query(){
+	echo "Querying source..."
+	echo "QUERY: $@"
+}
+
+# Only one of these will ever be specified,
+#  and they all have slightly different syntax.
+COM=$1 ; shift
+case $COM in
+	# $0 --full <file>
+	--full)
+		build "$1" ;;
+	# $0 --incremental <file>
+	--incremental)
+		build-incr "$1" ;;
+	# $0 --clean
+	--clean)
+		clean ;; # $# == 0
+	# $0 --query args*
+	--query)
+		query "$@" ;; # $# >= 0
+	*)
+		echo "Unknown command specified to source: $COM" ;;
+esac
+
