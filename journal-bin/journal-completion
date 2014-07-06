@@ -53,12 +53,11 @@ __journal(){
 			opts=""
 			;;
 		# things that complete to build-* entries
-		build|clean)
-			opts="`ls $(journal config journal bin)/build-* | sed 's_.*/build-__'`"
-			;;
-		# things that complete to query-* entries
-		query)
-			opts="`ls $(journal config journal bin)/query-* | sed 's_.*/query-__'`"
+		build|clean|query)
+			bin="$(journal config journal bin)"
+			prefix="$(journal config journal source-prefix)"
+			path="$bin/$prefix"
+			opts=`ls "$path"* | sed "s_.*/${prefix}__"`
 			;;
 		config)
 			__journal_config

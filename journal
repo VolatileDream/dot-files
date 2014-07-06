@@ -159,8 +159,7 @@ else
 	COMMAND="$1" ; shift
 	case $COMMAND in
 		build)
-			LAST=$(archivist -a "$JOURNAL" date)
-			tmp="$(mktemp "$LAST")"
+			tmp="$(mktemp)"
 			archivist -a "$JOURNAL" replay > "$tmp"
 			build --full "$tmp" -- "$@"
 			rm "$tmp"
