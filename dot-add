@@ -28,7 +28,7 @@ add_file(){
         FILE="$PWD/$FILE"
     fi
 
-    RELATIVE_TO_HOME="${FILE##$HOME/}"
+    RELATIVE_TO_HOME="./${FILE##$HOME/}"
 
     if [ "$RELATIVE_TO_HOME" = "$FILE" ]; then
         usage
