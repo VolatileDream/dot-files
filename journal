@@ -32,6 +32,19 @@ err(){
 	echo -ne "\e[0m"
 }
 
+require-journal(){
+	if [ -z "$JOURNAL" ]; then
+		err "journal hasn't been configured for use yet."
+		err "Run: 'journal create' to configure it."
+		exit 1
+	fi
+	if [ ! -f "$JOURNAL" ]; then
+		err "Unable to locate journal (${JOURNAL})."
+		err "Are you sure it exists?"
+		exit 1
+	fi
+}
+
 # takes the date-time as arg1
 temp-file(){
 	# no spaces or slashes in file name.
@@ -39,11 +52,14 @@ temp-file(){
 }
 
 query(){
+	require-journal
+	QUERY_PREFIX="$(config journal bin)/$(config journal source-prefix)"
 	if [ $# -lt 1 ]; then
 		err "query requires a data source and query be specified"
+		SOURCES=$(ls "${QUERY_PREFIX}"* 2> /dev/null | sed "s_${QUERY_PREFIX}__")
+		err "Valid sources are: $SOURCES"
 		exit 1
 	fi
-	QUERY_PREFIX="$(config journal bin)/$(config journal source-prefix)"
 
 	SRC="$1" ; shift
 	COM="${QUERY_PREFIX}${SRC}"
@@ -51,14 +67,18 @@ query(){
 		if [ -x "$COM" ]; then
 			# pass the query along
 			"$COM" --query "$@"
+		else
+			err "Cannot query data source '$SRC': ${QUERY_PREFIX}${SRC} is not executable"
+			exit 1
 		fi
 	else
-		err "Cannot query source '$SRC': could not find ${QUERY_PREFIX}${SRC}"
+		err "Cannot query data source '$SRC': could not find ${QUERY_PREFIX}${SRC}"
 		exit 1
 	fi
 }
 
 build(){
+	require-journal
 	# Args are laid out in 2 groups:
 	#  pass along flags
 	# --
@@ -94,12 +114,13 @@ build(){
 				"$COM" $ARGS
 			fi
 		else
-			err "Unable to build $SRC: could not find/execute ${BUILD_PREFIX}${SRC}"
+			err "Unable to build $SRC: could not find ${BUILD_PREFIX}${SRC}"
 		fi
 	done
 }
 
 update(){
+	require-journal
 	FORMAT="%Y-%m-%d"
 	LAST="$(archivist -a "$JOURNAL" date)"
 
@@ -125,6 +146,7 @@ update(){
 }
 
 edit(){
+	require-journal
 	LAST="$(archivist -a "$JOURNAL" date)"
 
 	# unfortunately we're stuck putting this into a temporary file.
@@ -140,6 +162,7 @@ edit(){
 }
 
 view(){
+	require-journal
 	# all entries must be shown with a single command invocation
 	# this prevents the user from having to exit the pager
 	# again and again and again, and get really frustrated
@@ -148,10 +171,22 @@ view(){
 	fi
 }
 
+create(){
+	if [ ! -z "$JOURNAL" ]; then
+		err "Journal already exists ($JOURNAL)."
+		exit 1
+	fi
+	# the only command that can be run without a journal
+	# it bootstraps the rest of the app, and configures
+	#  the location of the journal for further use
+}
 
 # TODO do option parsing here
 
 if [ $# -eq 0 ]; then
+	if [ ! -f "$JOURNAL" ]; then
+		create
+	fi
 	# invoke update first
 	update
 	edit
@@ -170,6 +205,9 @@ else
 			;;
 		config)
 			config "$@" ;;
+		create)
+			# setup the journal at the beginning
+			create ;;
 		edit)
 			# the only way to edit yesterdays entry
 			edit ;;
