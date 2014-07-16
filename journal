@@ -179,6 +179,36 @@ create(){
 	# the only command that can be run without a journal
 	# it bootstraps the rest of the app, and configures
 	#  the location of the journal for further use
+	echo "Creating a journal..."
+	configured=0
+	file_location=""
+	gen_location=""
+	while [ $configured -eq 0 ]; do
+		echo "Where should the journal file live?"
+		read -p "> " file_location
+		echo "Where should generated data files go?"
+		read -p "> " gen_location
+		echo "Put the journal here: '$file_location'"
+		echo " and put the generated files here: '$gen_location'"
+		echo "Is that correct?"
+		read -p "(y/n) > " confirm
+		if [ "$confirm" = "y" -o "$confirm" = "Y" ]; then
+			configured=1
+		else
+			echo "Okay, let's try again."
+		fi
+	done
+	# we set some defaults here, because they just make sense.
+	config journal bin "\${HOME}/bin/journal-bin"
+	config journal source-prefix "source-"
+	# user entered variables
+	# the location, modified to use '${HOME}' instead of ~
+	file_location="$(echo $file_location | sed 's_^~/_\${HOME}/_')"
+	config journal file "$file_location"
+	config journal generated "$gen_location"
+
+	# update the journal location so we can run update + edit after this
+	JOURNAL="$(config journal file)"
 }
 
 # TODO do option parsing here
