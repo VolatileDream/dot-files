@@ -57,7 +57,7 @@ __journal(){
 			bin="$(journal config journal bin)"
 			prefix="$(journal config journal source-prefix)"
 			path="$bin/$prefix"
-			opts=`ls "$path"* | sed "s_.*/${prefix}__"`
+			opts=`ls "$path"* | sed "s_${path}__"`
 			;;
 		config)
 			__journal_config
