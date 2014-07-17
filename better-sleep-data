@@ -9,7 +9,12 @@ def hours_to_seconds(hours):
 
 for line in sys.stdin:
 
-    # line format is: date, hour:min asleep, hour:min awake, time slept, notes
+    # line format is:
+    #    date-awake
+    #    , hour:min asleep (this might be the date before)
+    #    , hour:min awake
+    #    , time slept
+    #    , notes
 
     if 'Date' in line:
         # first line has headers, skip
@@ -17,16 +22,17 @@ for line in sys.stdin:
 
     segments = line.split(',')
 
-    date_asleep = dt.datetime.strptime(segments[0] + " " + segments[1], '%y/%m/%d %H:%M')
+    date_awake = dt.datetime.strptime(segments[0] + " " + segments[2], '%y/%m/%d %H:%M')
 
     # just use the time delta to get the right date, parse the 3rd segment to get the real time.
     hours_sleep = float(segments[3])
-    time_asleep = dt.timedelta(0, hours_to_seconds(hours_sleep))
-    date_awake = date_asleep + time_asleep
+    sleep_duration = dt.timedelta(0, hours_to_seconds(hours_sleep))
+    date_asleep = date_awake - sleep_duration
 
-    time_awake = dt.datetime.strptime(segments[2], '%H:%M')
+    # time we fell asleep
+    time_asleep = dt.datetime.strptime(segments[1], '%H:%M')
 
-    date_awake = dt.datetime(date_awake.year, date_awake.month, date_awake.day, time_awake.hour, time_awake.minute)
+    date_asleep = dt.datetime(date_asleep.year, date_asleep.month, date_asleep.day, time_asleep.hour, time_asleep.minute)
 
     print date_asleep, " ", date_awake
 
