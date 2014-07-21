@@ -44,7 +44,6 @@ alias jar='java -jar'
 alias tail='tail -f'
 alias g='grep -E'
 alias sw='sudo iwlist scan'
-alias list='find . | grep -E'
 alias count='ls | wc -l'
 
 if [[ -n $(which xdg-open) ]]; then
