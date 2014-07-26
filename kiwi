@@ -12,6 +12,8 @@ usage(){
 	echo " remove - removes the specified key, prints the old value to stdout"
 }
 
+SQL="sqlite3"
+
 STORE="$1" ; shift
 COM=$1; shift
 KEY="$1" ; shift
@@ -23,24 +25,24 @@ fi
 
 if [ ! -f "$STORE" ]; then
 	# create db if required
-	echo "CREATE TABLE kiwi_store ( key text PRIMARY KEY ON CONFLICT REPLACE, value text );" | sqlite "$STORE"
+	echo "CREATE TABLE kiwi_store ( key text PRIMARY KEY ON CONFLICT REPLACE, value text );" | "$SQL" "$STORE"
 fi
 
 case $COM in
 	get)
-		echo -n "SELECT value FROM kiwi_store WHERE key = '$KEY';" | sqlite "$STORE"
+		echo -n "SELECT value FROM kiwi_store WHERE key = '$KEY';" | "$SQL" "$STORE"
 	;;
 	put)
-		# sqlite escaping
+		# "$SQL" escaping
 		DATA=$( sed "s_'_''_g" )
-		echo -n "INSERT INTO kiwi_store(key,value) VALUES ( '$KEY', '$DATA');" | sqlite "$STORE" 
+		echo -n "INSERT INTO kiwi_store(key,value) VALUES ( '$KEY', '$DATA');" | "$SQL" "$STORE" 
 	;;
 	match)
-		echo -n "SELECT key FROM kiwi_store WHERE key LIKE '$KEY';" | sqlite "$STORE"
+		echo -n "SELECT key FROM kiwi_store WHERE key LIKE '$KEY';" | "$SQL" "$STORE"
 	;;
 	remove)
-		echo -n "SELECT value FROM kiwi_store WHERE key = '$KEY';" | sqlite "$STORE"
-		echo -n "DELETE FROM kiwi_store WHERE key = '$KEY';" | sqlite "$STORE"
+		echo -n "SELECT value FROM kiwi_store WHERE key = '$KEY';" | "$SQL" "$STORE"
+		echo -n "DELETE FROM kiwi_store WHERE key = '$KEY';" | "$SQL" "$STORE"
 	;;
 	*)
 		usage
