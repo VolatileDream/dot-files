@@ -33,9 +33,14 @@ case $COM in
 		echo -n "SELECT value FROM kiwi_store WHERE key = '$KEY';" | "$SQL" "$STORE"
 	;;
 	put)
-		# "$SQL" escaping
-		DATA=$( sed "s_'_''_g" )
-		echo -n "INSERT INTO kiwi_store(key,value) VALUES ( '$KEY', '$DATA');" | "$SQL" "$STORE" 
+		# 'sql' escaping
+		# and subshell magic
+		( echo -n "INSERT INTO kiwi_store(key,value) VALUES ( '"
+		  echo $KEY | sed "s_'_''_g" ;
+		  echo "', '" ;
+		  # escapes standard input
+		  sed "s_'_''_g" ;
+		  echo "');" ) | "$SQL" "$STORE" 
 	;;
 	match)
 		echo -n "SELECT key FROM kiwi_store WHERE key LIKE '$KEY';" | "$SQL" "$STORE"
