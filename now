@@ -15,6 +15,12 @@
 #  including GNU bash that returns 1 instead.
 #
 
+cleanup(){
+	# make sure to put a newline at the end of output
+	echo
+}
+trap cleanup SIGINT
+
 read -t 1 <&1
 timeout=$?
 
@@ -30,6 +36,9 @@ do
         do
                 IFS= read -r -t 1 line; rc=$?
                 if [ $rc != 0 ]; then break; fi
+                # because otherwise we overwrite the time output
+                # and that happens to look very very ugly.
+                echo
                 echo "$line"
         done
 	#
