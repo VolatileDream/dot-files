@@ -15,16 +15,17 @@ usage(){
 	echo " NOTE: Conch requires that none of the fields contain spaces."
 	echo
 	echo " ex:"
-	echo "  > inifile-command file your args"
+	echo "  > ini file your args"
 	echo "  /a/path/that/isnt/complete/\${last.arg}"
-	echo "  > inifile-command file last arg"
-	echo "  end/of/path"
 	echo
-	echo "  > conch 'inifile-command file' your args"
-	echo "  /a/path/that/isnt/complete/end/of/path"
+	echo "  > ini file last arg"
+	echo "  end/of/path/"
 	echo
-	echo "  > conch 'inifile-command file' \"/string/to/fill/in/\${last.arg}\""
-	echo "  /string/to/fill/in/end/of/path"
+	echo "  > conch 'ini file' your args"
+	echo "  /a/path/that/isnt/complete/end/of/path/"
+	echo
+	echo "  > conch 'ini file' \"/string/to/fill/in/\${last.arg}/file.extension\""
+	echo "  /string/to/fill/in/end/of/path//file.extension"
 }
 
 first-match(){
