@@ -3,55 +3,16 @@
 # configuration file
 CONFIG="$HOME/.config/journal2-config.ini"
 
-first-match(){
-	STR="$1" ; shift
-	MATCH="$1" ; shift
-	echo "$STR" | grep -oE "$MATCH" | head -n 1
-}
-
-config-fill(){
-	VAR="$1" ; shift
-	INITIAL="$VAR"
-	while echo "$VAR" | grep --silent '\$' ; do
-		# replace each "${...}" group with it's config value
-
-		# find the "${...}" group, extract the "..."
-		match="$(first-match "$VAR" '\${[^}]+}' )"
-		segment="$(echo $match | tr -d '${}' )"
-
-		if [ `echo $segment | grep -c '.'` -ne 1 ]; then
-			echo "error: can't fill in config value, bad group '$segment' in $INITIAL" > /dev/stderr
-			exit 2
-		fi
-
-		# split into the two parts.
-		front="${segment%%.*}"
-		back="${segment##*.}"
-
-		# go and fetch the parts
-		replace="$(config "$front" "$back")"
-		VAR="$( echo "$VAR" | sed "s_${match}_${replace}_")"
-	done
-	echo "$VAR"
-}
-
 config(){
 	if [ $# -eq 0 ]; then
 		if [ -e "$CONFIG" ]; then
 			cat "$CONFIG"
 		fi
 	else
-		# update the config
-		SECTION="$1" ; shift ; KEY="$1" ; shift
-		if [ $# -gt 0 ]; then
-			inifile -f "$CONFIG" -c -s "$SECTION" -k "$KEY" -v "$@"
-		else
-			# this kind of automatically takes care of the case that
-			# not enough arguments are passed.
-			# TODO allow dependent config variables
-			VALUE="$(inifile -f "$CONFIG" -n -s "$SECTION" -k "$KEY")"
-			config-fill "$(echo $VALUE | sed "s_\${HOME}_${HOME}_" )"
-		fi
+		# get the value we wanted, and substitute
+		# any $HOME value with the environment variable
+		VAR="$(ini "$CONFIG" "$@" | sed "s_\${HOME}_${HOME}_" )"
+		conch 'journal config' "$VAR"
 	fi
 }
 
