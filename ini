@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+
+if [ $# -lt 3 ]; then
+	echo Not enough args for $0, requires at least 3.
+else
+	FILE="$1" ; shift
+	SECTION="$1" ; shift
+	KEY="$1" ; shift
+
+	# we've modified $#, check it against 0
+	if [ $# -eq 0 ]; then
+		inifile -f "$FILE" -s "$SECTION" -k "$KEY"
+	elif [ $# -gt 0 ]; then
+		inifile -f "$FILE" -s "$SECTION" -k "$KEY" "$@"
+	fi
+fi
