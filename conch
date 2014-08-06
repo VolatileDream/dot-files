@@ -13,6 +13,14 @@ usage(){
 	echo " Conch replaces all the fields with: '<command> a b c ...'"
 	echo
 	echo " NOTE: Conch requires that none of the fields contain spaces."
+	echo
+	echo " ex:"
+	echo "  > inifile-command file your args"
+	echo "  /a/path/that/isnt/complete/\${last.arg}"
+	echo "  > inifile-command file last arg"
+	echo "  end/of/path"
+	echo "  > conch 'inifile-command file' your args"
+	echo "  /a/path/that/isnt/complete/end/of/path"
 }
 
 first-match(){
