@@ -19,8 +19,12 @@ usage(){
 	echo "  /a/path/that/isnt/complete/\${last.arg}"
 	echo "  > inifile-command file last arg"
 	echo "  end/of/path"
+	echo
 	echo "  > conch 'inifile-command file' your args"
 	echo "  /a/path/that/isnt/complete/end/of/path"
+	echo
+	echo "  > conch 'inifile-command file' \"/string/to/fill/in/\${last.arg}\""
+	echo "  /string/to/fill/in/end/of/path"
 }
 
 first-match(){
@@ -66,4 +70,10 @@ fi
 
 COMMAND="$1" ; shift
 
-config "$@"
+if [ $# -gt 1 ]; then
+	# they're asking for the key, value
+	config "$@"
+else
+	# they're asking for the string to get filled in
+	config-fill "$1"
+fi
