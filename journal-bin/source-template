@@ -33,9 +33,11 @@ query(){
 COM=$1 ; shift
 case $COM in
 	# $0 --full <file>
+	# <file> contains the entire journal
 	--full)
 		build "$1" ;;
 	# $0 --incremental <file>
+	# <file> contains a single entry
 	--incremental)
 		build-incr "$1" ;;
 	# $0 --clean
