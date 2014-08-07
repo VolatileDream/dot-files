@@ -1,5 +1,0 @@
-#!/bin/bash
-
-# TODO placeholder so that 'journal query' can do some stuff
-
-echo "QUERY INDEX: $@"

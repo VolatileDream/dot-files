@@ -1,0 +1,156 @@
+#!/bin/bash
+
+# this file gets sourced by other journal sources,
+#  so they don't have to write these functions again.
+
+# this file assumes the following:
+# * SRC is set
+
+# were to put all the files we generate
+GENERATED="$(journal config journal generated)"
+
+# standard config reading stuff
+config(){
+	_assert_variable SRC
+	KEY="$1" ; shift
+	if [ $# -gt 0 ]; then
+		journal config "$SRC" "$KEY" "$*"
+	else
+		journal config "$SRC" "$KEY"
+	fi
+}
+
+ensure-config(){
+	KEY="$1" ; shift ;
+	VALUE="$( config "$KEY" )"
+	if [ -z "$VALUE" ];then
+		config "$KEY" "$@"
+		VALUE="$@"
+	fi
+	echo "$VALUE"
+}
+
+# functions that we assume exist, and work:
+# * run-build
+# * run-incremental
+# * run-clean
+# * run-query
+# variables that we assume exist for functions,
+# which might get replaced or not used.
+# * FILE (file path)
+# * INITIAL_HEADER (initial file contents for generated file)
+
+# functions that may get overridden
+
+is-init(){
+	_assert_variable FILE
+	[ -f "$FILE" ]
+	return $?
+}
+
+run-init(){
+	_assert_variable FILE
+	_assert_variable INITIAL_HEADER
+	echo -en "$INITIAL_HEADER" > "$FILE"
+}
+
+run-clean(){
+	_assert_variable FILE
+	rm "$FILE"
+}
+
+error-not-init(){
+	echo "error running $1, not initialized" > /dev/stderr
+	exit 1
+}
+
+# functions in the background
+
+_assert_function(){
+	if [ ! declare -f -F "$1" > /dev/null 2> /dev/null ]; then
+		echo -e "Error required function doesn't exist: $@" > /dev/stderr
+		exit 1
+	fi
+}
+
+_assert_variable(){
+	VAR="$1"
+	# check if the variable exists usually this is done by checking:
+	#  [ -z "${var+1}" ]
+	# which gives the string 1, if var is set. we use this eval
+	# monstrosity because we don't know which variable we want to check.
+	STR="$( eval echo \${$VAR+1} )"
+	if [ -z "$STR" ]; then
+		echo -e "Error required variable doesn't exist: $@" > /dev/stderr
+		exit 1
+	fi
+}
+
+_run-build(){
+	# check if we've already initialized
+	if is-init ; then 
+		# if we have initialized, that's a problem.
+		# so we clean up, and then run the build.
+		run-clean
+	fi
+	# this is what's required of a build
+	run-init
+	_assert_function run-build
+	run-build "$@" 
+}
+
+_run-incremental(){
+	if is-init ; then
+		_assert_function run-incremental
+		run-incremental "$@"
+	else
+		error-not-init "incremental build"
+	fi
+}
+
+_run-clean(){
+	if is-init ; then
+		_assert_function run-clean
+		run-clean
+	fi
+}
+
+_run-query(){
+	if is-init ; then
+		_assert_function run-query
+		run-query "$@"
+	else
+		error-not-init "query"
+	fi
+}
+
+run(){
+	if [ $# -eq 0 ]; then
+		echo "$0: [--clean] [--full] [--incremental] file"
+		echo "$0: --query ..."
+		exit 1
+	fi
+
+	# Only one of these will ever be specified,
+	#  and they all have slightly different syntax.
+	COM="$1" ; shift
+	case "$COM" in
+		# $0 --full <file>
+		# <file> contains the entire journal
+		--full)
+			_run-build "$1" ;;
+		# $0 --incremental <file>
+		# <file> contains a single entry
+		--incremental)
+			_run-incremental "$1" ;;
+		# $0 --clean
+		--clean)
+			_run-clean ;; # $# == 0
+		# $0 --query args*
+		--query)
+			_run-query "$@" ;; # $# >= 0
+		*)
+			echo "Unknown command specified to source: $COM" ;;
+	esac
+
+}

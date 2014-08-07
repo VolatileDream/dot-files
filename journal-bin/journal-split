@@ -1,25 +1,15 @@
 #!/usr/bin/env bash
 
-ENTRY_SEPERATOR="$(journal config journal entry-seperator)"
+ENTRY_SEPERATOR="---------------"
 
 read -d '' SCRIPT <<- EOF
 	BEGIN { file = "" }
-        /^$ENTRY_SEPERATOR/ {
+        /^$ENTRY_SEPERATOR / {
 		if( file != "" ){
 			print file
 		}
-                # strip out any extra date information that
-                # might have been put in the entry date line
-                line = \$1 ;
-                gsub( "$ENTRY_SEPERATOR", "", line );
-                len = split( line, A, "/" );
-                name=A[1];
-                for(i=2; i <= len; i++){
-                        name = A[i] "-" name;
-                }
-                file = name
-                gsub( "-", "/", name )
-                \$0 = "$ENTRY_SEPERATOR" name ;
+		# set the file to be only the date of the entry
+                file = \$2
         }
         { print \$0 >> file }
 	END { print file }

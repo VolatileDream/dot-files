@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+
+# 2 args:
+# 1: command (space escaped)
+# 2: string to complete
+
+usage(){
+	echo "usage: $0 <command> <string>"
+	echo " Conch is a recursive string completion engine"
+	echo
+	echo "    command: a command string to execute, with spaces escaped"
+	echo "    string: a string containing fields of the form \${a.b.c ... }"
+	echo " Conch replaces all the fields with: '<command> a b c ...'"
+	echo
+	echo " NOTE: Conch requires that none of the fields contain spaces."
+	echo
+	echo " ex:"
+	echo "  > ini file your args"
+	echo "  /a/path/that/isnt/complete/\${last.arg}"
+	echo
+	echo "  > ini file last arg"
+	echo "  end/of/path/"
+	echo
+	echo "  > conch 'ini file' your args"
+	echo "  /a/path/that/isnt/complete/end/of/path/"
+	echo
+	echo "  > conch 'ini file' \"/string/to/fill/in/\${last.arg}/file.extension\""
+	echo "  /string/to/fill/in/end/of/path//file.extension"
+}
+
+first-match(){
+	STR="$1" ; shift
+	MATCH="$1" ; shift
+	echo "$STR" | grep -oE "$MATCH" | head -n 1
+}
+
+config-fill(){
+	VAR="$1" ; shift
+	INITIAL="$VAR"
+	while echo "$VAR" | grep --silent '\$' ; do
+		# replace each "${...}" group with it's config value
+
+		# find the "${...}" group, extract the "..."
+		match="$(first-match "$VAR" '\${[^}]+}' )"
+		segment="$(echo $match | tr -d '${}' )"
+
+		if [ `echo $segment | grep -c '.'` -ne 1 ]; then
+			echo "error: can't fill in config value, bad group '$segment' in $INITIAL" > /dev/stderr
+			exit 2
+		fi
+
+		# split into the parts
+		args="$( echo $segment | tr '.' ' ' )"
+
+		# go and fetch the parts
+		replace="$( config $args )"
+		VAR="$( echo "$VAR" | sed "s_${match}_${replace}_" )"
+	done
+	echo "$VAR"
+}
+
+config(){
+	# echo $COMMAND "$@" > /dev/stderr
+	config-fill "$( $COMMAND "$@" )"
+}
+
+if [ $# -lt 2 ]; then
+	usage > /dev/stderr
+	exit 1
+fi
+
+COMMAND="$1" ; shift
+
+if [ $# -gt 1 ]; then
+	# they're asking for the key, value
+	config "$@"
+else
+	# they're asking for the string to get filled in
+	config-fill "$1"
+fi

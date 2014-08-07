@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+SRC=template
+
+# For nice things to interact with the journal
+source "$(journal config journal library)"
+
+# these should be set to properly use the sourced functions
+# FILE="$GENERATED/$SRC.file"
+# INITIAL_HEADER="hello\nworld\n"
+
+run-build(){
+	echo "Building with file $1"
+}
+
+run-incremental(){
+	echo "Incremental update using $1"
+}
+
+run-clean(){
+	echo "Cleaning up..."
+}
+
+run-query(){
+	echo "Querying source..."
+	echo "QUERY: $@"
+}
+
+# this takes care of most of the things
+# that could go wrong by itself.
+
+run "$@"
+

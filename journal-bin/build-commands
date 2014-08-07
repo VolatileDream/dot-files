@@ -3,6 +3,12 @@
 # the name of this source
 SRC='commands'
 
+if [ $# -eq 0 ]; then
+	echo "$0: [--clean] [--full] [--incremental] file"
+	echo "$0: --query ..."
+	exit 1
+fi
+
 # standard config reading stuff
 config(){
 	KEY="$1" ; shift
@@ -27,56 +33,78 @@ ensure-config(){
 # this doesn't auto expand to $HOME, but embeds the string '$HOME' in the config
 # it gets auto expanded when we read it.
 PATH_AUGMENT="$(ensure-config augment-path '$HOME/bin/journal-bin/commands')"
-ECHO_COMMANDS="$(ensure-config echo '')"
-GEN_OUTPUT="$(journal config journal generated)"
+# were to put all the files we generate
+GENERATED="$(journal config journal generated)"
 
-CLEAN=0
-FULL=0
-INCR=0
-
-if [ $# -eq 0 ]; then
-	echo "$0: [--clean] [--full] [--incremental] file+"
-	exit 1
-fi
-
-while [ $# -gt 0 ]; do
-	case $1 in
-		--full) FULL=1 ; CLEAN=1 ;;
-		--clean) CLEAN=1 ;;
-		--incremental) INCR=1 ;;
-		*) # This is the start of the files/dirs for update/build
-			break ;;
-	esac
-	shift
-done
-
-if [ $FULL -ne 0 -a $INCR -ne 0 ]; then
-	# this should never happen
-	echo "$0: --full and --incremental are exclusive, only one can be specified at a time" >> /dev/stderr
-	exit 1
-fi
-if [ $CLEAN -ne 0 -a -d "$GEN_OUTPUT" ]; then
-	# since we toss all of out output into `journal config journal generated` we don't have to do anythng
-	echo -n
-fi
-
-if [ $INCR -ne 0 -o $FULL -ne 0 ]; then
-
-	ARGS="$@"
-	if [ $FULL -ne 0 ]; then
-		ARGS="$( echo ${ARGS}/* )"
-	fi
-
+build(){
 	# as far as journal-parse is concerned, there's no difference
 	# between full and incremental, except for the files that get
 	# passed to it
 
-	cat $ARGS |
+	cat "$1" |
 	"$HOME/bin/journal-bin/journal-parse"	\
 		--path "$PATH_AUGMENT:$PATH"	\
-		--output "$GEN_OUTPUT"		\
-		$ECHO_COMMANDS			\
+		--output "$GENERATED"		\
 		--stdin
+}
 
-fi
+clean(){
+	# um.... figure out what files were generated and delete them.
+	echo "Cleaning up..."
+}
+
+usage(){
+	echo "Usage: $0 <command>"
+	echo "  Query generated files from build-commands"
+	echo
+	echo "Commands are:"
+	echo " - events"
+	echo " - quotes"
+}
+
+query(){
+
+	if [ $# -eq 0 ]; then
+		usage
+		exit 1
+	fi
+
+	while [ $# -gt 0 ]; do
+
+		case $1 in
+			events)
+				cat "$(journal config journal generated)/life.md"
+				;;
+			quotes)
+				( echo .mode lines ; sqlite-select quotes \*) |
+					sqlite  "$(journal config journal generated)/quote.db"
+				;;
+			*)
+				usage
+				exit 1
+				;;
+		esac
+		shift
+	done
+}
+
+# Only one of these will ever be specified,
+#  and they all have slightly different syntax.
+COM=$1 ; shift
+case $COM in
+	# $0 --full <file>
+	--full)
+		build "$1" ;;
+	# $0 --incremental <file>
+	--incremental)
+		build "$1" ;;
+	# $0 --clean
+	--clean)
+		clean ;; # $# == 0
+	# $0 --query args*
+	--query)
+		query "$@" ;; # $# >= 0
+	*)
+		echo "Unknown command specified to source: $COM" ;;
+esac
 
