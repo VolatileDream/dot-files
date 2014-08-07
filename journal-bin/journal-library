@@ -67,7 +67,7 @@ error-not-init(){
 # functions in the background
 
 _assert_function(){
-	if [ declare -f -F "$1" > /dev/null 2> /dev/null ]; then
+	if [ ! declare -f -F "$1" > /dev/null 2> /dev/null ]; then
 		echo -e "Error required function doesn't exist: $@" > /dev/stderr
 		exit 1
 	fi
