@@ -1,52 +1,32 @@
 #!/usr/bin/env bash
 
-if [ $# -eq 0 ]; then
-	echo "$0: [--clean] [--full] [--incremental] file"
-	echo "$0: --query ..."
-	exit 1
-fi
-
 SRC=template
 
 # For nice things to interact with the journal
 source "$(journal config journal library)"
 
-build(){
+FILE="$GENERATED/$SRC.file"
+INITIAL_HEADER="hello\nworld\n"
+
+run-build(){
 	echo "Building with file $1"
 }
 
-build-incr(){
+run-incremental(){
 	echo "Incremental update using $1"
 }
 
-clean(){
+run-clean(){
 	echo "Cleaning up..."
 }
 
-query(){
+run-query(){
 	echo "Querying source..."
 	echo "QUERY: $@"
 }
 
-# Only one of these will ever be specified,
-#  and they all have slightly different syntax.
-COM=$1 ; shift
-case $COM in
-	# $0 --full <file>
-	# <file> contains the entire journal
-	--full)
-		build "$1" ;;
-	# $0 --incremental <file>
-	# <file> contains a single entry
-	--incremental)
-		build-incr "$1" ;;
-	# $0 --clean
-	--clean)
-		clean ;; # $# == 0
-	# $0 --query args*
-	--query)
-		query "$@" ;; # $# >= 0
-	*)
-		echo "Unknown command specified to source: $COM" ;;
-esac
+# this takes care of most of the things
+# that could go wrong by itself.
+
+run "$@"
 
