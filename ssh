@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+# prompt usage of ssh key first, then ssh.
+
+if ! ssh-add -l > /dev/null 2> /dev/null ; then
+	ssh-add
+fi
+
+/usr/bin/ssh "$@"
