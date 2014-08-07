@@ -35,6 +35,7 @@ ensure-config(){
 # * run-incremental
 # * run-clean
 # * run-query
+
 # variables that we assume exist for functions,
 # which might get replaced or not used.
 # * FILE (file path)
@@ -61,16 +62,18 @@ run-clean(){
 
 error-not-init(){
 	echo "error running $1, not initialized" > /dev/stderr
-	exit 1
+	_leave_library
 }
 
 # functions in the background
 
+# always exit with 1, that way people know it was a library problem.
+_leave_library(){
+	exit 1
+}
+
 _assert_function(){
-	if [ ! declare -f -F "$1" > /dev/null 2> /dev/null ]; then
-		echo -e "Error required function doesn't exist: $@" > /dev/stderr
-		exit 1
-	fi
+	_assert declare -f -F "$1"
 }
 
 _assert_variable(){
@@ -80,9 +83,18 @@ _assert_variable(){
 	# which gives the string 1, if var is set. we use this eval
 	# monstrosity because we don't know which variable we want to check.
 	STR="$( eval echo \${$VAR+1} )"
-	if [ -z "$STR" ]; then
-		echo -e "Error required variable doesn't exist: $@" > /dev/stderr
-		exit 1
+	_assert [ ! -z "$STR" ]
+}
+
+_assert(){
+	if [ $# -eq 0 ]; then
+		echo "Error empty assertion." > /dev/stderr
+		_leave_library
+	fi
+	"$@" > /dev/null 2> /dev/null
+	if [ $? -ne 0 ]; then
+		echo "Error assertion failed: $@" > /dev/stderr
+		_leave_library
 	fi
 }
 
@@ -128,7 +140,7 @@ run(){
 	if [ $# -eq 0 ]; then
 		echo "$0: [--clean] [--full] [--incremental] file"
 		echo "$0: --query ..."
-		exit 1
+		_leave_library
 	fi
 
 	# Only one of these will ever be specified,
