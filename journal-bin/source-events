@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+# this is part of a library of functions, so we set SRC funny
+SRC=commands
+
+# For nice things to interact with the journal
+source "$(journal config journal library)"
+
+# Required for use of the standard journal-library functions
+FILE="$GENERATED/life.md"
+INITIAL_HEADER="My Life\n===============\n"
+
+# For all the functiosn that we use for command stuff
+source "$(config library)"
+
+# required for use of the standard commands-library functions
+COMMAND_NAMES="event event-start event-end"
+HANDLER(){
+	cat -
+}
+
+run "$@"
