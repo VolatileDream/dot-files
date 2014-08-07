@@ -1,22 +1,15 @@
 #!/usr/bin/env bash
 
-if [ $# -eq 0 ]; then
-	echo "$0: [--clean] [--full] [--incremental] file"
-	echo "$0: --query ..."
-	exit 1
-fi
+source "$(journal config journal library)"
 
-# were to put all the files we generate
-GENERATED="$(journal config journal generated)"
+FILE="$GENERATED/swish++.index"
 
-require-index(){
-	if [ ! -f "$GENERATED/swish++.index" ]; then
-		echo "Unable to find index file run 'journal build index'" >> /dev/stderr
-		exit 1
-	fi
+# override this function because it's not needed
+run-init(){
+	echo -n
 }
 
-build(){
+run-build(){
 	BIN="$(journal config journal bin)"
 	# the argument passed is a file, unfortunately index++
 	# doesn't like to index this, and just returns the one
@@ -33,8 +26,8 @@ build(){
 	rm -r "$tmp"
 }
 
-build-incr(){
-	require-index ; cd "$GENERATED"
+run-incremental(){
+	cd "$GENERATED"
 
 	# the argument passed is a file
 	index++ --incremental -e text:* "$1"
@@ -45,17 +38,13 @@ build-incr(){
 	mv swish++.index.new swish++.index
 }
 
-clean(){
-	rm "$GENERATED/swish++.index"
-}
-
-query(){
+run-query(){
 	if [ $# -eq 0 ]; then
 		man search++
 		exit
 	fi
 
-	require-index ; cd "$GENERATED"
+	cd "$GENERATED"
 	# temporary storage file for index thing to show the user,
 	tmp=`mktemp`
 
@@ -75,23 +64,4 @@ query(){
 	journal view $dates
 }
 
-# Only one of these will ever be specified,
-#  and they all have slightly different syntax.
-COM=$1 ; shift
-case $COM in
-	# $0 --full <file>
-	--full)
-		build "$1" ;;
-	# $0 --incremental <file>
-	--incremental)
-		build-incr "$1" ;;
-	# $0 --clean
-	--clean)
-		clean ;; # $# == 0
-	# $0 --query args*
-	--query)
-		query "$@" ;; # $# >= 0
-	*)
-		echo "Unknown command specified to source: $COM" ;;
-esac
-
+run "$@"
