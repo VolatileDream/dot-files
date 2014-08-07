@@ -36,11 +36,11 @@ case $COM in
 		# 'sql' escaping
 		# and subshell magic
 		( echo -n "INSERT INTO kiwi_store(key,value) VALUES ( '"
-		  echo $KEY | sed "s_'_''_g" ;
-		  echo "', '" ;
+		  echo -n $KEY | sed "s_'_''_g" ;
+		  echo -n "', '" ;
 		  # escapes standard input
-		  sed "s_'_''_g" ;
-		  echo "');" ) | "$SQL" "$STORE" 
+		  sed  "s_'_''_g" ;
+		  echo -n "');" ) | "$SQL" "$STORE" 
 	;;
 	match)
 		echo -n "SELECT key FROM kiwi_store WHERE key LIKE '$KEY';" | "$SQL" "$STORE"
