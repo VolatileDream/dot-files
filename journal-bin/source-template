@@ -5,8 +5,9 @@ SRC=template
 # For nice things to interact with the journal
 source "$(journal config journal library)"
 
-FILE="$GENERATED/$SRC.file"
-INITIAL_HEADER="hello\nworld\n"
+# these should be set to properly use the sourced functions
+# FILE="$GENERATED/$SRC.file"
+# INITIAL_HEADER="hello\nworld\n"
 
 run-build(){
 	echo "Building with file $1"
