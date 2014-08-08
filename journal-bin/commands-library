@@ -1,14 +1,19 @@
 #!/usr/bin/env bash
 
 # this should probably configurable.
-ENTRY_SEPERATOR="----------------"
+ENTRY_SEPERATOR="---------------"
 
 # accepts archivist replay on stdin,
 # optionally takes a command name.
 get-bang-command(){
 	_assert [ $# -gt 0 ]
-	COMMANDS="$( echo "$@" | sed 's/ +/|!/g' )"
-	grep -E "^(${ENTRY_SEPERATOR}|!${COMMANDS})"
+	COMMANDS="$( echo "$@" | sed 's_ \+_|!_g' )"
+
+	grep -E "^(${ENTRY_SEPERATOR}|!${COMMANDS})" | remove-start
+}
+
+remove-start(){
+	sed 's/^!//'
 }
 
 run-build(){

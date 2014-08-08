@@ -16,7 +16,53 @@ source "$(config library)"
 # required for use of the standard commands-library functions
 COMMAND_NAMES="event event-start event-end"
 HANDLER(){
-	cat -
+	local DATE=""
+	while read line ; do
+		case "$line" in
+			${ENTRY_SEPERATOR}*)
+				VAR="$( echo $line | sed 's_[^ ]* \([^ ]*\) .*$_\1_' )"
+				month="${VAR#*-}" ; month="${month%-*}"
+				DATE="${VAR##*-}/$month/${VAR%%-*}"
+			;;
+			*)
+				_assert [ ! -z "$DATE" ]
+				run-line "$DATE" $line
+			;;
+		esac
+	done
+}
+
+replace-line(){
+	local DATE="$1" ; shift
+	local VAR=""
+
+	while read line ; do
+		VAR="$( echo $line | grep -oE -- "^- ../../....-~ $*" )"
+		if [ ! -z "$VAR" ] ; then
+			echo $line | sed "s_~_${DATE}_"
+		else
+			echo $line
+		fi
+	done
+}
+
+run-line(){
+	local DATE="$1" ; shift
+	local COM="$1" ; shift
+
+	case $COM in
+		event)
+			echo "- ${DATE} $@" >> "$FILE"
+		;;
+		event-start)
+			echo "- ${DATE}-~ $@" >> "$FILE"
+		;;
+		event-end)
+			tmp=`mktemp`
+			cat "$FILE" | replace-line "$DATE" "$@" > "$tmp"
+			mv "$tmp" "$FILE"
+		;;
+	esac
 }
 
 run "$@"
