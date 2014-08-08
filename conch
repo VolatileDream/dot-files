@@ -91,11 +91,13 @@ conch(){
 
 	if [ $# -gt 1 ]; then
 		# they're asking for the key, value
-		exit $(config "$@")
+		config "$@"
 	else
 		# they're asking for the string to get filled in
-		exit $(config-fill "$1")
+		config-fill "$1"
 	fi
+
+	exit $?
 }
 
 conch "$@"
