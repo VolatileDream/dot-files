@@ -54,6 +54,14 @@ config-fill(){
 
 		# go and fetch the parts
 		replace="$( config $args )"
+
+		# annoying subshell handling stuff...
+		# otherwise the exit value gets swallowed
+		local EXIT_VAL=$?
+		if [ $EXIT_VAL -ne 0 ]; then
+			exit $EXIT_VAL
+		fi
+
 		VAR="$( echo "$VAR" | sed "s_${match}_${replace}_" )"
 	done
 	echo "$VAR"
@@ -61,20 +69,33 @@ config-fill(){
 
 config(){
 	# echo $COMMAND "$@" > /dev/stderr
-	config-fill "$( $COMMAND "$@" )"
+	ARGS="$( $COMMAND "$@" )"
+
+	# check if the lookup worked
+	local EXIT_VAL=$?
+	if [ $EXIT_VAL -ne 0 ]; then
+		echo "Error looking up '$@'" > /dev/stderr
+		exit $EXIT_VAL
+	fi
+
+	config-fill $ARGS
 }
 
-if [ $# -lt 2 ]; then
-	usage > /dev/stderr
-	exit 1
-fi
+conch(){
+	if [ $# -lt 2 ]; then
+		usage > /dev/stderr
+		exit 1
+	fi
 
-COMMAND="$1" ; shift
+	COMMAND="$1" ; shift
 
-if [ $# -gt 1 ]; then
-	# they're asking for the key, value
-	config "$@"
-else
-	# they're asking for the string to get filled in
-	config-fill "$1"
-fi
+	if [ $# -gt 1 ]; then
+		# they're asking for the key, value
+		exit $(config "$@")
+	else
+		# they're asking for the string to get filled in
+		exit $(config-fill "$1")
+	fi
+}
+
+conch "$@"

@@ -1,7 +1,8 @@
 #!/usr/bin/env sh
 
 if [ $# -lt 3 ]; then
-	echo Not enough args for $0, requires at least 3.
+	echo "Not enough args for $0, requires at least 3 ($#: $@)." > /dev/stderr
+	exit 1
 else
 	FILE="$1" ; shift
 	SECTION="$1" ; shift
