@@ -12,6 +12,6 @@ else
 	if [ $# -eq 0 ]; then
 		inifile -f "$FILE" -s "$SECTION" -k "$KEY"
 	elif [ $# -gt 0 ]; then
-		inifile -f "$FILE" -s "$SECTION" -k "$KEY" "$@"
+		inifile -f "$FILE" -s "$SECTION" -k "$KEY" -v "$*"
 	fi
 fi
