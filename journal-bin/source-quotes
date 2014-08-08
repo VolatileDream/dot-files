@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+SRC=commands
+
+source "$(journal config journal library)"
+source "$(config library)"
+
+SQL="$(config sql)"
+
+FILE="$GENERATED/quotes.db"
+
+# replace a bunch of things that we need because this isn't a .txt file we're creating
+
+run-init(){
+	_assert_variable FILE
+	echo "CREATE TABLE quotes ( quote TEXT );" | "$SQL" "$FILE"
+}
+
+run-query(){
+	if [ $# -gt 0 ]; then
+		# SQL injection for flexibility. lol
+		sqlite-select quotes \* -w quote LIKE "'$*'" | "$SQL" "$FILE"
+	else
+		sqlite-select quotes \* | "$SQL" "$FILE"
+	fi
+}
+
+get-bang-command(){
+	_assert [ $# -gt 0 ]
+	COMMANDS="$( echo "$@" | sed 's_ \+_|!_g' )"
+
+	grep -E "^(!${COMMANDS})" | remove-start
+}
+
+remove-start(){
+	sed 's_^!quotes \+__'
+}
+
+COMMAND_NAMES="quotes"
+HANDLER(){
+	sed "s_'_''_" |
+	while read line ; do
+		sqlite-insert quotes "$line" | "$SQL" "$FILE"
+	done
+}
+
+run "$@"
