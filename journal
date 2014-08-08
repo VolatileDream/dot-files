@@ -12,7 +12,9 @@ config(){
 		# get the value we wanted, and substitute
 		# any $HOME value with the environment variable
 		VAR="$(ini "$CONFIG" "$@" | sed "s_\${HOME}_${HOME}_" )"
-		conch 'journal config' "$VAR"
+		if [ ! -z "$VAR" ]; then
+			conch 'journal config' "$VAR"
+		fi
 	fi
 }
 
