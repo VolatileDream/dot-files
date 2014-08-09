@@ -3,6 +3,9 @@
 # configuration file
 CONFIG="$HOME/.config/journal-config.ini"
 
+# get conrch stuff for config
+source "$HOME/bin/conch"
+
 config(){
 
 	if [ ! -e "$CONFIG" ]; then
@@ -24,7 +27,7 @@ config(){
 			# any $HOME value with the environment variable
 			VAR="$(ini "$CONFIG" "$@" | sed "s_\${HOME}_${HOME}_" )"
 			if [ ! -z "$VAR" ]; then
-				conch 'journal config' "$VAR"
+				conch config "$VAR"
 			fi
 		fi
 	fi

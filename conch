@@ -100,4 +100,7 @@ conch(){
 	exit $?
 }
 
-conch "$@"
+if [ "$_" = "$0" ]; then
+	# this file wasn't sourced, execute.
+	conch "$@"
+fi
