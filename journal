@@ -1,25 +1,34 @@
 #!/bin/bash
 
 # configuration file
-CONFIG="$HOME/.config/journal2-config.ini"
+CONFIG="$HOME/.config/journal-config.ini"
 
 config(){
+
+	if [ ! -e "$CONFIG" ]; then
+		# create ?
+		echo "Config file doesn't exist."
+		exit 2
+	fi
+
 	if [ $# -eq 0 ]; then
-		if [ -e "$CONFIG" ]; then
-			cat "$CONFIG"
-		fi
+		cat "$CONFIG"
 	else
-		# get the value we wanted, and substitute
-		# any $HOME value with the environment variable
-		VAR="$(ini "$CONFIG" "$@" | sed "s_\${HOME}_${HOME}_" )"
-		if [ ! -z "$VAR" ]; then
-			conch 'journal config' "$VAR"
+		if [ $# -gt 2 ] ; then
+			section="$1" ; shift
+			key="$1" ; shift
+
+			ini "$CONFIG" "$section" "$key" "$@"
+		else
+			# get the value we wanted, and substitute
+			# any $HOME value with the environment variable
+			VAR="$(ini "$CONFIG" "$@" | sed "s_\${HOME}_${HOME}_" )"
+			if [ ! -z "$VAR" ]; then
+				conch 'journal config' "$VAR"
+			fi
 		fi
 	fi
 }
-
-# stuff that should be in configs
-JOURNAL="$(config journal file)" 	# file for for archivist
 
 err(){
 	echo -ne "\e[31m"
@@ -28,6 +37,9 @@ err(){
 }
 
 require-journal(){
+	# stuff that should be in configs
+	JOURNAL="$(config journal file)" 	# file for for archivist
+
 	if [ -z "$JOURNAL" ]; then
 		err "journal hasn't been configured for use yet."
 		err "Run: 'journal create' to configure it."
@@ -209,9 +221,11 @@ create(){
 # TODO do option parsing here
 
 if [ $# -eq 0 ]; then
+	JOURNAL="$(config journal file)"
 	if [ ! -f "$JOURNAL" ]; then
 		create
 	fi
+
 	# invoke update first
 	update
 	edit
@@ -219,6 +233,7 @@ else
 	COMMAND="$1" ; shift
 	case $COMMAND in
 		build)
+			require-journal
 			tmp="$(mktemp)"
 			archivist -a "$JOURNAL" replay > "$tmp"
 			build --full "$tmp" -- "$@"
