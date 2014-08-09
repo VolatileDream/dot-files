@@ -38,7 +38,7 @@ remove-start(){
 
 COMMAND_NAMES="quotes"
 HANDLER(){
-	sed "s_'_''_" |
+	sed "s_'_''_g" |
 	while read line ; do
 		sqlite-insert quotes "$line" | "$SQL" "$FILE"
 	done
