@@ -5,14 +5,14 @@ ENTRY_SEPERATOR="---------------"
 read -d '' SCRIPT <<- EOF
 	BEGIN { file = "" }
         /^$ENTRY_SEPERATOR / {
-		if( file != "" ){
-			print file
-		}
+		#if( file != "" ){
+		#	print file
+		#}
 		# set the file to be only the date of the entry
                 file = \$2
         }
         { print \$0 >> file }
-	END { print file }
+	#END { print file }
 EOF
 
 awk "$SCRIPT" < /dev/stdin > /dev/stdout
