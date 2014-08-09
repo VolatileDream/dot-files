@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+usage(){
+	echo "${0##*/} is an augmented wrapper around archivist"
+	echo " is allows for more useful set of operations with archivist"
+	echo
+	echo " edit <date>"
+	echo " - edits an archivist entry for <date>, must be an exact date match"
+	echo
+}
+
+_maybe_exit(){
+	if [ $1 -ne 0 ] ; then
+		rm "$2" "$3"
+		exit $1
+	fi
+}
+
+edit(){
+	local archive="$1" ; shift
+
+	date=`mktemp`
+	content=`mktemp`
+
+	archivist -a "$archive" peek "$1" > "$content" 2> "$date"
+
+	_maybe_exit $? "$date" "$content"
+
+	sensible-editor "$content"
+
+	_maybe_exit $? "$date" "$content"
+
+	cat "$content" | archivist -a "$archive" submit "$( cat "$date" )"
+
+	rm "$date" "$content"
+}
+
+ARCHIVE="$1" ; shift
+COM="$1" ; shift
+
+case "$COM" in
+	edit)
+		edit "$ARCHIVE" "$@"
+	;;
+	*)
+		echo "Error: unknown command $COM" > /dev/stderr
+		exit 2
+	;;
+esac
