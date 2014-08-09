@@ -54,3 +54,5 @@ case $COM in
 		exit 2
 	;;
 esac
+
+exit $?

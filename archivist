@@ -13,6 +13,11 @@ seperate(){
 	echo "${SEPERATOR}${1}"
 }
 
+parse-date(){
+	date "+$DATE_FORMAT" "--date=$1"
+	return $?
+}
+
 submit(){
 	IN="/dev/stdin"
 	DATE=""
@@ -35,20 +40,20 @@ submit(){
 		esac
 	fi
 
-	tmp=`mktemp`
-	cat "$IN" > "$tmp"
-
 	date_provided=0
 	if [ -z "$DATE" ]; then
 		DATE="$(date "+$DATE_FORMAT")"
 	else
 		# use the provided date
-		DATE="$(date "+$DATE_FORMAT" --date="$DATE")"
+		DATE="$( parse-date "$DATE" )"
 		if [ $? -ne 0 ]; then
 			exit 2
 		fi
 		date_provided=1
 	fi
+
+	tmp=`mktemp`
+	cat "$IN" | trim > "$tmp"
 
 	cat "$tmp" | kiwi "$ARCHIVE" put "$DATE"
 	# only update the last pointer if a date wasn't provided
@@ -79,6 +84,24 @@ view(){
 			show "$key" ;
 		done
 	done
+}
+
+peek(){
+	local date="$( parse-date "$1" )"
+	local EXIT_VALUE=$?
+
+	if [ $EXIT_VALUE -ne 0 ]; then
+		exit $EXIT_VALUE
+	fi
+
+	matching="$( kiwi "$ARCHIVE" match "$date" )"
+	if [ "$matching" = "$date" ]; then
+		echo "$date" > /dev/stderr
+		kiwi "$ARCHIVE" get "$date" > /dev/stdout
+	else
+		# that key doesn't exist
+		exit 2
+	fi
 }
 
 replay(){
@@ -113,6 +136,9 @@ EVENT="$( echo -n $ARCHIVE | sed 's_/_-_g' )-event"
 case $command in
 	submit)
 		submit "$@"
+	;;
+	peek)
+		peek "$@"
 	;;
 	view)
 		view "$@"
@@ -154,6 +180,11 @@ archivist is a light weight event bus that supports a few simple operations:
  - dumps all entries out to stdout
  - entries are seperated by:
        "-"*15 + " " + \${date} + " " + \${time}
+
+ peek date-time
+ - looks for an exact entry by date
+ - if no entry is found, exits with non 0 status
+ - otherwise the entry is sent to stdout, and the date to stderr
 
  replay
  - show all entries
