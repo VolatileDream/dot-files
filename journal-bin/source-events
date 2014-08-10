@@ -62,6 +62,9 @@ run-line(){
 			cat "$FILE" | replace-line "$DATE" "$@" > "$tmp"
 			mv "$tmp" "$FILE"
 		;;
+		*)
+			echo "Error with line: $@" > /dev/stderr
+		;;
 	esac
 }
 
