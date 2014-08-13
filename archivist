@@ -73,13 +73,14 @@ show(){
 }
 
 view(){
-	# conveniently we use the fact that kiwi provides key match
+	# conveniently we use the fact that kiwi provides key listing
 	# functionality to find and display matching keys
 	for entry in "$@"; do
 		
 		# Since we get a single entry per line we pipe and use
 		# read line to avoid whitespace across the line.
-		kiwi "$ARCHIVE" match "${entry}%" | 
+		kiwi "$ARCHIVE" list |
+		grep "${entry}" | 
 		while read key; do
 			show "$key" ;
 		done
@@ -94,7 +95,7 @@ peek(){
 		exit $EXIT_VALUE
 	fi
 
-	matching="$( kiwi "$ARCHIVE" match "$date" )"
+	matching="$( kiwi "$ARCHIVE" list | grep "$date" )"
 	if [ "$matching" = "$date" ]; then
 		echo "$date" > /dev/stderr
 		kiwi "$ARCHIVE" get "$date" > /dev/stdout
@@ -111,7 +112,7 @@ replay(){
 	# * keys matching DATE_FORMAT
 	# So we pass something that will only
 	#  match the DATE_FORMAT entries.
-	view '% ' # remember that '%' gets appended to this
+	view ' '
 }
 
 last-date(){
