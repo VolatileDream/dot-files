@@ -84,7 +84,7 @@ config(){
 conch(){
 	if [ $# -lt 2 ]; then
 		usage > /dev/stderr
-		exit 1
+		return 1
 	fi
 
 	COMMAND="$1" ; shift
@@ -97,10 +97,11 @@ conch(){
 		config-fill "$1"
 	fi
 
-	exit $?
+	return $?
 }
 
 if [ "$_" = "$0" ]; then
 	# this file wasn't sourced, execute.
 	conch "$@"
+	exit $?
 fi
