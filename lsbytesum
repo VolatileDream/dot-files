@@ -14,4 +14,4 @@ EOF
 
 #echo "$script"
 
-echo -n `ls -al | awk -- "$script"`
+echo `ls -al | awk -- "$script"`

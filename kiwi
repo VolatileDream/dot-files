@@ -8,7 +8,7 @@ usage(){
 	echo "Commands available:"
 	echo " get - retrieve the value of the specified key, prints to stdout"
 	echo " put - store the value to the specified key, reads from stdin"
-	echo " match - retrieves all matching keys, prints keys to stdout"
+	echo " list - lists all keys to stdout"
 	echo " remove - removes the specified key, prints the old value to stdout"
 }
 
@@ -42,8 +42,8 @@ case $COM in
 		  sed  "s_'_''_g" ;
 		  echo -n "');" ) | "$SQL" "$STORE" 
 	;;
-	match)
-		echo -n "SELECT key FROM kiwi_store WHERE key LIKE '$KEY';" | "$SQL" "$STORE"
+	list)
+		echo -n "SELECT key FROM kiwi_store;" | "$SQL" "$STORE"
 	;;
 	remove)
 		echo -n "SELECT value FROM kiwi_store WHERE key = '$KEY';" | "$SQL" "$STORE"
