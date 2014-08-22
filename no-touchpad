@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+syndaemon -d -t -k -R
+
+exit_val=$?
+
+if [ $exit_val -gt 0 ]; then
+	echo "error with syndaemon: $exit_val"
+fi
+
