@@ -1,0 +1,6 @@
+[submodule "submodules/chronos"]
+	path = submodules/chronos
+	url = git@github.com:VolatileDream/chronos.git
+[submodule "submodules/tup"]
+	path = submodules/tup
+	url = https://github.com/gittup/tup.git

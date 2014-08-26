@@ -27,6 +27,7 @@ mirror-dir-structure(){
 }
 
 do-generate(){
+
     mkdir -p "$GEN_DIR"
     
     mirror-dir-structure "$GEN_DIR" "$HOME"
@@ -50,6 +51,11 @@ do-generate(){
 	        fi
 	fi # executable
     done
+}
+
+do-submodules(){
+    # submodules are symlinked using git
+    cd "$BIN_DIR/submodules/" ; make
 }
 
 do-linking(){
@@ -82,4 +88,5 @@ do-linking(){
 }
 
 do-linking
+do-submodules
 do-generate
