@@ -2,16 +2,10 @@
 
 # CONFIG stuff
 SEPERATOR="--------------- "
-# * due to limitations of kiwi we also want to avoid underscores
 # * also need to make sure that we can take it as a parameter
 #   back in with the submit command
 # So this ends up being awkward with the number of constraints
-DATE_FORMAT="%Y-%m-%d %H:%M:%S"
-
-# tiny utility function to print out the seperator and key
-seperate(){
-	echo "${SEPERATOR}${1}"
-}
+DATE_FORMAT="%Y-%m-%d %H:%M:%S.%N"
 
 parse-date(){
 	date "+$DATE_FORMAT" "--date=$1"
@@ -55,32 +49,33 @@ submit(){
 	tmp=`mktemp`
 	cat "$IN" | trim > "$tmp"
 
-	cat "$tmp" | kiwi "$ARCHIVE" put "$DATE"
-	# only update the last pointer if a date wasn't provided
-	if [ $date_provided -eq 0 ]; then
-		echo "$DATE" | kiwi "$ARCHIVE" put LAST
-	fi
+	cat "$tmp" | chronos append "$ARCHIVE" -t "${DATE}"
 
 	# put the entry seperator + contents
-	(seperate "${DATE}" ; cat "$tmp") | event-publish "$EVENT"
+	(
+	 echo -e "${SEPERATOR}${DATE}" ;
+	 cat "$tmp" ;
+	 echo ;
+	) | event-publish "$EVENT"
 
 	rm "$tmp"
 }
 
 show(){
-	seperate "$1"
-	kiwi "$ARCHIVE" get "$1"
+	echo "${SEPERATOR}${1}"
+	chronos get "$ARCHIVE" "$1"
+	echo
 }
 
 view(){
-	# conveniently we use the fact that kiwi provides key listing
+	# conveniently we use the fact that chronos provides key listing
 	# functionality to find and display matching keys
 	for entry in "$@"; do
 		
 		# Since we get a single entry per line we pipe and use
 		# read line to avoid whitespace across the line.
-		kiwi "$ARCHIVE" list |
-		grep "${entry}" | 
+		chronos list "$ARCHIVE" |
+		grep -E "^${entry}" | 
 		while read key; do
 			show "$key" ;
 		done
@@ -95,44 +90,45 @@ peek(){
 		exit $EXIT_VALUE
 	fi
 
-	matching="$( kiwi "$ARCHIVE" list | grep "$date" )"
-	if [ "$matching" = "$date" ]; then
-		echo "$date" > /dev/stderr
-		kiwi "$ARCHIVE" get "$date" > /dev/stdout
-	else
-		# that key doesn't exist
-		exit 2
-	fi
+	chonos get "$ARCHIVE" "$date"
+	return $?
 }
 
 replay(){
-	# (ab)use the way view works.
-	# there should only be 2 types of keys:
-	# * LAST
-	# * keys matching DATE_FORMAT
-	# So we pass something that will only
-	#  match the DATE_FORMAT entries.
-	view ' '
+	local NL; printf -v NL "\n"
+	chronos iterate "$ARCHIVE" "$(echo -en "$SEPERATOR")" "$NL" "$NL"
 }
 
 last-date(){
-	entry="$(kiwi "$ARCHIVE" get LAST)"
+	entry="$(chronos last "$ARCHIVE")"
 	if [ ! -z "$entry" ]; then
 		echo "$entry"
 	fi
+}
+
+ensure-archive(){
+	# it's wonderful that chronos takes care of this for us
+	chronos init "$ARCHIVE"
+	return $?
 }
 
 if [ "-a" = "$1" ]; then
 	ARCHIVE="$2"
 	shift ; shift ; # shift off the archive param
 else
-	mkdir "$HOME/.archivist" > /dev/null 2> /dev/null
-	ARCHIVE="$HOME/.archivist/archive"
+	mkdir "$HOME/.archivist/" > /dev/null 2> /dev/null
+	ARCHIVE="$HOME/.archivist/"
 fi
 command="$1"; shift
 
+if [ "$STR" != "${STR#/}" ]; then
+	# relative directory
+	ARCHIVE="${PWD}/${ARCHIVE}"
+fi
 # strip out slashes from the name
-EVENT="$( echo -n $ARCHIVE | sed 's_/_-_g' )-event"
+EVENT="archivist-$( echo -n $ARCHIVE | sed 's_/_-_g' )-event"
+
+ensure-archive "$ARCHIVE"
 
 case $command in
 	submit)
@@ -153,8 +149,8 @@ case $command in
 	last)
 		# just dump the last entry out, and
 		# does not print out the entry seperator.
-		last="$(kiwi "$ARCHIVE" get LAST)"
-		kiwi "$ARCHIVE" get "$last"
+		last="$(chronos last"$ARCHIVE")"
+		chronos get "$ARCHIVE"
 	;;
 	sub|subscribe)
 		ARG=""

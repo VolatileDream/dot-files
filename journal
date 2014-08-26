@@ -34,21 +34,20 @@ config(){
 }
 
 err(){
-	echo -ne "\e[31m"
-	echo $@ >> /dev/stderr
-	echo -ne "\e[0m"
+	echo -e "\e[31m" "$@" "\e[0m" >> /dev/stderr
 }
 
 require-journal(){
 	# stuff that should be in configs
-	JOURNAL="$(config journal file)" 	# file for for archivist
+	JOURNAL="$(config journal location)" 	# file for for archivist
 
 	if [ -z "$JOURNAL" ]; then
 		err "journal hasn't been configured for use yet."
 		err "Run: 'journal create' to configure it."
 		exit 1
 	fi
-	if [ ! -f "$JOURNAL" ]; then
+	# the journal location is a directory
+	if [ ! -d "$JOURNAL" ]; then
 		err "Unable to locate journal (${JOURNAL})."
 		err "Are you sure it exists?"
 		exit 1
@@ -131,44 +130,45 @@ build(){
 
 update(){
 	require-journal
+
+	if [ ! -e "$JOURNAL/last-journal-entry" ]; then
+		return 0
+	fi
+
 	FORMAT="%Y-%m-%d"
-	LAST="$(archivist -a "$JOURNAL" date)"
 
-	# unfortunately we have to know a bit about archivists' date format
-	LAST_ENTRY_DATE="`date --date="$(echo $LAST | sed 's/ .*//')" +$FORMAT `"
+	# last entry date
+	LAST="$(cat "$JOURNAL/last-journal-date")"
+	# current date
 	NOW="$(date +$FORMAT)"
-	
-	if [ "$NOW" != "$LAST_ENTRY_DATE" ]; then
 
-		# Update, creating a new latest file
-		echo | archivist -a "$JOURNAL" submit
+	if [ "$NOW" != "$LAST" ]; then
+
+		# use a temporary file so that none of the data sources every
+		#  attempt to look at or open the last-journal-entry file by mistake.
+		tmp="$(temp-file "$LAST")"
+		mv "$JOURNAL/last-journal-entry" "$tmp"
 
 		# Now run an incremental update
-		tmp="$(temp-file "$LAST")"
-
-		archivist -a "$JOURNAL" view "$LAST" > "$tmp"
-
 		build --incremental "$tmp" --
 
-		rm "$tmp"
+		# Update the immutable archive of entries
+		cat "$tmp" | archivist -a "$JOURNAL" submit "$LAST"
+
+		# clean up, $JOURNAL/last-journal-entry was moved to $tmp
+		rm "$JOURNAL/last-journal-date" "$tmp"
 	fi
-	
 }
 
 edit(){
 	require-journal
-	LAST="$(archivist -a "$JOURNAL" date)"
 
-	# unfortunately we're stuck putting this into a temporary file.
-	tmp="$(temp-file "$LAST")"
-	archivist -a "$JOURNAL" last > "$tmp"
-
-	sensible-editor "$tmp"
-
-	# send it back, this is very important
-	cat "$tmp" | archivist -a "$JOURNAL" submit "$LAST"
-
-	rm "$tmp"
+	if [ ! -e "$JOURNAL/last-journal-entry" ]; then
+		date "+%Y-%m-%d" > "$JOURNAL/last-journal-date"
+	fi
+	# if the user doesn't write to this file, it will remain empty.
+	# this is a nice way to ignore empty entries.
+	sensible-editor "$JOURNAL/last-journal-entry"
 }
 
 view(){
@@ -194,7 +194,7 @@ create(){
 	file_location=""
 	gen_location=""
 	while [ $configured -eq 0 ]; do
-		echo "Where should the journal file live?"
+		echo "Where should the journal files live?"
 		read -p "> " file_location
 		echo "Where should generated data files go?"
 		read -p "> " gen_location
@@ -214,18 +214,18 @@ create(){
 	# user entered variables
 	# the location, modified to use '${HOME}' instead of ~
 	file_location="$(echo $file_location | sed 's_^~/_\${HOME}/_')"
-	config journal file "$file_location"
+	config journal location "$file_location"
 	config journal generated "$gen_location"
 
 	# update the journal location so we can run update + edit after this
-	JOURNAL="$(config journal file)"
+	JOURNAL="$(config journal location)"
 }
 
 # TODO do option parsing here
 
 if [ $# -eq 0 ]; then
-	JOURNAL="$(config journal file)"
-	if [ ! -f "$JOURNAL" ]; then
+	JOURNAL="$(config journal location)"
+	if [ ! -d "$JOURNAL" ]; then
 		create
 	fi
 
