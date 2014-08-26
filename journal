@@ -111,7 +111,7 @@ build(){
 			# nothing to build
 			return
 		fi
-		echo -n "Building sources: $SOURCES" | tr '\n' ' '
+		echo -n "Running sources: $SOURCES" | tr '\n' ' '
 		echo
 	fi
 
