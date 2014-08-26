@@ -32,20 +32,6 @@ HANDLER(){
 	done
 }
 
-replace-line(){
-	local DATE="$1" ; shift
-	local VAR=""
-
-	while read line ; do
-		VAR="$( echo $line | grep -oE -- "^- ../../....-~ $*" )"
-		if [ ! -z "$VAR" ] ; then
-			echo $line | sed "s_~_${DATE}_"
-		else
-			echo $line
-		fi
-	done
-}
-
 run-line(){
 	local DATE="$1" ; shift
 	local COM="$1" ; shift
@@ -59,7 +45,7 @@ run-line(){
 		;;
 		event-end)
 			tmp=`mktemp`
-			cat "$FILE" | replace-line "$DATE" "$@" > "$tmp"
+			sed "s_^- \(../../....\)-~ $*_- \1-${DATE} $*_" "$FILE" > "$tmp"
 			mv "$tmp" "$FILE"
 		;;
 		*)
