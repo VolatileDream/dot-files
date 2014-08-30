@@ -50,9 +50,9 @@ run-query(){
 
 	# all of our arguments get passed to search++, since
 	# the user should know how to query us.
-	search++ "$@" > "$tmp"
+	search++ "$@" | awk ' /^#/ { print $0 ; next } { print $1 " " $4 " " $3 }' > "$tmp"
 
-	dates=$(cat "$tmp" | awk '{ print $4 }' | tr '\n' ' ' )
+	dates=$(cat "$tmp" | awk '!/^#/ { print $2 }' | tr '\n' ' ' )
 
 	# display the results before the actual entries
 	sensible-pager "$tmp"
