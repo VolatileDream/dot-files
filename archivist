@@ -90,7 +90,7 @@ peek(){
 		exit $EXIT_VALUE
 	fi
 
-	chonos get "$ARCHIVE" "$date"
+	chronos get "$ARCHIVE" "$date"
 	return $?
 }
 
@@ -149,8 +149,8 @@ case $command in
 	last)
 		# just dump the last entry out, and
 		# does not print out the entry seperator.
-		last="$(chronos last"$ARCHIVE")"
-		chronos get "$ARCHIVE"
+		last="$(chronos last "$ARCHIVE")"
+		chronos get "$ARCHIVE" "$last"
 	;;
 	sub|subscribe)
 		ARG=""
