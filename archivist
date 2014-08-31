@@ -91,7 +91,13 @@ peek(){
 	fi
 
 	chronos get "$ARCHIVE" "$date"
-	return $?
+
+	EXIT_VALUE=$?
+	if [ $EXIT_VALUE -eq 0 ]; then
+		echo "$date" >> /dev/stderr
+	fi
+
+	return $EXIT_VALUE
 }
 
 replay(){
