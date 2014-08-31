@@ -121,6 +121,10 @@ build(){
 			if [ -x "$COM" ]; then
 				mkdir -p "$(config journal generated)"
 				"$COM" $ARGS
+				local exit_status=$?
+				if [ $exit_status -ne 0 ]; then
+					echo "Error building $SRC, non-zero exit status: $exit_status" > /dev/stderr
+				fi
 			fi
 		else
 			err "Unable to build $SRC: could not find ${BUILD_PREFIX}${SRC}"
@@ -144,19 +148,24 @@ update(){
 
 	if [ "$NOW" != "$LAST" ]; then
 
+		# Update the immutable archive of entries
+		cat "$JOURNAL/last-journal-entry" | archivist -a "$JOURNAL" submit "$LAST"
+
+		# clean up, $JOURNAL/last-journal-entry was moved to $tmp
+		rm "$JOURNAL/last-journal-date" "$JOURNAL/last-journal-entry"
+
 		# use a temporary file so that none of the data sources every
 		#  attempt to look at or open the last-journal-entry file by mistake.
 		tmp="$(temp-file "$LAST")"
-		mv "$JOURNAL/last-journal-entry" "$tmp"
+
+		# get the properly formatted archivist entry for parsing and building.
+		archivist -a "$JOURNAL" view "$(archivist -a "$JOURNAL" date)" > "$tmp"
 
 		# Now run an incremental update
 		build --incremental "$tmp" --
 
-		# Update the immutable archive of entries
-		cat "$tmp" | archivist -a "$JOURNAL" submit "$LAST"
-
-		# clean up, $JOURNAL/last-journal-entry was moved to $tmp
-		rm "$JOURNAL/last-journal-date" "$tmp"
+		# cleanup the temp file
+		rm "$tmp"
 	fi
 }
 
