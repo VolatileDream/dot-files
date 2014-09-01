@@ -192,7 +192,7 @@ view(){
 
 create(){
 	if [ ! -z "$JOURNAL" ]; then
-		err "Journal already exists ($JOURNAL)."
+		err "Journal is already set ($JOURNAL)."
 		exit 1
 	fi
 	# the only command that can be run without a journal
@@ -234,7 +234,7 @@ create(){
 
 if [ $# -eq 0 ]; then
 	JOURNAL="$(config journal location)"
-	if [ ! -d "$JOURNAL" ]; then
+	if [ -z "$JOURNAL" ]; then
 		create
 	fi
 
