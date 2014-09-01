@@ -65,7 +65,7 @@ query(){
 	QUERY_PREFIX="$(config journal bin)/$(config journal source-prefix)"
 	if [ $# -lt 1 ]; then
 		err "query requires a data source and query be specified"
-		SOURCES=$(ls "${QUERY_PREFIX}"* 2> /dev/null | sed "s_${QUERY_PREFIX}__")
+		SOURCES=$(ls "${QUERY_PREFIX}"* 2> /dev/null | sed "s_${QUERY_PREFIX}__" | tr '\n' ' ')
 		err "Valid sources are: $SOURCES"
 		exit 1
 	fi
