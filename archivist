@@ -51,6 +51,18 @@ submit(){
 
 	cat "$tmp" | chronos append "$ARCHIVE" -t "${DATE}"
 
+	if [ $? -ne 0 ]; then
+		if [ $date_provided -ne 0 ]; then
+			echo "Bad date provided, is not after the last already added." > /dev/stderr
+		else
+			echo "Clock skew or future dates were added, current time is not after the last date" > /dev/stderr
+		fi
+
+		echo "Last date was: $(chronos last "$ARCHIVE")" > /dev/stderr
+		echo "Inserted date is: ${DATE}" > /dev/stderr
+		exit 2
+	fi
+
 	# put the entry seperator + contents
 	(
 	 echo -e "${SEPERATOR}${DATE}" ;

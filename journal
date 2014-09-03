@@ -151,6 +151,13 @@ update(){
 		# Update the immutable archive of entries
 		cat "$JOURNAL/last-journal-entry" | archivist -a "$JOURNAL" submit "$LAST"
 
+		if [ $? -ne 0 ]; then
+			# error submitting, what should we do?
+			# We shouldn't lose user data
+			echo "Error adding journal entry to log" > /dev/stderr
+			exit 3
+		fi
+
 		# clean up, $JOURNAL/last-journal-entry was moved to $tmp
 		rm "$JOURNAL/last-journal-date" "$JOURNAL/last-journal-entry"
 
