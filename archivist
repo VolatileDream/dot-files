@@ -112,6 +112,12 @@ last-date(){
 	fi
 }
 
+entries(){
+	ensure-archive
+	chronos list "$ARCHIVE"
+	return $?
+}
+
 ensure-archive(){
 	# it's wonderful that chronos takes care of this for us
 	chronos init "$ARCHIVE"
@@ -139,6 +145,9 @@ ensure-archive "$ARCHIVE"
 case $command in
 	submit)
 		submit "$@"
+	;;
+	entries)
+		entries
 	;;
 	peek)
 		peek "$@"
@@ -174,6 +183,9 @@ archivist is a light weight event bus that supports a few simple operations:
  - add a new entry into the bus for the current date-time, or the one specified
  - by default takes stdin, otherwise a file specified
  - specifying a time does NOT update the value retrieved by 'last'
+
+ entries
+ - lists the date-time of every single entry in the archive
 
  view [date-time]+
  - lookup a bunch of entries by date-time

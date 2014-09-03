@@ -180,6 +180,11 @@ edit(){
 	sensible-editor "$JOURNAL/last-journal-entry"
 }
 
+entries(){
+	require-journal
+	archivist -a "$JOURNAL" entries
+}
+
 view(){
 	require-journal
 	# all entries must be shown with a single command invocation
@@ -263,6 +268,8 @@ else
 		edit)
 			# the only way to edit yesterdays entry
 			edit ;;
+		entries)
+			entries ;;
 		query)
 			query "$@" ;;
 		search)
@@ -290,6 +297,9 @@ else
 			echo
 			echo "- edit"
 			echo "    edit the most recent journal entry (default)"
+			echo
+			echo "- entries"
+			echo "    lists all the entry dates in the journal"
 			echo
 			echo "- query <source> query*"
 			echo "    query the generated data from the specific source"
