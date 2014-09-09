@@ -5,7 +5,7 @@
 # 2: string to complete
 
 usage(){
-	echo "usage: $0 <command> <string>"
+	echo "usage: conch <command> <string>"
 	echo " Conch is a recursive string completion engine"
 	echo
 	echo "    command: a command string to execute, with spaces escaped"
