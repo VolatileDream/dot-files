@@ -67,6 +67,11 @@ if [ -f "$BASH_CONF/bash_ps1" ]; then
     source "$BASH_CONF/bash_ps1"
 fi
 
+# variables that are nice to have around
+if [ -f "$BASH_CONF/bash_variables" ]; then
+    source "$BASH_CONF/bash_variables"
+fi
+
 # Alias definitions.
 # You may want to put all your additions into a separate file like
 # ~/.bash_aliases, instead of adding them here directly.
@@ -79,10 +84,5 @@ fi
 # extra bash completion stuff
 if [ -f "$BASH_CONF/bash_completion" ]; then
     source "$BASH_CONF/bash_completion"
-fi
-
-# variables that are nice to have around
-if [ -f "$BASH_CONF/bash_variables" ]; then
-    source "$BASH_CONF/bash_variables"
 fi
 
