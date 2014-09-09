@@ -260,10 +260,8 @@ settings = {
   core = {
     real_name = "Gianni Leonardo Gambetti";
     user_name = "glgambet";
-    nick = "glgambet";
+    nick = "VolatileDream";
   };
   "fe-text" = { actlist_sort = "refnum"; };
 };
-ignores = (
-  { level = "JOINS PARTS QUITS MODES TOPICS"; channels = ( "#csc" ); }
-);
+ignores = ( { level = "JOINS PARTS QUITS"; channels = ( "#csc" ); } );
