@@ -88,8 +88,11 @@ alias mcheck='ffmpeg -i'
 alias randnum='cat /dev/urandom | g -Eo --binary-files=text "[0-9]"'
 
 # Commands used for journal
-date=`date +%Y_%m_%d`
 alias rec='arecord'
 alias play='aplay'
 alias alog='arecord $date ; cp $date /media/Giannis\ Key/Journal/Audio\ Log/ ; shred -u $date'
+
+if [[ "$(hostname -d)" = "$CS" ]]; then
+	alias mp=ncmpcpp
+fi
 
