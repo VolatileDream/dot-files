@@ -8,8 +8,7 @@ __journal_view(){
 	prev="${COMP_WORDS[COMP_CWORD-1]}"
 
 	# this disgusting shell line
-	COMPREPLY=( $(kiwi "$(journal config journal file)" list |
-		grep ' ' |
+	COMPREPLY=( $(journal entries |
 		# get only the next chunk of the date
 		# TODO relies on file date stamp encoding
 		grep -Eo "^${cur}[^-]*(-|$)" |
