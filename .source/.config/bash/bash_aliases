@@ -36,6 +36,15 @@ null-term-lines(){
 	awk '{ printf( "%s%c", $0, 0 ); }'
 }
 
+# pass(2) stuff
+pass-here(){
+	PASSWORD_STORE_DIR="$(pwd)"
+}
+
+pass-restore(){
+	PASSWORD_STORE_DIR="$DEFAULT_PASSWORD_STORE"
+}
+
 alias aoeu='setxkbmap us'
 alias asdf='setxkbmap dvorak'
 

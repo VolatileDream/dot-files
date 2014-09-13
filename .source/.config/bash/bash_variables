@@ -1,3 +1,8 @@
+# by default we use this directory for the pass(2) store.
+# but also provide some shell aliases to muck about with it
+export PASSWORD_STORE_DIR="/media/$(whoami)/simulacrum/Keys"
+export DEFAULT_PASSWORD_STORE="$PASSWORD_STORE_DIR"
+
 # source for extra variables
 source ~/.selected_editor
 export EDITOR=$SELECTED_EDITOR

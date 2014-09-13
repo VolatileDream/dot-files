@@ -58,10 +58,6 @@ export PATH="$HOME/bin:$PATH"
 export BASE_PATH="$PATH"
 export BASH_CONF="$HOME/.config/bash"
 
-# set pass(1) storage directory to current directory
-# much better for transporting password files around
-export PASSWORD_STORE_DIR='.'
-
 # shell prompt
 if [ -f "$BASH_CONF/bash_ps1" ]; then
     source "$BASH_CONF/bash_ps1"
