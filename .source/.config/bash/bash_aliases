@@ -45,6 +45,8 @@ pass-restore(){
 	PASSWORD_STORE_DIR="$DEFAULT_PASSWORD_STORE"
 }
 
+source "$BASH_CONF/bugs_everywhere_config"
+
 alias aoeu='setxkbmap us'
 alias asdf='setxkbmap dvorak'
 
