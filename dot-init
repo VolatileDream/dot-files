@@ -26,33 +26,6 @@ mirror-dir-structure(){
     done # directories
 }
 
-do-generate(){
-
-    mkdir -p "$GEN_DIR"
-    
-    mirror-dir-structure "$GEN_DIR" "$HOME"
-
-    for file in ` cd "$GEN_DIR" ; find . -type f ` ; do
-
-        tmp=`mktemp`
-
-	if [ -x "$GEN_DIR/$file" ]; then
-	        "$GEN_DIR/$file" "$PWD" > "$tmp"
-
-	        if [[ -f "$HOME/$file" ]]; then
-	            # use diff because this file was generated
-	            if [ ! diff "$HOME/$file" "$tmp" ] ; then
-	                echo "$HOME/$file already exists and differs from $SOURCE/$file output"
-	                echo "generating to  $HOME/$file.1 instead"
-	                mv "$tmp" "$HOME/${file}.1"
-	            fi
-	        else
-	            mv "$tmp" "$HOME/$file"
-	        fi
-	fi # executable
-    done
-}
-
 do-submodules(){
     # submodules are symlinked using git
     cd "$BIN_DIR/submodules/" ; make
@@ -62,31 +35,27 @@ do-linking(){
 
     mkdir -p $SRC_DIR
 
-    linkFile(){
-        out="$HOME/${1}${2}"
-        if [[ -f "$out" ]] ; then
-            rm "$out"
-        fi
-        ln "$SRC_DIR/$1" "$out"
-    }
-
     mirror-dir-structure "$SRC_DIR" "$HOME"
 
     for file in ` cd $SRC_DIR ; find . -type f ` ; do
 
-        if [[ -f "$HOME/$file" ]]; then
-            if [ ! "$HOME/$file" -ef "$SRC_DIR/$file" ] ; then
-                echo "$HOME/$file already exists and differs from $SOURCE/$file"
-                echo "linked source to $file.1 instead"
-                linkFile "$file" ".1"
-            fi
-        else
-            # don't exist yet
-            linkFile "$file"
+        output="$HOME/$file"
+
+        if [[ -L "$output" ]]; then
+            continue
+        fi
+
+        # remove the file if the user will let us
+        if [[ -f "$output" ]]; then
+            rm -i "$output"
+        fi
+
+        # do a second check to see if the file was removed.
+        if [[ ! -f "$output" ]]; then
+            ln -s "$SRC_DIR/$file" "$output"
         fi
     done
 }
 
 do-linking
 do-submodules
-do-generate
