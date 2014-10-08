@@ -1,5 +1,5 @@
 function be-all(){
-	be list --status=any
+	be list --status=all
 }
 function be-add(){
 	if [ $# -lt 1 ]; then
