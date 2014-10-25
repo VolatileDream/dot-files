@@ -8,6 +8,8 @@ fi
 if [ ${#FAST_PATH} -gt 0 ]; then
     PS1='${debian_chroot:+($debian_chroot)}\u@\h:\W\$ '
 else
+    source "$HOME/bin/path-bits"
+    source "$HOME/bin/path-prompt-char"
     path_chroot='${debian_chroot:+(\$debian_chroot)}'
     path_bits='$(path-bits)'
     path_prompt_char='$(path-prompt-char)'

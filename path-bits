@@ -1,5 +1,7 @@
 #!/bin/bash
 
+path-bits(){
+
 read -d '' script <<- EOF
 
     {
@@ -35,3 +37,11 @@ EOF
 #echo "$script"
 
 echo -n "$PWD" | awk -F "/" -- "$script"
+
+}
+
+# source trickery!
+if [ "$_" = "$0" ]; then
+    path-bits "$@"
+    exit $?
+fi

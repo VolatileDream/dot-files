@@ -1,5 +1,16 @@
 #!/bin/bash
+
+path-prompt-char(){
+
 radioactive="\u2622"
 [ "$PATH" != "$BASE_PATH" ] && echo -e "\e[0;31m${radioactive}\e[m" && exit
 
 echo ">"
+
+}
+
+# source trickery!
+if [ "$_" = "$0" ]; then
+    path-prompt-char "$@"
+    exit $?
+fi
