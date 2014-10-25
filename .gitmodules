@@ -4,3 +4,6 @@
 [submodule "submodules/tup"]
 	path = submodules/tup
 	url = https://github.com/gittup/tup.git
+[submodule "submodules/inotify-tools"]
+	path = submodules/inotify-tools
+	url = git@github.com:rvoicilas/inotify-tools
