@@ -58,6 +58,9 @@ export PATH="$HOME/bin:$PATH"
 export BASE_PATH="$PATH"
 export BASH_CONF="$HOME/.config/bash"
 
+# umask, this is -rw------
+umask 077
+
 # shell prompt
 if [ -f "$BASH_CONF/bash_ps1" ]; then
     source "$BASH_CONF/bash_ps1"
