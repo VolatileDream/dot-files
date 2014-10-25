@@ -6,4 +6,4 @@
 	url = https://github.com/gittup/tup.git
 [submodule "submodules/inotify-tools"]
 	path = submodules/inotify-tools
-	url = git@github.com:rvoicilas/inotify-tools
+	url = git@github.com:VolatileDream/inotify-tools
