@@ -148,6 +148,11 @@ update(){
 
 	if [ "$NOW" != "$LAST" ]; then
 
+		read -p "You have an existing entry for: $LAST, commit it to log? (y/n)"
+		if [[ ! "$REPLY" =~ "Y|y" ]]; then
+			return
+		fi
+
 		# Update the immutable archive of entries
 		cat "$JOURNAL/last-journal-entry" | archivist -a "$JOURNAL" submit "$LAST"
 
