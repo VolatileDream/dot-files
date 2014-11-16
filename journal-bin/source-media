@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+
+# this is part of a library of functions, so we set SRC funny
+SRC=commands
+
+# For nice things to interact with the journal
+source "$(journal config journal library)"
+
+# For all the functiosn that we use for command stuff
+source "$(config library)"
+
+SQL="$(config sql)"
+
+# Required for use of the standard journal-library functions
+FILE="$GENERATED/media.db"
+
+# required for use of the standard commands-library functions
+COMMAND_NAMES="media rating"
+
+get-bang-command(){
+	_assert [ $# -gt 0 ]
+	COMMANDS="$( echo "$@" | sed 's_ \+_|!_g' )"
+
+	grep -E "^(!${COMMANDS})" | remove-start
+}
+
+db(){
+	_assert_variable SQL
+	_assert_variable FILE
+	"$SQL" "$FILE"
+}
+
+run-init(){
+	echo "CREATE TABLE media ( title TEXT PRIMARY KEY ON CONFLICT ABORT, type TEXT, description TEXT );" | db
+	echo "CREATE TABLE ratings ( title TEXT PRIMARY KEY ON CONFLICT ABORT, summary TEXT, rating TEXT );" | db
+
+	#media  - title, type, description
+	#rating - title, sumary, rating (type?)
+}
+
+run-query(){
+	_assert_variable FILE
+	_assert_variable SQL
+	if [ $# -gt 0 ]; then
+		# SQL injection for flexibility. but read only
+		( echo PRAGMA QUERY_ONLY = true ;
+		sqlite-select media \* -w "$@" ) | db
+	else
+		sqlite-select media \* | db
+	fi
+}
+
+HANDLER(){
+	while read line ; do
+		run-line $line
+	done
+}
+
+run-line(){
+	local COM="$1" ; shift
+
+	local title=""; local field1=""; local field2="";
+	local which=0;
+	while [ $# -gt 0 ]; do
+		in=$1; shift
+		if [ "$in" = "--" ]; then
+			which=$((which+1))
+			continue
+		fi
+		case $which in
+			0) title="$title $in" ;;
+			1) field1="$field1 $in" ;;
+			2) field2="$field2 $in" ;;
+			*) error ;;
+		esac
+	done
+
+	case "$COM" in
+		# TODO implement this bit
+		media|rating|*) error ;;
+	esac
+}
+
+run "$@"
