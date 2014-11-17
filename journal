@@ -123,7 +123,7 @@ build(){
 				"$COM" $ARGS
 				local exit_status=$?
 				if [ $exit_status -ne 0 ]; then
-					echo "Error building $SRC, non-zero exit status: $exit_status" > /dev/stderr
+					err "Error building $SRC, non-zero exit status: $exit_status"
 				fi
 			fi
 		else
@@ -160,7 +160,7 @@ update(){
 		if [ $? -ne 0 ]; then
 			# error submitting, what should we do?
 			# We shouldn't lose user data
-			echo "Error adding journal entry to log" > /dev/stderr
+			err "Error adding journal entry to log"
 			exit 3
 		fi
 
