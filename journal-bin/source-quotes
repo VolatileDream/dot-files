@@ -19,7 +19,7 @@ run-init(){
 run-query(){
 	if [ $# -gt 0 ]; then
 		# SQL injection for flexibility, but read only mode.
-		( echo PRAGMA QUERY_ONLY = true ;
+		( echo PRAGMA QUERY_ONLY = true \; ;
 		  sqlite-select quotes \* -w quote LIKE "'$*'" ) | "$SQL" "$FILE"
 	else
 		sqlite-select quotes \* | "$SQL" "$FILE"
