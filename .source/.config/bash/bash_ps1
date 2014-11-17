@@ -9,11 +9,11 @@ if [ ${#FAST_PATH} -gt 0 ]; then
     PS1='${debian_chroot:+($debian_chroot)}\u@\h:\W\$ '
 else
     source "$HOME/bin/path-bits"
-    source "$HOME/bin/path-prompt-char"
+    source "$HOME/bin/path-prompt"
     path_chroot='${debian_chroot:+(\$debian_chroot)}'
     path_bits='$(path-bits)'
-    path_prompt_char='$(path-prompt-char)'
-    PS1="${path_chroot}\u@\h:${path_bits} ${path_prompt_char} "
+    path_prompt='$(path-prompt)'
+    PS1="${path_chroot}\u@\h:${path_bits} ${path_inception}${path_prompt} "
 fi
 
 # If this is an xterm set the title to user@host:dir
