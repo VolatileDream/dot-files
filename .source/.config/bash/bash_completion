@@ -8,4 +8,28 @@ __pass_completion(){
 
 complete -d -X '.[^./]*' -F __pass_completion pass
 
+__time-capsule_completion(){
+
+	if [ $COMP_CWORD -gt 2 ]; then
+		return 0
+	fi
+
+	local cur base opts
+	COMPREPLY=()
+	cur="${COMP_WORDS[COMP_CWORD]}"
+	base="${COMP_WORDS[1]}"
+
+	case $base in
+		add|create|memo|view) opts="$(grep -l '== TIME_CAPSULE ==' * 2> /dev/null )" ;;
+		*) opts="add create memo view" ;;
+	esac
+
+	if [ -n "$COMPREPLY" ]; then
+		return 0
+	fi
+	COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+}
+
+complete -F __time-capsule_completion time-capsule
+
 source $HOME/bin/journal-bin/journal-completion
