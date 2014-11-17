@@ -2,5 +2,4 @@
 
 cd "$HOME/bin"
 git pull
-dot-reset
 dot-init
