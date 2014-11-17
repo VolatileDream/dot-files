@@ -43,7 +43,7 @@ run-query(){
 	_assert_variable SQL
 	if [ $# -gt 0 ]; then
 		# SQL injection for flexibility. but read only
-		( echo PRAGMA QUERY_ONLY = true ;
+		( echo PRAGMA QUERY_ONLY = true \; ;
 		sqlite-select media \* -w "$@" ) | db
 	else
 		sqlite-select media \* | db
@@ -75,9 +75,16 @@ run-line(){
 		esac
 	done
 
+	title="${title## }"
+	field1="${field1## }"
+	field2="${field2## }"
+
 	case "$COM" in
-		# TODO implement this bit
-		media|rating|*) error ;;
+		media)
+			sqlite-insert media "$title" "$field1" "$field2" | db ;;
+		rating)
+			sqlite-insert ratings "$title" "$field1" "$field2" | db ;;
+		*) error ;;
 	esac
 }
 
