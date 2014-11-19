@@ -29,7 +29,13 @@ path-reset(){
 path-include(){
 	if [ $# -gt 0 ]; then
 		while [ $# -gt 0 ]; do
-			PATH="$1:$PATH"; shift
+			ADD="$1" ; shift
+			if [[ "${ADD:0:1}" != "/" ]]; then
+				# relative paths must be made absolute.
+				ADD="${PWD}/${ADD}"
+			fi
+
+			PATH="$ADD:$PATH"; shift
 		done
 	else
 		# include the current directory in the path
