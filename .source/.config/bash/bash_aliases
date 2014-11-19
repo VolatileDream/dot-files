@@ -27,8 +27,14 @@ path-reset(){
 	PATH="$BASE_PATH"
 }
 path-include(){
-	# include the current directory in the path
-	PATH="$PWD:$PATH"
+	if [ $# -gt 0 ]; then
+		while [ $# -gt 0 ]; do
+			PATH="$1:$PATH"; shift
+		done
+	else
+		# include the current directory in the path
+		PATH="$PWD:$PATH"
+	fi
 }
 
 # stuff that doesn't count as a script
