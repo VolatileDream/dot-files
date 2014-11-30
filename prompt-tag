@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+
+prompt-tag(){
+	if [ $# -gt 0 ] ; then
+		export ps_prompt="$*"
+	else
+		if [ ${#ps_prompt} -gt 0 ]; then
+			echo "[$ps_prompt] "
+		fi
+	fi
+}
+
+if [ "$_" = "$0" ]; then
+    prompt-tag "$@"
+    exit $?
+fi

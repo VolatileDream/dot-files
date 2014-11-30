@@ -1,25 +1,21 @@
 # PS1 this file is for all things related to PS1 changes
 
-# set variable identifying the chroot you work in (used in the prompt below)
-if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
-    debian_chroot=$(cat /etc/debian_chroot)
-fi
-
 if [ ${#FAST_PATH} -gt 0 ]; then
-    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\W\$ '
+    PS1='\u@\h:\W\$ '
 else
     source "$HOME/bin/path-bits"
     source "$HOME/bin/path-prompt"
-    path_chroot='${debian_chroot:+(\$debian_chroot)}'
+    source "$HOME/bin/prompt-tag"
+    ps_tag='$(prompt-tag)'
     path_bits='$(path-bits)'
     path_prompt='$(path-prompt)'
-    PS1="${path_chroot}\u@\h:${path_bits} ${path_inception}${path_prompt} "
+    PS1="${ps_tag}\u@\h:${path_bits} ${path_prompt} "
 fi
 
 # If this is an xterm set the title to user@host:dir
 case "$TERM" in
 xterm*|rxvt*)
-    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
+    PS1="\[\e]0;${ps_tag}\u@\h: \w\a\]$PS1"
     ;;
 *)
     ;;
