@@ -2,7 +2,7 @@
 
 # This fixes problems with mplayer stopping at the end of mp3 files
 # and falls back to something else if it doesn't exist
-ao=alsa,
+ao=pulse,
 
 #vfm=ffmpeg
 #lavdopts=lowres=1:fast:skiploopfilter=all
