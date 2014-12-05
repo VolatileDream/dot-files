@@ -1,4 +1,6 @@
-#!/usr/bin/env sh
+#!/bin/bash
+
+# this only works because this gets sourced by the .bashrc
 
 prompt-tag(){
 	if [ $# -gt 0 ] ; then
