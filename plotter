@@ -1,0 +1,54 @@
+#!/usr/bin/env python3
+
+import argparse
+
+def args():
+	parser = argparse.ArgumentParser(description="plot characters on the command line")
+	parser.add_argument("characters", metavar="N", nargs="*",
+		help="Characters to use for plotting", default=["#"])
+	parser.add_argument("-w", "--width", type=int, default=80, nargs="?",
+		help="Pad rows to this length, defaults to tty length determination or 80")
+	parser.add_argument("-p", "--pad", default=None, help="pad to <width> with this character")
+	parser.add_argument("-f", "--files", nargs="*", help="input file[s]", default=[])
+
+	return parser
+
+
+def plot_input( strings, padding, pad_char, out_stream, in_stream ):
+	str_count = len(strings)
+	for line in in_stream:
+		nums = line.split(" ")
+		index = 0
+		count = 0
+		for number in nums:
+			number = int(float(number))
+			out_stream.write( strings[index] * number );
+			index = (index + 1) % str_count
+			count += number
+		if padding - count > 0 and pad_char:
+			out_stream.write( pad_char * (padding - count) )
+		out_stream.write("\n")
+
+
+import sys
+
+def plot( strings, pad_width, pad_char, files=[] ):
+
+	# single character strings only
+	strings = [ s[0] for s in strings ]
+
+	for f in files:
+		with open(f) as file_input:
+			plot_input( strings, pad_width, pad_char, sys.stdout, file_input)
+	else:
+		plot_input( strings, pad_width, pad_char, sys.stdout, sys.stdin)
+		
+
+
+if __name__ == "__main__":
+	parser = args()
+
+	args = parser.parse_args()
+
+	plot( args.characters, args.width, args.pad, args.files )
+
