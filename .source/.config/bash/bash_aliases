@@ -24,12 +24,12 @@ ndir(){
 # path stuff
 path-reset(){
 	# reset the path to whatever it was before
-	PATH="$BASE_PATH"
+	export PATH="$BASE_PATH"
 }
 path-include(){
 	if [ $# -gt 0 ]; then
 		while [ $# -gt 0 ]; do
-			ADD="$1" ; shift
+			local ADD="$1" ; shift
 			if [[ "${ADD:0:1}" != "/" ]]; then
 				# relative paths must be made absolute.
 				ADD="${PWD}/${ADD}"
@@ -39,8 +39,20 @@ path-include(){
 		done
 	else
 		# include the current directory in the path
-		PATH="$PWD:$PATH"
+		export PATH="$PWD:$PATH"
 	fi
+}
+path-remove(){
+	local nPATH="$PATH"
+	select REMOVE in $(echo $nPATH | tr ':' ' ') ; do
+		nPATH="$(echo -n $nPATH |
+			tr ':' '\n' |
+			grep -vE "^$REMOVE\$" |
+			tr '\n' ':' )"
+		echo "$REMOVE removed from path"
+	done
+	nPATH="${nPATH%%:}" # remove trailing ':'
+	export PATH="$nPATH"
 }
 
 # stuff that doesn't count as a script
