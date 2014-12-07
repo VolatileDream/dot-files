@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+
+import sys
+import argparse
+
+def args():
+	parser = argparse.ArgumentParser(description="plot characters on the command line")
+	parser.add_argument("files", nargs="+", help="list of files to intersperse, - for stdin")
+
+	return parser
+
+
+def intersperse_files( files ):
+
+	fds = []
+	for name in files:
+		if name == "-":
+			fds.append( sys.stdin )
+		else:
+			fds.append( open(name) )
+
+	# once one file runs out, we're done
+	for lines in zip( *fds ):
+		for line in lines:
+			sys.stdout.write(line)
+
+
+if __name__ == "__main__":
+	parser = args()
+
+	args = parser.parse_args()
+
+	files = args.files
+
+	if len(files) >= 2:
+		intersperse_files( files )
+	else:
+		intersperse_files( [ "-", files[0] ] ) # use stdin
+
