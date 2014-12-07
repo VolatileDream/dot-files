@@ -4,6 +4,8 @@ import datetime as dt
 
 import sys
 
+DateTimeFormat="%Y-%m-%dT%H:%M"
+
 def hours_to_seconds(hours):
     return hours*60*60
 
@@ -34,5 +36,6 @@ for line in sys.stdin:
 
     date_asleep = dt.datetime(date_asleep.year, date_asleep.month, date_asleep.day, time_asleep.hour, time_asleep.minute)
 
-    print date_asleep, " ", date_awake
+    print "asleep", date_asleep.strftime(DateTimeFormat)
+    print "awake", date_awake.strftime(DateTimeFormat)
 
