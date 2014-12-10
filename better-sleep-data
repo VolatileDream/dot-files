@@ -36,6 +36,6 @@ for line in sys.stdin:
 
     date_asleep = dt.datetime(date_asleep.year, date_asleep.month, date_asleep.day, time_asleep.hour, time_asleep.minute)
 
-    print "asleep", date_asleep.strftime(DateTimeFormat)
-    print "awake", date_awake.strftime(DateTimeFormat)
+    print("asleep", date_asleep.strftime(DateTimeFormat))
+    print("awake", date_awake.strftime(DateTimeFormat))
 
