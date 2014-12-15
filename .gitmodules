@@ -7,3 +7,6 @@
 [submodule "submodules/inotify-tools"]
 	path = submodules/inotify-tools
 	url = git@github.com:VolatileDream/inotify-tools
+[submodule "submodules/zzzcron"]
+	path = submodules/zzzcron
+	url = git@github.com:VolatileDream/zzzcron.git

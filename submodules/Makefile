@@ -1,10 +1,16 @@
 
-all : tup chronos scry
-.PHONY: tup chronos scry
+all : tup chronos scry zzzcron
+.PHONY: tup chronos scry zzzcron
 
 tup : tup/tup
 chronos : chronos/chronos
 scry : inotify-tools/libinotify-tools/src/scry
+
+zzzcron : python-virtual-env
+	# ahahahahah, ew. ;-;
+	echo "source python-virtual-env/bin/activate; \
+		pip install -r zzzcron/requirements.txt; \
+		pip install --editable zzzcron" | bash
 
 tup/tup : 
 	cd tup ; ./bootstrap.sh
@@ -17,3 +23,6 @@ inotify-tools/libinotify-tools/src/scry : inotify-tools/src/inotifywait
 
 inotify-tools/src/inotifywait :
 	cd inotify-tools ; ./autogen.sh ; ./configure ; make
+
+python-virtual-env : 
+	virtualenv -p python3 python-virtual-env
