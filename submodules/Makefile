@@ -1,10 +1,14 @@
 
-all : tup chronos scry zzzcron
-.PHONY: tup chronos scry zzzcron
+all : tup chronos scry zzzcron roll-dice
+.PHONY: tup chronos scry zzzcron roll-dice
 
 tup : tup/tup
 chronos : chronos/chronos
 scry : inotify-tools/libinotify-tools/src/scry
+
+roll-dice : python-virtual-env
+	echo "source python-virtual-env/bin/activate; \
+		pip install -r roll-dice/requirements.txt;" | bash
 
 zzzcron : python-virtual-env
 	# ahahahahah, ew. ;-;

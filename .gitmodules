@@ -10,3 +10,6 @@
 [submodule "submodules/zzzcron"]
 	path = submodules/zzzcron
 	url = git@github.com:VolatileDream/zzzcron.git
+[submodule "submodules/roll-dice"]
+	path = submodules/roll-dice
+	url = git@github.com:VolatileDream/roll-dice.git
