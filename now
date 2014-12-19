@@ -16,7 +16,8 @@
 cleanup(){
         # make sure to put a newline at the end of output, that
         # way our prompt won't get written on the last timestamp
-        echo
+        print_timeout
+        exit
 }
 trap cleanup SIGINT
 
@@ -24,6 +25,12 @@ read -t 1 <&1
 timeout=$?
 
 did_timeout=0
+print_timeout(){
+        if [ $did_timeout -eq 1 ]; then
+                echo
+                did_timeout=0
+        fi
+}
 #
 #	loop forever
 #
@@ -36,11 +43,8 @@ do
         do
                 IFS= read -r -t 1 line; rc=$?
                 if [ $rc != 0 ]; then break; fi
-                if [ $did_timeout != 0 ]; then
-                        # because otherwise we overwrite the time output, and that looks bad
-                        echo
-                        did_timeout=0
-                fi
+                # because otherwise we overwrite the time output, and that looks bad
+                print_timeout
                 echo "$line"
         done
 	#
@@ -55,3 +59,7 @@ do
         echo -ne "$now\r" >&2
         did_timeout=1
 done
+
+# handle exiting the stream without printing the last newline
+print_timeout
+
