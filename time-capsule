@@ -64,7 +64,7 @@ tc-create(){
 	echo "Enter a memo for the time capsule."
 	read input_memo
 
-	echo "# == TIME_CAPSULE ==" >> $FILE
+	echo "# $HEADER" >> $FILE
 	echo "# $KEY_EXPIRE = $open_date" >> $FILE
 	echo "# $KEY_MEMO = $input_memo" >> $FILE
 
@@ -104,6 +104,7 @@ tc-view(){
 		err "Time capsule hasn't expired yet."
 		err "Please wait until $end_date."
 		tc-memo
+		exit 1
 	else
 		# strip out the headers before displaying the file
 		cat "$FILE" |
