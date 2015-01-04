@@ -57,7 +57,7 @@ require-journal(){
 # takes the date-time as arg1
 temp-file(){
 	# no spaces or slashes in file name.
-	mktemp --tmpdir=/tmp "XXXXXXXX--$(echo $1 | tr '/ ' '--')"
+	mktemp --tmpdir=/tmp "XXXXXXXX__$(echo $1 | tr '/ ' '--')"
 }
 
 query(){

@@ -52,7 +52,9 @@ run-query(){
 	# the user should know how to query us.
 	search++ "$@" | awk ' /^#/ { print $0 ; next } { print $1 " " $4 " " $3 }' > "$tmp"
 
-	dates=$(cat "$tmp" | awk '!/^#/ { print $2 }' | tr '\n' ' ' )
+	# some of the files are temporary index files, strip out the
+	# random temporary part, and use only their entry date
+	dates=$(cat "$tmp" | awk '!/^#/ { gsub( /^[^_]+__/, "", $2); print $2 }' | tr '\n' ' ' )
 
 	# display the results before the actual entries
 	sensible-pager "$tmp"
