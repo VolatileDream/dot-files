@@ -238,6 +238,7 @@ create(){
 	# we set some defaults here, because they just make sense.
 	config journal bin "\${HOME}/bin/journal-bin"
 	config journal source-prefix "source-"
+	config journal extension-prefix "ext-"
 	# user entered variables
 	# the location, modified to use '${HOME}' instead of ~
 	file_location="$(echo $file_location | sed 's_^~/_\${HOME}/_')"
@@ -246,6 +247,27 @@ create(){
 
 	# update the journal location so we can run update + edit after this
 	JOURNAL="$(config journal location)"
+}
+
+extension(){
+	local EXT="$1" ; shift
+
+	local EXT_PREFIX="$(config journal bin)/$(config journal extension-prefix)"
+	local COM="${EXT_PREFIX}${EXT}"
+
+	local rval=1
+
+	if [ -e "$COM" -a -x "$COM" ]; then
+		rval=0
+		"$COM" "$@"
+		local exit_status=$?
+		if [ $exit_status -ne 0 ]; then
+			err "Error running $EXT, non-zero exit status: $exit_status"
+			rval=$exit_status
+		fi
+	fi
+
+	return $rval
 }
 
 # TODO do option parsing here
@@ -345,8 +367,12 @@ else
 			echo "    The source is responsible for displaying the resultant data."
 			;;
 		*)
-			err "Journal command '$COMMAND' not found"
-			exit 1
+			if extension "$COMMAND" "$@"; then
+				echo -n ; # Nothing...
+			else
+				err "Journal command '$COMMAND' not found"
+				exit 1
+			fi
 			;;
 	esac
 fi

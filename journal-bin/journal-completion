@@ -64,7 +64,13 @@ __journal(){
 			__journal_view
 			;;
 		*)
-			opts="build clean config edit entries help query search update view"
+			# add the extensions that exist
+			bin="$(journal config journal bin)"
+			prefix="$(journal config journal extension-prefix)"
+			path="$bin/$prefix"
+			opts=`ls "$path"* | sed "s_${path}__"`
+			# Add the defaults
+			opts="build clean config edit entries help query search update view $opts"
 			;;
 	esac
 
