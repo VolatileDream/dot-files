@@ -307,8 +307,6 @@ else
 			entries ;;
 		query)
 			query "$@" ;;
-		search)
-			query index "$@" ;;
 		update)
 			update ;;
 		view)
