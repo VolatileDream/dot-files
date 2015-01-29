@@ -8,10 +8,10 @@ source "$HOME/bin/conch"
 
 config(){
 
-	if [ ! -e "$CONFIG" ]; then
+	if [ ! -e "$CONFIG" -a $# -lt 3 ]; then
 		# create ?
-		echo "Config file doesn't exist."
-		exit 2
+		err "Config file doesn't exist."
+		return 2
 	fi
 
 	if [ $# -eq 0 ]; then
@@ -41,7 +41,7 @@ require-journal(){
 	# stuff that should be in configs
 	JOURNAL="$(config journal location)" 	# file for for archivist
 
-	if [ -z "$JOURNAL" ]; then
+	if [ $? -ne 0 -o -z "$JOURNAL" ]; then
 		err "journal hasn't been configured for use yet."
 		err "Run: 'journal create' to configure it."
 		exit 1
@@ -247,9 +247,16 @@ create(){
 
 	# update the journal location so we can run update + edit after this
 	JOURNAL="$(config journal location)"
+
+	# update things to make sure it will run correctly
+	mkdir -p "$(config journal location)"
 }
 
 extension(){
+	require-journal
+
+	# The first argument is the name of the extension we want to run.
+	# This makes it so that extensions can't have whitespace in their names.
 	local EXT="$1" ; shift
 
 	local EXT_PREFIX="$(config journal bin)/$(config journal extension-prefix)"

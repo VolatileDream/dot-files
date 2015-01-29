@@ -47,7 +47,7 @@ __journal(){
 
 	case ${base} in
 		# things that don't complete:
-		edit|update|search)
+		edit|entries|help|update)
 			opts=""
 			;;
 		# things that complete to build-* entries
@@ -64,13 +64,17 @@ __journal(){
 			__journal_view
 			;;
 		*)
-			# add the extensions that exist
-			bin="$(journal config journal bin)"
-			prefix="$(journal config journal extension-prefix)"
-			path="$bin/$prefix"
-			opts=`ls "$path"* | sed "s_${path}__"`
-			# Add the defaults
-			opts="build clean config edit entries help query search update view $opts"
+			if journal config &> /dev/null ; then
+				# add the extensions that exist
+				bin="$(journal config journal bin)"
+				prefix="$(journal config journal extension-prefix)"
+				path="$bin/$prefix"
+				opts=`ls "$path"* | sed "s_${path}__"`
+				# Add the defaults
+				opts="build clean config edit entries help query update view $opts"
+			else
+				opts="create"
+			fi
 			;;
 	esac
 
