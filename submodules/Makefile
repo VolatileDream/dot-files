@@ -1,6 +1,6 @@
 
-all : tup chronos scry zzzcron roll-dice
-.PHONY: tup chronos scry zzzcron roll-dice
+all : tup chronos scry zzzcron roll-dice bloom-filter
+.PHONY: tup chronos scry zzzcron roll-dice bloom-filter
 
 tup : tup/tup
 chronos : chronos/chronos
@@ -15,6 +15,9 @@ zzzcron : python-virtual-env
 	echo "source python-virtual-env/bin/activate; \
 		pip install -r zzzcron/requirements.txt; \
 		pip install --editable zzzcron" | bash
+
+bloom-filter : bloom-filter/bloom
+	cd bloom-filter ; make
 
 tup/tup : 
 	cd tup ; ./bootstrap.sh
