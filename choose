@@ -22,25 +22,37 @@ end
 require "optparse"
 require "io/console"
 
-KEY_CTRL_C = ?\C-c
 KEY_CTRL_N = ?\C-n
 KEY_CTRL_P = ?\C-p
+KEY_CTRL_U = ?\C-u
+KEY_CTRL_H = ?\C-h
 KEY_CTRL_W = ?\C-w
+KEY_CTRL_J = ?\C-j
+KEY_CTRL_M = ?\C-m
 KEY_DELETE = 127.chr # Equivalent to ?\C-?
 
 class Selecta
+  VERSION = [0, 0, 6]
+
   def main
     # We have to parse options before setting up the screen or trying to read
     # the input in case the user did '-h', an invalid option, etc. and we need
     # to terminate.
     options = Configuration.parse_options(ARGV)
+    input_lines = $stdin.readlines
 
     search = Screen.with_screen do |screen, tty|
-      config = Configuration.from_inputs($stdin.readlines, options, screen.height)
+      config = Configuration.from_inputs(input_lines, options, screen.height)
       run_in_screen(config, screen, tty)
     end
 
-    puts search.selected_choice
+    unless search.selection == Search::NoSelection
+      puts search.selection
+    end
+  rescue ScreenValidator::NotATTY
+    $stderr.puts(
+      "Can't get a working TTY. Selecta requires an ANSI-compatible terminal.")
+    exit(1)
   end
 
   def run_in_screen(config, screen, tty)
@@ -75,11 +87,11 @@ class Selecta
     when KEY_CTRL_N then search.down
     when KEY_CTRL_P then search.up
 
+    when KEY_CTRL_U then search.clear_query
     when KEY_CTRL_W then search.delete_word
-    when KEY_DELETE then search.backspace
+    when KEY_CTRL_H, KEY_DELETE then search.backspace
 
-    when ?\r then search.done
-    when KEY_CTRL_C then raise SystemExit
+    when ?\r, KEY_CTRL_J, KEY_CTRL_M then search.done
 
     when /[[:print:]]/ then search.append_search_string(key.chr)
 
@@ -113,8 +125,13 @@ class Configuration < Struct.new(:visible_choices, :initial_search, :choices)
     parser = OptionParser.new do |opts|
       opts.banner = "Usage: #{$PROGRAM_NAME} [options]"
 
-      opts.on("-h", "--help", "Show this message") do |v|
+      opts.on_tail("-h", "--help", "Show this message") do |v|
         puts opts
+        exit
+      end
+
+      opts.on_tail("--version", "Show version") do
+        puts Selecta::VERSION.join('.')
         exit
       end
 
@@ -146,22 +163,29 @@ class Configuration < Struct.new(:visible_choices, :initial_search, :choices)
       # fixes this. I don't understand why. I found it via:
       #
       # http://stackoverflow.com/questions/2982677/ruby-1-9-invalid-byte-sequence-in-utf-8
-      utf16 = choice.encode('UTF-16', 'UTF-8', :invalid => :replace, :replace => '')
-      utf16.encode('UTF-8', 'UTF-16')
-    end.map(&:strip)
+      if choice.valid_encoding?
+        choice
+      else
+        utf16 = choice.encode('UTF-16', 'UTF-8', :invalid => :replace, :replace => '')
+        utf16.encode('UTF-8', 'UTF-16')
+      end.strip
+    end
   end
 end
 
 class Search
-  attr_reader :choices, :index, :query, :config
+  attr_reader :choices, :index, :query, :config, :matches
 
   def initialize(vars)
-    @vars = vars
     @config = vars.fetch(:config)
     @choices = vars.fetch(:choices)
     @index = vars.fetch(:index)
     @query = vars.fetch(:query)
     @done = vars.fetch(:done)
+
+    # Lazily compute matches if there aren't any
+    @matches = vars.fetch(:matches) { compute_matches }
+    @vars = vars.merge(:matches => @matches)
   end
 
   def self.blank(config)
@@ -172,26 +196,38 @@ class Search
         :done => false)
   end
 
-  def merge(vars)
-    Search.new(@vars.merge(vars))
+  # Construct a new Search by merging in a hash of changes.
+  def merge(changes)
+    vars = @vars.merge(changes)
+
+    # If the query changed, throw away the old matches so that new ones will be
+    # computed.
+    matches_are_stale = vars.fetch(:query) != @query
+    if matches_are_stale
+      vars = vars.reject { |key| key == :matches }
+    end
+
+    Search.new(vars)
   end
 
   def done?
     @done
   end
 
-  def selected_choice
-    raise SystemExit if matches.empty?
-    matches.fetch(@index)
+  def selection
+    matches.fetch(@index) { NoSelection }
   end
 
   def down
-    index = [@index + 1, matches.count - 1, config.visible_choices - 1].min
-    merge(:index => index)
+    move_cursor(1)
   end
 
   def up
-    merge(:index => [@index - 1, 0].max)
+    move_cursor(-1)
+  end
+
+  def max_visible_choices
+    [@config.visible_choices, matches.count].min
   end
 
   def append_search_string(string)
@@ -204,14 +240,25 @@ class Search
           :query => @query[0...-1])
   end
 
+  def clear_query
+    merge(:index => 0,
+          :query => "")
+  end
+
   def delete_word
     merge(:index => 0,
           :query => @query.sub(/[^ ]* *$/, ""))
   end
 
-  def matches
+  def done
+    merge(:done => true)
+  end
+
+  private
+
+  def compute_matches
     @choices.map do |choice|
-      [choice, Score.score(choice, query)]
+      [choice, Score.score(choice, @query)]
     end.select do |choice, score|
       score > 0.0
     end.sort_by do |choice, score|
@@ -221,9 +268,16 @@ class Search
     end
   end
 
-  def done
-    merge(:done => true)
+  def move_cursor(direction)
+    if max_visible_choices > 0
+      index = (@index + direction) % max_visible_choices
+      merge(:index => index)
+    else
+      self
+    end
   end
+
+  class NoSelection; end
 end
 
 class Score
@@ -287,9 +341,9 @@ class Score
   end
 end
 
-class Renderer < Struct.new(:search, :screen)
+class Renderer < Struct.new(:search)
   def self.render!(search, screen)
-    rendered = Renderer.new(search, screen).render
+    rendered = Renderer.new(search).render
     start_line = screen.height - search.config.visible_choices - 1
     screen.with_cursor_hidden do
       screen.write_lines(start_line, rendered.choices)
@@ -298,14 +352,22 @@ class Renderer < Struct.new(:search, :screen)
   end
 
   def render
-    search_line = "> " + search.query
-    matches = search.matches
+    index, matches = search.index, search.matches
+    search_line = "#{match_count_label} > " + search.query
     unless matches.empty?
-      matches[search.index] = Text[:inverse, matches.fetch(search.index), :reset]
+      selection_line = Text[:inverse, matches.fetch(index), :reset]
+      matches = replace_array_element(matches, index, selection_line)
     end
     matches = correct_match_count(matches)
     lines = [search_line] + matches
     Rendered.new(lines, search_line)
+  end
+
+  def match_count_label
+    choice_count = search.choices.length
+    max_label_width = choice_count.to_s.length
+    match_count = search.matches.count
+    match_count.to_s.rjust(max_label_width)
   end
 
   def correct_match_count(matches)
@@ -316,6 +378,14 @@ class Renderer < Struct.new(:search, :screen)
 
   class Rendered < Struct.new(:choices, :search_line)
   end
+
+  private
+
+  def replace_array_element(array, index, new_value)
+    array = array.dup
+    array[index] = new_value
+    array
+  end
 end
 
 class Screen
@@ -324,6 +394,7 @@ class Screen
       screen = self.new(tty)
       screen.configure_tty
       begin
+        ScreenValidator.raise_unless_screen_is_valid(screen.height)
         yield screen, tty
       ensure
         screen.restore_tty
@@ -336,16 +407,15 @@ class Screen
 
   def initialize(tty)
     @tty = tty
-    @ansi = ANSI.new(tty.out_file)
+    @ansi = ANSI.new(tty.console_file)
     @original_stty_state = tty.stty("-g")
   end
 
 
   def configure_tty
-    # raw: Disable input and output processing
-    # -echo: Don't echo keys back
-    # cbreak: Set up lots of standard stuff, including INTR signal on ^C
-    tty.stty("raw -echo cbreak")
+    # -echo: terminal doesn't echo typed characters back to the terminal
+    # -icanon: terminal doesn't  interpret special characters (like backspace)
+    tty.stty("-echo -icanon")
   end
 
   def restore_tty
@@ -405,7 +475,7 @@ class Screen
 
   def write_unrestricted(line, column, text)
     text = Text[:default, text] unless text.is_a? Text
-    write_text_object(line, column,text)
+    write_text_object(line, column, text)
   end
 
   def write_text_object(line, column, text)
@@ -421,7 +491,7 @@ class Screen
         #   - subtract the current column from that to get the number of
         #   columns we have left.
         chars_to_draw = [0, width - 1 - column].max
-        component = component[0..chars_to_draw]
+        component = expand_tabs(component)[0..chars_to_draw]
         ansi.addstr!(component)
         column += component.length
       elsif component == :inverse
@@ -438,6 +508,22 @@ class Screen
       end
     end
   end
+
+  def expand_tabs(string)
+    # Modified from http://markmail.org/message/avdjw34ahxi447qk
+    tab_width = 8
+    string.gsub(/([^\t\n]*)\t/) do
+      $1 + " " * (tab_width - ($1.size % tab_width))
+    end
+  end
+end
+
+class ScreenValidator
+  def self.raise_unless_screen_is_valid(screen_height)
+    raise NotATTY if screen_height == 0
+  end
+
+  class NotATTY < RuntimeError; end
 end
 
 class Text
@@ -543,26 +629,26 @@ class ANSI
   end
 end
 
-class TTY < Struct.new(:in_file, :out_file)
+class TTY < Struct.new(:console_file)
   def self.with_tty(&block)
-    File.open("/dev/tty", "r") do |in_file|
-      File.open("/dev/tty", "w") do |out_file|
-        tty = TTY.new(in_file, out_file)
-        block.call(tty)
-      end
-    end
+    # Selecta reads data from stdin and writes it to stdout, so we can't draw
+    # UI and receive keystrokes through them. Fortunately, all modern
+    # Unix-likes provide /dev/tty, which IO.console gives us.
+    console_file = IO.console
+    tty = TTY.new(console_file)
+    block.call(tty)
   end
 
   def get_char
-    in_file.getc
+    console_file.getc
   end
 
   def puts
-    out_file.puts
+    console_file.puts
   end
 
   def winsize
-    out_file.winsize
+    console_file.winsize
   end
 
   def stty(args)
@@ -586,7 +672,8 @@ end
 if $0 == __FILE__
   begin
     Selecta.new.main
-  rescue SystemExit, Interrupt
+  rescue Interrupt
     exit(1)
   end
 end
+
