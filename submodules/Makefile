@@ -5,6 +5,7 @@ all : tup chronos scry zzzcron roll-dice bloom-filter
 tup : tup/tup
 chronos : chronos/chronos
 scry : inotify-tools/libinotify-tools/src/scry
+bloom-filter : bloom-filter/bloom
 
 roll-dice : python-virtual-env
 	echo "source python-virtual-env/bin/activate; \
@@ -16,7 +17,7 @@ zzzcron : python-virtual-env
 		pip install -r zzzcron/requirements.txt; \
 		pip install --editable zzzcron" | bash
 
-bloom-filter : bloom-filter/bloom
+bloom-filter/bloom :
 	cd bloom-filter ; make
 
 tup/tup : 
