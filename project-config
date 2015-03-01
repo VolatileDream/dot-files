@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+# This finds a config file/directory for the current project.
+# Uses recursive lookup like git (check $PWD and go up until we find .git)
+
+project-config(){
+	if [ $# -lt 1 ]; then
+		echo "project-config <name>"
+		echo "  <name> - the name of the file/directory to look for"
+		echo "  To have a default value if project-config can't find anything use:"
+		echo "      project-config name || echo default"
+		return 1
+	fi
+
+	local name="$1"
+	local lookup="$PWD"
+
+	while [ ! -e "${lookup}/${name}" -a -n "$lookup" ]; do
+		lookup="${lookup%/*}"
+	done
+
+	# last check, it will catch "/$name", in case that's what we want.
+	if [ -e "${lookup}/${name}" ]; then
+		echo "${lookup}/${name}"
+		return 0
+	fi
+
+	return 1
+}
+
+if [ "$_" = "$0" ]; then
+	# this file wasn't sourced, it was executed.
+	project-config "$@"
+	exit $?
+fi
