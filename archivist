@@ -130,18 +130,35 @@ entries(){
 	return $?
 }
 
+last(){
+	ensure-archive
+	# just dump the last entry out, and
+	# does not print out the entry seperator.
+	last="$(chronos last "$ARCHIVE")"
+	e_val=$?
+	if [ $e_val -eq 0 ]; then
+		chronos get "$ARCHIVE" "$last"
+	fi
+	return $e_val
+}
+
 ensure-archive(){
 	# it's wonderful that chronos takes care of this for us
 	chronos init "$ARCHIVE"
 	return $?
 }
 
+
 if [ "-a" = "$1" ]; then
 	ARCHIVE="$2"
 	shift ; shift ; # shift off the archive param
+elif project-config .archivist > /dev/null ; then
+	ARCHIVE=`project-config .archivist`
 else
-	mkdir "$HOME/.archivist/" > /dev/null 2> /dev/null
-	ARCHIVE="$HOME/.archivist/"
+	# Note that this has to be different than the project-config lookup,
+	# because otherwise the user might accidentally run with the wrong location.
+	mkdir -p "$HOME/.config/archivist.d/" > /dev/null 2> /dev/null
+	ARCHIVE="$HOME/.config/archivist.d/"
 fi
 command="$1"; shift
 
@@ -174,10 +191,7 @@ case $command in
 		last-date
 	;;
 	last)
-		# just dump the last entry out, and
-		# does not print out the entry seperator.
-		last="$(chronos last "$ARCHIVE")"
-		chronos get "$ARCHIVE" "$last"
+		last
 	;;
 	sub|subscribe)
 		ARG=""
@@ -194,7 +208,6 @@ archivist is a light weight event bus that supports a few simple operations:
  submit [date-time] [-f file]
  - add a new entry into the bus for the current date-time, or the one specified
  - by default takes stdin, otherwise a file specified
- - specifying a time does NOT update the value retrieved by 'last'
 
  entries
  - lists the date-time of every single entry in the archive
