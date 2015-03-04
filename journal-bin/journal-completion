@@ -30,7 +30,7 @@ __journal_config(){
 		
 	elif [ $COMP_CWORD -eq 3 ]; then
 		# doing third thing
-		opts="$(journal config | write-from-to "\\\\[$prev\\\\]" '\\[' | sed 's/ =.*//')"
+		opts="$(journal config | write-from-to "\\[$prev\\]" '\[' | sed 's/ =.*//' )"
 	fi
 
 	COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )

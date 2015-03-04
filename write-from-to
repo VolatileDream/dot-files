@@ -1,17 +1,40 @@
 #!/bin/bash
 
-if [ $# -lt 2 ]; then
-	echo "Usage: $0 <from> <to>"
-	echo "  Prints starting at lines that match <from>"
-	echo "  and continues to print until a line matches <to>"
-	echo "  Prints non-inclusively."
+if [ $# -lt 1 ]; then
+	echo "Usage: $0 [-i] <pattern> <pattern>"
+	echo "  Prints all lines between the two patters specefied."
+	echo "  If a single pattern is supplied, it prints the file starting"
+	echo "    the line after the occurance of that pattern."
+	echo "  -i inverts the expected behaviour."
+	echo "  Prints inclusively with -i, non-inclusively otherwise."
+	exit
 fi
 
-read -d '' SCRIPT <<- EOF
-	BEGIN { matching = 0; }
-	/$2/ { matching = 0; }
-	{ if(matching > 0){ print } }
-	/$1/ { matching = 1; }
-EOF
+build_script(){
+	local start=0
 
-awk "$SCRIPT"
+	SCRIPT="BEGIN "
+
+	script_print="{ if(matching != 0){ print } }"
+	script_match_end="{ matching = 0; }"
+	script_match_start="{ matching = 1; }"
+
+	script_init="{ matching = 0; }"
+	if [ "$1" = "-i" ]; then
+		shift # take off the param
+		script_init="{ matching = 1; }"
+		script_match_start="{ matching = 0; }"
+		script_match_end="{ matching = 1; }"
+	fi
+
+	SCRIPT="${SCRIPT}${script_init}"
+
+	if [ $# -gt 1 ]; then
+		SCRIPT="${SCRIPT} /$2/ ${script_match_end}"
+	fi
+	SCRIPT="${SCRIPT} ${script_print} /$1/ ${script_match_start}"
+
+	echo "$SCRIPT"
+}
+
+awk "$(build_script "$@")"
