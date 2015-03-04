@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+FILE="$( journal config journal location )/last-journal-entry"
+
+aspell check "$FILE"
+
+if [ -e "${FILE}.bak" ]; then
+	rm "$FILE.bak"
+fi
+
