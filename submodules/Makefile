@@ -15,7 +15,7 @@ zzzcron : python-virtual-env
 		pip install --editable zzzcron" | bash
 
 bloom-filter :
-	cd bloom-filter ; make
+	cd bloom-filter ; tup
 
 tup :
 	cd tup ; if [ ! -e ./tup ]; then ./bootstrap.sh ; else ./tup ; fi
