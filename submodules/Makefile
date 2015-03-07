@@ -1,5 +1,5 @@
 
-all : tup chronos scry zzzcron roll-dice bloom-filter
+all : tup chronos scry zzzcron roll-dice bloom-filter lookup
 .PHONY: tup chronos scry zzzcron roll-dice bloom-filter
 
 scry : inotify-tools/libinotify-tools/src/scry
@@ -22,6 +22,9 @@ tup :
 
 chronos : tup
 	cd chronos ; tup
+
+lookup :
+	cd lookup ; make
 
 inotify-tools/libinotify-tools/src/scry : inotify-tools/src/inotifywait
 	cd inotify-tools/libinotifytools/src ; gcc -I. *.o example.c -o scry
