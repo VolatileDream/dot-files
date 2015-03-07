@@ -152,8 +152,8 @@ ensure-archive(){
 if [ "-a" = "$1" ]; then
 	ARCHIVE="$2"
 	shift ; shift ; # shift off the archive param
-elif project-config .archivist > /dev/null ; then
-	ARCHIVE=`project-config .archivist`
+elif lookup .archivist > /dev/null ; then
+	ARCHIVE=`lookup .archivist`
 else
 	# Note that this has to be different than the project-config lookup,
 	# because otherwise the user might accidentally run with the wrong location.
