@@ -10,9 +10,11 @@ class TimedCacheSet(object):
 		self.content = dict()
 		self.moment = moment
 
+
 	def add(self, item):
 		# don't care if the item is in there or not
 		self.content[ item ] = datetime.datetime.utcnow()
+
 
 	def __contains__(self, item):
 		now = datetime.datetime.utcnow()
@@ -26,6 +28,7 @@ class TimedCacheSet(object):
 				return True
 
 		return False
+
 
 def parse_timedelta(time_str):
 	timep = re.compile("^(\d*)(s|m|h|d|w|y)?$")
@@ -75,11 +78,12 @@ def main(timedelta):
 
 import argparse
 def args():
-	parse = argparse.ArgumentParser(description=u"")
+	parse = argparse.ArgumentParser(description=u"a tool to briefly ignore duplicate input")
 	parse.add_argument("time_window", default="5s",	nargs="?",
 			help="a string that matches '\\d*(s|m|h|d|w|y)?'."
-			" The letter indicating the time span desired (seconds,"
-			" minutes, hours, days, weeks, years).")
+			" The letter indicating the desired time span (seconds,"
+			" minutes, hours, days, weeks, years) over which to ignore"
+			" duplicate input. Defaults to 5 seconds.")
 
 	return parse
 
