@@ -1,6 +1,6 @@
 
 all : tup chronos scry zzzcron roll-dice bloom-filter lookup
-.PHONY: tup chronos scry zzzcron roll-dice bloom-filter
+.PHONY: tup chronos scry zzzcron roll-dice bloom-filter lookup
 
 scry : inotify-tools/libinotify-tools/src/scry
 
