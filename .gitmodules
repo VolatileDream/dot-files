@@ -19,3 +19,6 @@
 [submodule "submodules/lookup"]
 	path = submodules/lookup
 	url = git@github.com:VolatileDream/lookup.git
+[submodule "submodules/pick"]
+	path = submodules/pick
+	url = git@github.com:thoughtbot/pick.git

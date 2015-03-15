@@ -1,6 +1,6 @@
 
-all : tup chronos scry zzzcron roll-dice bloom-filter lookup
-.PHONY: tup chronos scry zzzcron roll-dice bloom-filter lookup
+all : tup chronos scry zzzcron roll-dice bloom-filter lookup pick
+.PHONY: tup chronos scry zzzcron roll-dice bloom-filter lookup pick
 
 scry : inotify-tools/libinotify-tools/src/scry
 
@@ -25,6 +25,9 @@ chronos : tup
 
 lookup :
 	cd lookup ; make
+
+pick :
+	cd pick ; ./autogen.sh ; ./configure ; make
 
 inotify-tools/libinotify-tools/src/scry : inotify-tools/src/inotifywait
 	cd inotify-tools/libinotifytools/src ; gcc -I. *.o example.c -o scry
