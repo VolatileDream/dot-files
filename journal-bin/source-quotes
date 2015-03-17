@@ -39,9 +39,12 @@ remove-start(){
 
 COMMAND_NAMES="quotes"
 HANDLER(){
+	# escape quotes (req for sqlite)
 	sed "s_'_''_g" |
+	# escape things
+	sed 's_\\_\\\\_g' |
 	while read line ; do
-		sqlite-insert quotes "$line" | "$SQL" "$FILE"
+		sqlite-insert quotes "$(echo -e $line)" | "$SQL" "$FILE"
 	done
 }
 
