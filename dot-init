@@ -28,7 +28,7 @@ mirror-dir-structure(){
 
 do-submodules(){
     # submodules are symlinked using git
-    cd "$BIN_DIR/submodules/" ; make
+    cd "$BIN_DIR/submodules/" ; make --no-builtin-rules --no-builtin-variables
 }
 
 do-linking(){
