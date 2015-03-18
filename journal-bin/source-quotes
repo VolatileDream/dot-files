@@ -5,47 +5,37 @@ SRC=commands
 source "$(journal config journal library)"
 source "$(config library)"
 
-SQL="$(config sql)"
-
-FILE="$GENERATED/quotes.db"
+FILE="$GENERATED/quotes.txt"
 
 # replace a bunch of things that we need because this isn't a .txt file we're creating
 
 run-init(){
 	_assert_variable FILE
-	echo "CREATE TABLE quotes ( quote TEXT );" | "$SQL" "$FILE"
+	touch "$FILE"
+}
+
+run-clean(){
+	_assert_variable FILE
+	rm "$FILE"
 }
 
 run-query(){
 	if [ $# -gt 0 ]; then
-		# SQL injection for flexibility, but read only mode.
-		( echo PRAGMA QUERY_ONLY = true \; ;
-		  sqlite-select quotes \* -w quote LIKE "'%$*%'" ) | "$SQL" "$FILE"
+		cat "$FILE" | grep -iE "$*"
 	else
-		sqlite-select quotes \* | "$SQL" "$FILE"
-	fi
+		cat "$FILE"
+	fi | sed 's_\\n_\n_g'
 }
 
 get-bang-command(){
-	_assert [ $# -gt 0 ]
-	COMMANDS="$( echo "$@" | sed 's_ \+_|!_g' )"
-
-	grep -E "^(!${COMMANDS})" | remove-start
-}
-
-remove-start(){
+	grep -E "^!quotes +" |
+	# remove the start of lines
 	sed 's_^!quotes \+__'
 }
 
 COMMAND_NAMES="quotes"
 HANDLER(){
-	# escape quotes (req for sqlite)
-	sed "s_'_''_g" |
-	# escape things
-	sed 's_\\_\\\\_g' |
-	while read line ; do
-		sqlite-insert quotes "$(echo -e $line)" | "$SQL" "$FILE"
-	done
+	cat >> "$FILE"
 }
 
 run "$@"
