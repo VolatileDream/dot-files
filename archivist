@@ -114,7 +114,7 @@ peek(){
 
 replay(){
 	local NL; printf -v NL "\n"
-	chronos iterate "$ARCHIVE" "$(echo -en "$SEPERATOR")" "$NL" "$NL"
+	chronos iterate "$ARCHIVE" "${SEPERATOR}%k${NL}%v${NL}"
 }
 
 last-date(){
