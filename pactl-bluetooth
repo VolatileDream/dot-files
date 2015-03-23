@@ -1,0 +1,62 @@
+#!/bin/sh
+
+
+change_module(){
+	local change="$1" ; shift
+	local module="$1" ; shift
+	local loaded;
+	loaded=`pactl list modules short | grep "$module"`
+
+	echo "$loaded" | grep "$module" > /dev/null
+	local module_loaded=$?
+
+	local message="${module}"
+
+	if [ "$change" = "toggle" ]; then
+		if [ $module_loaded -eq 0 ]; then
+			change=unload
+		else
+			change=load
+		fi
+	fi
+
+	case "$change" in
+		load)
+			if [ $module_loaded -eq 0 ]; then
+				message="${message} already"
+			else
+				pactl load-module "$module" > /dev/null
+			fi
+			message="${message} loaded..."
+		;;
+
+		unload)
+			if [ $module_loaded -ne 0 ]; then
+				message="${message} already"
+			else
+				pactl unload-module "$module" > /dev/null
+			fi
+			message="${message} unloaded..."
+		;;
+	esac
+
+	echo "$message"
+}
+
+usage(){
+	echo "$0 load|unload|toggle"
+}
+
+if [ $# -lt 1 ]; then
+	usage
+	exit 1
+fi
+
+case "$1" in
+	load|unload|toggle)
+		change_module "$1" module-bluetooth-discover ;;
+	*)
+		usage
+		exit 1 ;;
+esac
+
