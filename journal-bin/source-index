@@ -56,8 +56,11 @@ run-query(){
 	# random temporary part, and use only their entry date
 	dates=$(cat "$tmp" | awk '!/^#/ { gsub( /^[^_]+__/, "", $2); print $2 }' | tr '\n' ' ' )
 
-	# display the results before the actual entries
-	sensible-pager "$tmp"
+	if [ -t 1 ]; then
+		# stdout is a terminal so we display the results before the actual entries
+		sensible-pager "$tmp"
+
+	fi
 
 	# delete the temporary file, asap
 	rm "$tmp"
