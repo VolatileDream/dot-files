@@ -6,4 +6,4 @@ FILE="$GENERATED/swish++.index"
 
 cd "$GENERATED"
 
-journal query index "$( search++ --index-file "$FILE" -D | awk '/^[^ ]/ { print }' | pick )"
+search++ --index-file "$FILE" -D | awk '/^[^ ]/ { print }'
