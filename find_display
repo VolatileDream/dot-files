@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [ $# -lt 1 ]; then
+	echo "find_display <user>"
+	echo " probably find reasonable values for DISPLAY"
+	exit 1
+fi
+
+who | awk '{ print $1 " " $2 }' | grep -E "^$1 " | awk '{ print $2 }' | grep -E "^:"
