@@ -15,3 +15,15 @@ set incsearch		" Incremental search
 set autowrite		" Automatically save before commands like :next and :make
 set hidden		" Hide buffers when they are abandoned
 
+" For newline wrap
+set showbreak=↪
+" Git commits.
+autocmd FileType gitcommit setlocal spell
+
+" Check for pathogen plugins
+call pathogen#infect()
+if exists("g:loaded_pathogen")
+  nnoremap <F5> :GundoToggle<CR>
+endif
+
+
