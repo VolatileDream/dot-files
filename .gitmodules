@@ -22,3 +22,6 @@
 [submodule "submodules/pick"]
 	path = submodules/pick
 	url = git@github.com:thoughtbot/pick.git
+[submodule "submodules/mwiki"]
+	path = submodules/mwiki
+	url = git@github.com:VolatileDream/mwiki.git
