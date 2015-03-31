@@ -20,6 +20,9 @@ set showbreak=↪
 " Git commits.
 autocmd FileType gitcommit setlocal spell
 
+" Colour scheme
+colorscheme slate
+
 " Check for pathogen plugins
 call pathogen#infect()
 if exists("g:loaded_pathogen")
