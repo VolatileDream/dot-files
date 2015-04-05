@@ -149,7 +149,7 @@ update(){
 	if [ "$NOW" != "$LAST" ]; then
 
 		# Check to make sure the user hasn't accidentally run update
-		read -p "You have an existing entry for: $LAST, commit it to log? (y/n) "
+		read -p "You have an existing entry for: $LAST, commit it to log? (y/N) "
 		if [[ "$REPLY" != "Y" && "$REPLY" != "y" ]]; then
 			return
 		fi
