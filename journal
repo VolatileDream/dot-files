@@ -62,7 +62,7 @@ temp-file(){
 
 query(){
 	require-journal
-	QUERY_PREFIX="$(config journal bin)/$(config journal source-prefix)"
+	local QUERY_PREFIX="$(config journal bin)/$(config journal source-prefix)"
 	if [ $# -lt 1 ]; then
 		err "query requires a data source and query be specified"
 		SOURCES=$(ls "${QUERY_PREFIX}"* 2> /dev/null | sed "s_${QUERY_PREFIX}__" | tr '\n' ' ')
@@ -70,8 +70,8 @@ query(){
 		exit 1
 	fi
 
-	SRC="$1" ; shift
-	COM="${QUERY_PREFIX}${SRC}"
+	local SRC="$1" ; shift
+	local COM="${QUERY_PREFIX}${SRC}"
 	if [ -e "$COM" ]; then
 		if [ -x "$COM" ]; then
 			# pass the query along
@@ -92,15 +92,17 @@ build(){
 	#  pass along flags
 	# --
 	#  sources
-	ARGS=""
-	BUILD_PREFIX="$(config journal bin)/$(config journal source-prefix)"
+	local ARGS=""
+	local BUILD_PREFIX="$(config journal bin)/$(config journal source-prefix)"
 	while [ $# -gt 0 ]; do
-		last_arg="$1" ; shift
+		local last_arg="$1" ; shift
 		if [ "$last_arg" = "--" ]; then
 			break
 		fi
 		ARGS="$ARGS $last_arg"
 	done
+
+	local SOURCES
 
 	if [ $# -gt 0 ]; then
 		SOURCES="$@"
@@ -114,6 +116,8 @@ build(){
 		echo -n "Running sources: $SOURCES" | tr '\n' ' '
 		echo
 	fi
+
+	local COM
 
 	for SRC in $SOURCES ; do
 		COM="${BUILD_PREFIX}${SRC}"
@@ -139,12 +143,12 @@ update(){
 		return 0
 	fi
 
-	FORMAT="%Y-%m-%d"
+	local FORMAT="%Y-%m-%d"
 
 	# last entry date
-	LAST="$(cat "$JOURNAL/last-journal-date")"
+	local LAST="$(cat "$JOURNAL/last-journal-date")"
 	# current date
-	NOW="$(date +$FORMAT)"
+	local NOW="$(date +$FORMAT)"
 
 	if [ "$NOW" != "$LAST" ]; then
 
@@ -169,7 +173,7 @@ update(){
 
 		# use a temporary file so that none of the data sources every
 		#  attempt to look at or open the last-journal-entry file by mistake.
-		tmp="$(temp-file "$LAST")"
+		local tmp="$(temp-file "$LAST")"
 
 		# get the properly formatted archivist entry for parsing and building.
 		archivist -a "$JOURNAL" view "$(archivist -a "$JOURNAL" date)" > "$tmp"
@@ -217,9 +221,9 @@ create(){
 	# it bootstraps the rest of the app, and configures
 	#  the location of the journal for further use
 	echo "Creating a journal..."
-	configured=0
-	file_location=""
-	gen_location=""
+	local configured=0
+	local file_location=""
+	local gen_location=""
 	while [ $configured -eq 0 ]; do
 		echo "Where should the journal files live?"
 		read -p "> " file_location

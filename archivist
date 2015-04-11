@@ -13,8 +13,8 @@ parse-date(){
 }
 
 submit(){
-	IN="/dev/stdin"
-	DATE=""
+	local IN="/dev/stdin"
+	local DATE=""
 	if [ $# -gt 0 ]; then
 		case $# in
 			1) # date
@@ -34,7 +34,7 @@ submit(){
 		esac
 	fi
 
-	date_provided=0
+	local date_provided=0
 	if [ -z "$DATE" ]; then
 		DATE="$(date "+$DATE_FORMAT")"
 	else
@@ -46,7 +46,7 @@ submit(){
 		date_provided=1
 	fi
 
-	tmp=`mktemp`
+	local tmp=`mktemp`
 	cat "$IN" | trim > "$tmp"
 
 	cat "$tmp" | chronos append "$ARCHIVE" -t "${DATE}"
@@ -118,7 +118,7 @@ replay(){
 }
 
 last-date(){
-	entry="$(chronos last "$ARCHIVE")"
+	local entry="$(chronos last "$ARCHIVE")"
 	if [ ! -z "$entry" ]; then
 		echo "$entry"
 	fi
@@ -134,8 +134,8 @@ last(){
 	ensure-archive
 	# just dump the last entry out, and
 	# does not print out the entry seperator.
-	last="$(chronos last "$ARCHIVE")"
-	e_val=$?
+	local last="$(chronos last "$ARCHIVE")"
+	local e_val=$?
 	if [ $e_val -eq 0 ]; then
 		chronos get "$ARCHIVE" "$last"
 	fi
