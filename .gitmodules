@@ -25,3 +25,6 @@
 [submodule "submodules/mwiki"]
 	path = submodules/mwiki
 	url = git@github.com:VolatileDream/mwiki.git
+[submodule "submodules/tomb"]
+	path = submodules/tomb
+	url = git@github.com:dyne/Tomb.git
