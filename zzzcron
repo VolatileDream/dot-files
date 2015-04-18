@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-source $HOME/bin/submodules/python-virtual-env/bin/activate
-$HOME/bin/submodules/python-virtual-env/bin/zzzcron "$@"
+source $HOME/bin/submodules/python3-virtual-env/bin/activate
+$HOME/bin/submodules/python3-virtual-env/bin/zzzcron "$@"

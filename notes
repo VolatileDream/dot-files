@@ -1,0 +1,116 @@
+#!/usr/bin/env bash
+
+# globals
+STORE=""
+
+n_store(){
+	STORE=`lookup .notes.db`
+}
+
+n_require(){
+	n_store
+	if [ -z "$STORE" -o ! -f "$STORE" ]; then
+		echo "Could not find datastore for notes." >> /dev/stderr
+		exit 1
+	fi
+}
+
+n_add(){
+	n_require
+	local file=`mktemp`
+	sensible-editor "$file"
+	# check if the user wrote to the file
+	if [ -s "$file" ]; then
+		cat "$file" | rel "$STORE" add
+	fi
+	rm "$file"
+}
+
+# init checks it's arguments to prompt the user to create the datastore or not
+n_init(){
+	local command="$1"; shift
+	local create=1
+
+	if [ -f ".notes.db" ]; then
+		echo "Notes datastore already exists." >> /dev/stderr
+		exit 1
+	fi
+
+	case "$command" in
+		prompt)
+			read -p "Could not find datastore for notes, create one here? (y/N)"
+			[ "$REPLY" = "y" -o "$REPLY" = "Y" ]
+			create=$?
+			;;
+		create)
+			create=1
+			;;
+	esac
+
+	if [ 0 -eq $create ]; then
+		rel .notes.db init
+		return 0
+	else
+		return 1
+	fi
+}
+
+n_list(){
+	n_require
+
+	local template="{id} := {short}"
+	local query=""
+	if [ $# -gt 0 ]; then
+		template="$( echo -e '--- {id} ---\n{content}' )"
+		query="(or"
+		while [ $# -gt 0 ]; do
+			query="$query (id $1)" ; shift
+		done
+		query="$query )"
+	fi
+
+	rel "$STORE" list --template "$template" "$query"
+}
+
+notes(){
+	if [ $# -eq 0 ]; then
+		n_store
+		if [ ! -f "$STORE" ]; then
+			n_init prompt || exit 1
+		else
+			n_add
+		fi
+	else
+		local command="$1"; shift
+		case "$command" in
+			add)
+				n_add "$@"
+				;;
+			find)
+				n_list "$@"
+				;;
+			init)
+				n_init create
+				;;
+			--help)
+				echo "usage: notes <command> <opts...>"
+				echo "  notes is a lightweight wrapper around rel. it"
+				echo "   automatically finds and passes the datastorage"
+				echo "   to rel, and it provides (or wraps) the following commands:"
+				echo "    init - better storage initialization"
+				echo "    find - simple id search for items"
+				echo "    add  - editor usage for adding items"
+				echo
+				echo "  notes defaults to running 'add' when no command is given."
+				echo
+				rel --help
+				;;
+			*)
+				n_require
+				rel "$STORE" "$command" "$@"
+				;;
+		esac
+	fi
+}
+
+notes "$@"
