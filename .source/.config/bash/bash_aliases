@@ -88,10 +88,13 @@ fi
 if [[ -n $(which sshfs) ]];then
 	function ssh-mount(){
 		if [[ $# -lt 3 ]]; then
-			echo "Usage: ssh-mount host remote-dir local-dir";
+			echo "Usage: ssh-mount host remote-dir local-dir <sshfs opts>";
 			return
 		fi
-		sshfs ${1}:${2} ${3}
+		host="$1" ; shift
+		remote="$1" ; shift
+		local="$1" ; shift
+		sshfs "${host}:${remote}" "${local}" "$@"
 	}
 	function ssh-umount(){
 		fusermount -u ${1}
