@@ -21,9 +21,6 @@ if [ "${FILE_BASE:0:1}" != "/" ]; then
 else
 	echo "Warning: Event is already has an absolute path."
 	echo "EVENT: $FILE_BASE"
-	echo "This should be avoided because it has the possibility"
-	echo " of creating PIPE files that don't get cleaned up"
-	echo " across system shutdown."
 fi
 
 # check if we're supposed to continue
@@ -41,7 +38,8 @@ cleanup(){
 # attach our pid to the event name
 FILE="${FILE_BASE}-$$"
 
-# trap control-c to cleanup
+# trap control-c to cleanup, set this up just before we create the fifo
+# because if we get SIGINT before this, we could safely exit.
 trap cleanup SIGINT
 
 mkfifo "$FILE"
@@ -56,7 +54,6 @@ while true; do
 	fi
 
 	cat "$FILE"
-
 done
 
 # run cleanup

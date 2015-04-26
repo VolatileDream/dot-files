@@ -21,22 +21,26 @@ if [ "${FILE_BASE:0:1}" != "/" ]; then
 else
 	echo "Warning: Event is already has an absolute path."
 	echo "EVENT: $FILE_BASE"
-	echo "This should be avoided because it has the possibility"
-	echo " of creating PIPE files that don't get cleaned up"
-	echo " across system shutdown."
 fi
 
+# create a temporary file and put all of stdin into it. this is desirable
+# because we might be writing to a bunch of different files.
 tmp=`mktemp`
 cat - > "$tmp"
 
 for file in "$FILE_BASE"* ; do
 	# it needs to be a pipe file
 	if [ -p "$file" ]; then
-		# TODO deal with race conditions here
-		# A process might exit and delete it's pipe
-		# after we've starting writing to it, which
-		# would leave us in an awkward blocked state.
-		cat "$tmp" >> $file
+		# If we start writting to a pipe when it has not been opened
+		# for reading, and it then gets deleted, there is no way to
+		# recover.
+
+		# A process might exit and delete it's pipe after we've
+		# starting writing to it (having been opened for read), this is
+		# ok. The kernel will error the write(2) call with EPIPE. cat
+		# handles this correctly.
+
+		cat "$tmp" >> "$file"
 		echo "Notified: $file"
 	fi
 done
