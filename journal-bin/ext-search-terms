@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-source "$(journal config journal library)"
-
-FILE="$GENERATED/swish++.index"
-
-cd "$GENERATED"
-
-search++ --index-file "$FILE" -D | awk '/^[^ ]/ { print }'

@@ -32,5 +32,5 @@ __time-capsule_completion(){
 
 complete -F __time-capsule_completion time-capsule
 
-source $HOME/bin/journal-bin/journal-completion
 source $HOME/bin/submodules/mwiki/completion.bash
+source $HOME/bin/submodules/mwiki/plugins/journal/completion.bash

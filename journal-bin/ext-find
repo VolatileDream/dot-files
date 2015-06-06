@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-
-if [ $# -lt 1 ]; then
-	echo "usage: journal find <regex>"
-	exit
-fi
-
-journal query index "$(journal search-terms | grep "$*" | tr '\n' ' ' | sed 's/ / or /g' | sed 's/ or $//' )"
