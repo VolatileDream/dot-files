@@ -28,7 +28,9 @@ inotify-tools/libinotify-tools/src/scry : inotify-tools/src/inotifywait
 inotify-tools/src/inotifywait :
 	cd inotify-tools ; if [ ! -e Makefile ]; then ./autogen.sh ; ./configure ; fi ; make
 
-extruder : 
+extruder : extruder/extruder
+
+extruder/extruder :
 	cd extruder ; git submodule init ; git submodule update
 	make
 
