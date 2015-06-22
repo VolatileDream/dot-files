@@ -1,6 +1,6 @@
 
 all : tup chronos bloom-filter no-tup
-no-tup : zzzcron rel roll-dice lookup pick scry
+no-tup : zzzcron rel roll-dice lookup pick scry extruder
 
 .PHONY: all no-tup
 .PHONY: tup chronos scry zzzcron roll-dice bloom-filter lookup pick
@@ -27,6 +27,10 @@ inotify-tools/libinotify-tools/src/scry : inotify-tools/src/inotifywait
 
 inotify-tools/src/inotifywait :
 	cd inotify-tools ; if [ ! -e Makefile ]; then ./autogen.sh ; ./configure ; fi ; make
+
+extruder : 
+	cd extruder ; git submodule init ; git submodule update
+	make
 
 rel : python2-virtual-env
 	echo "source python2-virtual-env/bin/activate; \
