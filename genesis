@@ -1,0 +1,135 @@
+#!/usr/bin/env bash
+
+usage(){
+	echo "usage: genesis [-h|--help] [--gen] base-file [generated script arguments]"
+	echo
+	echo " genesis is a fairly trivial code generation tool (inspired by"
+	echo " http://ribosome.ch/). genesis uses the same style of"
+	echo " whitespace-dot started lines to output text data, with other"
+	echo " lines containing scripting language directives in them."
+	echo
+	echo " By default genesis assumes that the scripting language used"
+	echo " is going to be bash, and uses a preamble and line printing that"
+	echo " are appropriate for this. genesis can be trivially modified to"
+	echo " instead output to a different scripting language."
+	echo
+	echo " by default genesis creates the script and then executes it,"
+	echo "  passing whatever arguments were provided to it along. Note that"
+	echo "  passing arguments is incompatible with --gen."
+	echo
+	echo " --gen      : output the generated script, instead of running it"
+	echo " -h, --help : output this help message"
+}
+
+lstrip(){
+	echo "$1" | sed "s_^$2__"
+}
+
+# the two functions that have to be changed to output to a different language:
+
+# line out writes a line out in such a way that it can be evaluated in the
+# output programming language.
+#
+# it is passed 1) the line (with left whitespace removed), 2) the removed
+# left whitespace
+line_out(){
+	# we use ' because it won't cause any problems with content being
+	# evaluated again or allowing other content to be injected
+	# (like " would, see variables ${} or subshells $() ), so we
+	# escape ' characters because we have to.
+	echo "${2}echo -n '${1//'/\'}'"
+}
+# the preamble is output before any other code is output, and is run only once.
+preamble(){
+	echo "#!/usr/bin/env bash"
+	echo " set -u"
+}
+
+include(){
+	local FILE="$1" ; shift
+	while [ $# -gt 0 ]; do
+		FILE="${FILE}/$1" ; shift
+	done
+
+	cat "$FILE" | transform "${FILE%/*}"
+
+	if [ $? -ne 0 ]; then
+		echo " error in $FILE" >> /dev/stderr
+		return 1
+	fi
+}
+
+transform(){
+	# we are passed in the relative directory for use with includes
+	local dir="$1" ; shift
+
+	# A line that starts with (optional whitespace and) a dot is special
+	# all other lines get output exaclty as they are.
+	local line_test='^ *\.'
+	while IFS= read line ; do
+		# line_test is a variable because of bash weirdness...
+		if [[ "$line" =~ $line_test ]]; then
+			local unpad="$( lstrip "$line" " *\." )"
+			# lpad is the padding on the left hand of the line, we
+			# attempt to keep padding on lines, just so that the lines
+			# kind of look nice.
+			local lpad="${line%%.$unpad}"
+			case $unpad in
+				/!include*)
+					unpad="$( lstrip "$unpad" "/!include *" )"
+					include ${dir} ${unpad}
+					if [ $? -ne 0 ]; then
+						echo " error including: $unpad" >> /dev/stderr
+						return 1
+					fi
+					;;
+				*)
+					line_out "${unpad}" "${lpad}"
+					;;
+			esac
+		else
+			echo "$line"
+		fi
+	done
+}
+
+genesis(){
+	if [ $# -lt 1 -o "$1" = "-h" -o "$1" = "--help" ]; then
+		usage
+		exit 1
+	fi
+
+	local GEN FILE OUT
+	GEN=0
+
+	if [ "$1" = "--gen" ]; then
+		GEN=1
+		shift
+	fi
+
+	FILE="$1" ; shift
+
+	if [ ! $GEN -eq 1 ]; then
+		# have to hide the fact that we did shenanigans.
+		# use mktemp to ensure that we can be run in parallel
+		# on the same file.
+		OUT=`mktemp`
+	else
+		if [ $# -gt 0 ]; then
+			echo "error: too many parameters, --gen supplied"
+			usage
+			exit 1
+		fi
+		# setup "nicer" output
+		OUT=/dev/stdout
+	fi
+
+	( preamble ; include "$FILE" ) > "$OUT"
+
+	if [ ! $GEN -eq 1 ]; then
+		chmod +x "$OUT"
+		"$OUT" "$@"
+	fi
+}
+
+genesis "$@"
