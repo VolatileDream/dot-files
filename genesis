@@ -127,7 +127,7 @@ genesis(){
 	( preamble ; include "$FILE" ) > "$OUT"
 
 	if [ ! $GEN -eq 1 ]; then
-		chmod +x "$OUT"
+		chmod u+x "$OUT"
 		"$OUT" "$@"
 	fi
 }
