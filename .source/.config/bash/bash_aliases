@@ -76,7 +76,7 @@ alias asdf='setxkbmap dvorak'
 
 alias lsall='lshal ; lshw ; lspci ; lsusb'
 alias jar='java -jar'
-alias tail='tail -f'
+alias tailf='tail -f'
 alias g='grep -E'
 alias sw='sudo iwlist scan'
 alias count='ls | wc -l'
