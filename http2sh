@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+source $HOME/bin/submodules/python3-virtual-env/bin/activate
+python $HOME/bin/submodules/http2sh/http2sh "$@"
