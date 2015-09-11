@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env bash
 
-#source ~/bin/submodules/python3-virtual-env/bin/activate
+source ~/bin/submodules/python3-virtual-env/bin/activate
 
-#python3 - "$@" <<PYTHON_END
+python3 - "$@" <<PYTHON_END
 
 from plyplus import Grammar, STransformer
 
@@ -431,4 +431,4 @@ if __name__ == "__main__":
 			print(item)
 
 
-#PYTHON_END
+PYTHON_END
