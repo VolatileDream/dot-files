@@ -36,6 +36,10 @@ range		: char '-' char ;
 WS: '[\t\n]+' (%ignore) (%newline);
 """)
 
+def debug(*args):
+	#print(*args)
+	pass
+
 import itertools
 
 def str_range(start, end):
@@ -106,7 +110,10 @@ class ResetableIterator():
 			return self.i.random( rand )
 
 	def index(self, index):
+		if index < 0:
+			raise Exception()
 		if self.use_list:
+			debug("list", index, self.i[index])
 			return self.i[index]
 		else:
 			return self.i.index(index)
@@ -175,10 +182,10 @@ class IteratorProduct():
 		return self
 
 	def count(self):
-		count = 0
+		count = 1
 
 		for item in self.i:
-			count += item.count()
+			count *= item.count()
 
 		return count
 
@@ -187,12 +194,15 @@ class IteratorProduct():
 		return self.index(index)
 
 	def index(self, index):
+		if index < 0:
+			raise Exception()
 		index_items = []
 
 		for item in self.i:
-			count = item.count()
-			index_items.append( item.index( index % count ) )
-			index -= item.count()
+			new_item = item.index( index % item.count() )
+			debug("product", index, new_item)
+			index_items.append( new_item )
+			index //= item.count()
 
 		return "".join( index_items )
 
@@ -234,13 +244,20 @@ class RangeIterator():
 		return self.index( index )
 
 	def index(self, index):
+		if index < 0:
+			raise Exception()
+
 		count = self.i.count()
+
 		for i in range(self.start, self.end+1):
+			debug("range", index, count ** i)
 			if index < count ** i:
 				items = []
 				for c in range(i):
-					items.append( self.i.index( index % count ) )
-					index -= count
+					new_item = self.i.index( index % count )
+					debug("range2",index, new_item)
+					items.append( new_item )
+					index //= count
 				return "".join( items )
 			else:
 				index -= count ** i
@@ -288,8 +305,12 @@ class IteratorUnion():
 		return self.index(index)
 
 	def index(self, index):
+		if index < 0:
+			raise Exception()
 		for i in self.i:
+			debug("union",index)
 			if index < i.count():
+				debug("union", index, i.index(index))
 				return i.index( index )
 			index -= i.count()
 
@@ -365,6 +386,7 @@ def parse(expr, star_plus_count = 4):
 
 	return p.transform( ast )
 
+
 import argparse
 
 def arg_parser():
@@ -381,6 +403,8 @@ def arg_parser():
 	parser.add_argument('-r', '--random', action='store_true'
 			, help="randomly select one of the matching regex's")
 
+	parser.add_argument('-C', '--count', action='store_true'
+			, help="writes out then number of generated regex's")
 	return parser
 
 import random
@@ -395,9 +419,13 @@ if __name__ == "__main__":
 
 	if args.random:
 
-		rand = random.SystemRandom()
+		r = random.randrange(iter.count())
 
-		print( iter.random(rand) )
+		#for r in range(iter.count()):
+		#print( r, "/", iter.count() )
+		print( iter.index(r) )
+	elif args.count:
+		print( iter.count() )
 	else:
 		for item in iter:
 			print(item)
