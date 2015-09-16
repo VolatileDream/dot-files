@@ -19,12 +19,13 @@ count_specifier : '\*' | '\+' | '\?' | match_count ;
 
 elementary_re	: group | set | any | char ;
 group		: '\(' re '\)' ;
-match_count	: '\{' number ( ',' number) ? '\}' ;
-number		: '[0123456789]+' ;
+match_count	: '\{' ( number ',' ) ? number '\}' ;
+digit		: '[0123456789]' ;
+number		: digit+ ;
 any		: '\.' ;
 char		: non_meta | '~' meta ;
 
-non_meta	: '[ _a-zA-Z0123456789]' ;
+non_meta	: '[ _a-zA-Z]' | digit ;
 meta		: '[[]\(\)|$\.\+\*\?]' ;
 
 set		: pset | nset ;
@@ -349,10 +350,11 @@ class RegExprParser(STransformer):
 		return exp.tail[0]
 
 	def match_count(self, exp):
+		count = int(exp.tail[0])
 		if len(exp.tail) == 1:
-			return match_range(1, int(exp.tail[0]) )
+			return match_range( count, count )
 		else:
-			return match_range( int(exp.tail[0]), int(exp.tail[1]) )
+			return match_range( count, int(exp.tail[1]) )
 
 	def concat(self, exp):
 		#print(exp)
