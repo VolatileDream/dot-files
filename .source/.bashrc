@@ -19,6 +19,11 @@ shopt -s histappend
 HISTSIZE=1000
 HISTFILESIZE=2000
 
+# do really fancy stuff with history (keep it "forever")
+## Sourced: https://twitter.com/michaelhoffman/status/639178145673932800
+HISTFILE="${HOME}/.history/$(date -u +%Y/%m/%d.%H.%M.%S)_${HOSTNAME}_$$"
+mkdir -p "${HISTFILE%/*}/"
+
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
 shopt -s checkwinsize
