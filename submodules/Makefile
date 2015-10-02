@@ -1,9 +1,9 @@
 
 all : tup chronos bloom-filter no-tup
-no-tup : zzzcron rel roll-dice lookup pick scry extruder
+no-tup : zzzcron rel roll-dice lookup pick scry extruder http2sh
 
 .PHONY: all no-tup
-.PHONY: tup chronos scry zzzcron roll-dice bloom-filter lookup pick
+.PHONY: tup chronos scry zzzcron roll-dice bloom-filter lookup pick http2sh
 
 tup :
 	cd tup ; if [ ! -e ./tup ]; then ./bootstrap.sh ; else ./tup ; fi
@@ -32,12 +32,16 @@ extruder : extruder/extruder
 
 extruder/extruder :
 	cd extruder ; git submodule init ; git submodule update
-	make
+	cd extruder ; make
 
 rel : python2-virtual-env
 	echo "source python2-virtual-env/bin/activate; \
 		pip install -r rel/requirements.txt;  \
 		pip install --editable rel" | bash
+
+http2sh : python3-virtual-env
+	echo "source python3-virtual-env/bin/activate; \
+		pip install -r http2sh/requirements.txt;" | bash
 
 roll-dice : python3-virtual-env
 	echo "source python3-virtual-env/bin/activate; \
