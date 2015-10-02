@@ -12,8 +12,8 @@ esac
 # See bash(1) for more options
 HISTCONTROL=ignoreboth
 
-# append to the history file, don't overwrite it
-shopt -s histappend
+# don't allow for editing of history lines (backspace after Ctrl-r)
+set revert-all-at-newline on
 
 # for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
 HISTSIZE=1000
@@ -21,8 +21,12 @@ HISTFILESIZE=2000
 
 # do really fancy stuff with history (keep it "forever")
 ## Sourced: https://twitter.com/michaelhoffman/status/639178145673932800
-HISTFILE="${HOME}/.history/$(date -u +%Y/%m/%d.%H.%M.%S)_${HOSTNAME}_$$"
+# this breaks CTRL-R
+HISTFILE="${HOME}/.history/$(date -u +%Y/%m/%d/%H.%M.%S)_${HOSTNAME}_$$"
 mkdir -p "${HISTFILE%/*}/"
+
+# append to the history file, don't overwrite it. shouldn't be necessary.
+shopt -s histappend
 
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
@@ -37,16 +41,6 @@ shopt -s checkwinsize
 
 # if we don't have awk, enable fast path
 [ -x /usr/bin/awk ] || FAST_PATH="yes"
-
-# enable color support of ls and also add handy aliases
-if [ -x /usr/bin/dircolors ]; then
-    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-    alias ls='ls --color=auto'
-
-    alias grep='grep --color=auto'
-    alias fgrep='fgrep --color=auto'
-    alias egrep='egrep --color=auto'
-fi
 
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
