@@ -11,7 +11,7 @@ path-prompt(){
 }
 
 # source trickery!
+# the file wasn't sourced, but executed
 if [ "$_" = "$0" ]; then
-    path-prompt "$@"
-    exit $?
+	path-prompt "$@"
 fi
