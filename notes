@@ -92,7 +92,7 @@ notes(){
 			init)
 				n_init create
 				;;
-			--help)
+			-h|--help)
 				echo "usage: notes <command> <opts...>"
 				echo "  notes is a lightweight wrapper around rel. it"
 				echo "   automatically finds and passes the datastorage"
