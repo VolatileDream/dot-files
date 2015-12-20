@@ -1,7 +1,15 @@
 
 # History manipulation
-# C-r breaks once you have a bunch of history files :c
-# so we have to rebuild it
+
+# include history files, attempt to restore history
+history-refresh(){
+    for file in ~/.history/*/*/*/* ; do
+        history -r "$file"
+    done
+}
+history-refresh
+
+# C-r breaks once you have a bunch of history files so we have to rebuild it
 hhg () { grep --recursive --no-filename "$@" ~/.history | uniq ; }
 
 hp () {
@@ -51,6 +59,25 @@ ndir(){
     done
 
     cd "$last"
+}
+
+m(){
+    local input="$1"; shift
+    if [ -d "$input" ]; then
+        local playlist=`mktemp`
+        if [ "${input#/}" = "$input" ]; then
+            find "$PWD/$input" -type f
+        else
+            find "$input" -type f
+        fi > "$playlist"
+        mpv "$@" --playlist "$playlist"
+        rm "$playlist"
+    elif [ -f "$input" ]; then
+        mpv "$@" "$input"
+    else
+        echo "m: input-file-or-dir <mpv options...>"
+        return 1
+    fi
 }
 
 # path stuff
@@ -151,9 +178,6 @@ alias .a='ls -A'
 alias .l='ls -l'
 alias .d='ls -Al | grep "^d"'
 alias ..='cd ..'
-
-# custom command aliases
-alias mcheck='ffmpeg -i'
 
 alias randnum='cat /dev/urandom | g -Eo --binary-files=text "[0-9]"'
 
