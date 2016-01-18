@@ -5,7 +5,6 @@ __pass_completion(){
     local IFS=$'\n'
     COMPREPLY=($(compgen -o filenames -f -d -X '!*.gpg' -- "${word}" | sed 's/.gpg$//gi' ))
 }
-
 complete -d -X '.[^./]*' -F __pass_completion pass
 
 __time-capsule_completion(){
@@ -29,7 +28,6 @@ __time-capsule_completion(){
 	fi
 	COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
 }
-
 complete -F __time-capsule_completion time-capsule
 
 source $HOME/bin/submodules/mwiki/completion.bash

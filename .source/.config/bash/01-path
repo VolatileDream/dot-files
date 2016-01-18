@@ -1,0 +1,40 @@
+# if we don't have awk, enable fast path
+[ -x /usr/bin/awk ] || FAST_PATH="yes"
+
+# important variables to have set
+export PATH="$HOME/bin:$PATH"
+export BASE_PATH="$PATH"
+
+# path stuff
+path-reset(){
+	# reset the path to whatever it was before
+	export PATH="$BASE_PATH"
+}
+path-include(){
+	if [ $# -gt 0 ]; then
+		while [ $# -gt 0 ]; do
+			local ADD="$1" ; shift
+			if [[ "${ADD:0:1}" != "/" ]]; then
+				# relative paths must be made absolute.
+				ADD="${PWD}/${ADD}"
+			fi
+
+			PATH="$ADD:$PATH"; shift
+		done
+	else
+		# include the current directory in the path
+		export PATH="$PWD:$PATH"
+	fi
+}
+path-remove(){
+	local nPATH="$PATH"
+	select REMOVE in $(echo $nPATH | tr ':' ' ') ; do
+		nPATH="$(echo -n $nPATH |
+			tr ':' '\n' |
+			grep -vE "^$REMOVE\$" |
+			tr '\n' ':' )"
+		echo "$REMOVE removed from path"
+	done
+	nPATH="${nPATH%%:}" # remove trailing ':'
+	export PATH="$nPATH"
+}
