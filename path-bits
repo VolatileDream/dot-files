@@ -12,7 +12,7 @@ read -d '' script <<- EOF
     }
 
     # Assume /media/$USER/drive path
-    ( \$1 ~ /media/ && NF > 2 ) \
+    ( \$1 ~ /media/ && NF > 2 && \$2 ~ /$USER/ ) \
     {
         if ( NF == 3 ) {
             print "/ on " \$3

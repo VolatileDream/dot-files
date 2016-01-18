@@ -11,20 +11,32 @@ history-refresh
 
 # C-r breaks once you have a bunch of history files so we have to rebuild it
 hhg () { grep --recursive --no-filename "$@" ~/.history | uniq ; }
-
 hp () {
 
     local tmp=`mktemp`
         # 1/10_000 error for 1_000_000 elements
         echo | bloom create "$tmp" 0.00001 1000000
         # lines must be less than 255 characters
-        line=`cat ~/.history/*/*/*/* | cut -b -254 | bloom filter -n -u "$tmp" | pick`
+        line=`cat ~/.history/*/*/*/* | bloom filter -n -u "$tmp" | pick`
     rm "$tmp"
 
     if [ -n "$line" ]; then
         history -s "$line"
         eval "$line"
     fi
+}
+
+# Editting things in a shell pipeline
+__TTY=`tty`
+es () {
+    local tmp=`mktemp`
+        cat > "$tmp"
+        # --nonewlines  : don't append newlines to the end
+        # --restricted  : don't allow file io to anything other than parameter
+        # --tempfile    : don't prompt for saving
+        nano --nonewlines --restricted --tempfile "$tmp" < "$__TTY"
+        cat "$tmp"
+    rm "$tmp"
 }
 
 # Colour stuff
@@ -61,23 +73,59 @@ ndir(){
     cd "$last"
 }
 
+# media command
 m(){
-    local input="$1"; shift
-    if [ -d "$input" ]; then
-        local playlist=`mktemp`
-        if [ "${input#/}" = "$input" ]; then
-            find "$PWD/$input" -type f
+    local options=()
+    local inputs=()
+    while [ $# -gt 0 ] ; do
+        # seperate out options from inputs
+        if [ -f "$1" ] || [ -d "$1" ]; then
+            inputs[${#inputs[@]}]="$1"
         else
-            find "$input" -type f
-        fi > "$playlist"
-        mpv "$@" --playlist "$playlist"
+            options[${#options[@]}]="$1"
+        fi
+        shift
+    done
+
+    # need at least 1 input file/dir
+    if [ ${#inputs[@]} -gt 0 ] ; then
+
+        # create a playlist out of the files and dirs,
+        # attempt to preserve order across inputs.
+
+        local playlist=`mktemp`
+        for index in ${!inputs[@]} ; do
+            local in="${inputs[$index]}"
+            if [ -f "$in" ]; then
+                readlink -f "$in"
+            else
+                find `readlink -f "${in}"` -type f
+            fi
+        done >> "$playlist"
+
+        mpv "${options[@]}" --playlist "$playlist"
         rm "$playlist"
-    elif [ -f "$input" ]; then
-        mpv "$@" "$input"
     else
         echo "m: input-file-or-dir <mpv options...>"
         return 1
     fi
+}
+
+# audio command
+a(){
+    # run through inputs, if we have a directory, shuffle + loop
+    local only_files=1
+    for thing in "$@" ; do
+        if [ -d "$thing" ]; then
+            only_files=0
+        fi
+    done
+
+    local params="--no-video"
+    if [ "$only_files" -eq 0 ]; then
+        params="$params --shuffle --loop inf"
+    fi
+    m "$@" $params
 }
 
 # path stuff
@@ -127,8 +175,6 @@ pass-here(){
 pass-restore(){
 	PASSWORD_STORE_DIR="$DEFAULT_PASSWORD_STORE"
 }
-
-source "$BASH_CONF/bugs_everywhere_config"
 
 alias aoeu='setxkbmap us'
 alias asdf='setxkbmap dvorak'
