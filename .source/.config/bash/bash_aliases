@@ -73,61 +73,6 @@ ndir(){
     cd "$last"
 }
 
-# media command
-m(){
-    local options=()
-    local inputs=()
-    while [ $# -gt 0 ] ; do
-        # seperate out options from inputs
-        if [ -f "$1" ] || [ -d "$1" ]; then
-            inputs[${#inputs[@]}]="$1"
-        else
-            options[${#options[@]}]="$1"
-        fi
-        shift
-    done
-
-    # need at least 1 input file/dir
-    if [ ${#inputs[@]} -gt 0 ] ; then
-
-        # create a playlist out of the files and dirs,
-        # attempt to preserve order across inputs.
-
-        local playlist=`mktemp`
-        for index in ${!inputs[@]} ; do
-            local in="${inputs[$index]}"
-            if [ -f "$in" ]; then
-                readlink -f "$in"
-            else
-                find `readlink -f "${in}"` -type f
-            fi
-        done >> "$playlist"
-
-        mpv "${options[@]}" --playlist "$playlist"
-        rm "$playlist"
-    else
-        echo "m: input-file-or-dir <mpv options...>"
-        return 1
-    fi
-}
-
-# audio command
-a(){
-    # run through inputs, if we have a directory, shuffle + loop
-    local only_files=1
-    for thing in "$@" ; do
-        if [ -d "$thing" ]; then
-            only_files=0
-        fi
-    done
-
-    local params="--no-video"
-    if [ "$only_files" -eq 0 ]; then
-        params="$params --shuffle --loop inf"
-    fi
-    m "$@" $params
-}
-
 # path stuff
 path-reset(){
 	# reset the path to whatever it was before

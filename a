@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+# audio command
+a(){
+    # run through inputs, if we have a directory, shuffle + loop
+    local only_files=1
+    for thing in "$@" ; do
+        if [ -d "$thing" ]; then
+            only_files=0
+        fi
+    done
+
+    local params="--no-video"
+    if [ "$only_files" -eq 0 ]; then
+        params="$params --shuffle --loop inf"
+    fi
+    m "$@" $params
+}
+
+if [ "$_" = "$0" ]; then
+	# this file wasn't sourced, execute.
+	a "$@"
+	exit $?
+fi
