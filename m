@@ -26,7 +26,10 @@ m(){
             if [ -f "$in" ]; then
                 readlink -f "$in"
             else
-                find "$(readlink -f "${in}")" -type f
+                # find is almost sorted, but isn't required to be. We
+                # assume that directories should be played in sorted
+                # order when they are passed in.
+                find "$(readlink -f "${in}")" -type f | sort
             fi
         done >> "$playlist"
 
