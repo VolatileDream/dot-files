@@ -26,7 +26,7 @@ m(){
             if [ -f "$in" ]; then
                 readlink -f "$in"
             else
-                find `readlink -f "${in}"` -type f
+                find "$(readlink -f "${in}")" -type f
             fi
         done >> "$playlist"
 
