@@ -1,0 +1,38 @@
+function __has_prog(){
+    [[ -n $(which "$prog") ]]
+    return $?
+}
+
+if __has_prog xdg-open; then
+	alias open='xdg-open'
+fi
+
+if __has_prog ssh-fs ; then
+	function ssh-mount(){
+		if [[ $# -lt 3 ]]; then
+			echo "Usage: ssh-mount host remote-dir local-dir <sshfs opts>";
+			return
+		fi
+		host="$1" ; shift
+		remote="$1" ; shift
+		local="$1" ; shift
+		sshfs "${host}:${remote}" "${local}" "$@"
+	}
+	function ssh-umount(){
+		fusermount -u ${1}
+	}
+else
+	function ssh-mount(){
+		echo "ssh-mount not supported (no ssh-fs found)"
+		return
+	}
+fi
+
+function hardware_detect(){
+    for prog in lshal lshw lspci lsusb ; do
+        if __has_prog $prog ; then
+            "$prog"
+        fi
+    done
+}
+

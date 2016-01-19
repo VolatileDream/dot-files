@@ -1,11 +1,29 @@
 # PS1 this file is for all things related to PS1 changes
 
-if [ ${#FAST_PATH} -gt 0 ]; then
+# if we don't have awk, enable fast PS1
+[ -x /usr/bin/awk ] || FAST_PS1="yes"
+
+ps_prompt=""
+prompt-tag(){
+	if [ $# -gt 0 ] ; then
+		ps_prompt="$*"
+	else
+		if [ ${#ps_prompt} -gt 0 ]; then
+			echo "[$ps_prompt] "
+		fi
+	fi
+}
+
+path-prompt(){
+	[ -n "$VIM" ] && echo -n "[vim] "
+	[ "$PATH" != "$BASE_PATH" ] && echo -en "\e[0;31m*\e[m"
+	echo ">"
+}
+
+if [ ${#FAST_PS1} -gt 0 ]; then
     PS1='\u@\h:\W\$ '
 else
     source "$HOME/bin/path-bits"
-    source "$HOME/bin/path-prompt"
-    source "$HOME/bin/prompt-tag"
     ps_tag='$(prompt-tag)'
     path_bits='$(path-bits)'
     path_prompt='$(path-prompt)'

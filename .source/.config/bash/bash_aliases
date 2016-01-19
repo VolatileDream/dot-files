@@ -1,59 +1,18 @@
 
-# Editting things in a shell pipeline
-__TTY=`tty`
+# Editting things in a shell pipeline, it only kind of works.
 es () {
     local tmp=`mktemp`
         cat > "$tmp"
         # --nonewlines  : don't append newlines to the end
         # --restricted  : don't allow file io to anything other than parameter
         # --tempfile    : don't prompt for saving
-        nano --nonewlines --restricted --tempfile "$tmp" < "$__TTY"
+        nano --nonewlines --restricted --tempfile "$tmp" < "/dev/tty"
         cat "$tmp"
     rm "$tmp"
 }
-
-# Add an "alert" alias for long running commands.  Use like so:
-#   sleep 10; alert
-alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
-
 
 # stuff that doesn't count as a script
 null-term-lines(){
 	awk '{ printf( "%s%c", $0, 0 ); }'
 }
-
-alias lsall='lshal ; lshw ; lspci ; lsusb'
-alias jar='java -jar'
-alias tailf='tail -f'
-alias sw='sudo iwlist scan'
-alias count='ls | wc -l'
-
-if [[ -n $(which xdg-open) ]]; then
-	alias open='xdg-open'
-fi
-
-if [[ -n $(which sshfs) ]];then
-	function ssh-mount(){
-		if [[ $# -lt 3 ]]; then
-			echo "Usage: ssh-mount host remote-dir local-dir <sshfs opts>";
-			return
-		fi
-		host="$1" ; shift
-		remote="$1" ; shift
-		local="$1" ; shift
-		sshfs "${host}:${remote}" "${local}" "$@"
-	}
-	function ssh-umount(){
-		fusermount -u ${1}
-	}
-else
-	function ssh-mount(){
-		echo "ssh-mount not supported (no ssh-fs)"
-		return
-	}
-fi
-
-alias bkj='time=`date +%Y_%m_%d` ; 7z a -r ~/Documents/${time}_Journal.7z /media/jex/simulacrum/* ; gpg --default-recipient jex --encrypt-files ~/Documents/${time}_Journal.7z ; shred --remove --zero --iterations 17 ~/Documents/${time}_Journal.7z ; echo "Saved to: ${time}"'
-
-alias randnum='cat /dev/urandom | g -Eo --binary-files=text "[0-9]"'
 

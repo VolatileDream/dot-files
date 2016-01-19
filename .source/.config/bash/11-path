@@ -1,6 +1,3 @@
-# if we don't have awk, enable fast path
-[ -x /usr/bin/awk ] || FAST_PATH="yes"
-
 # important variables to have set
 export PATH="$HOME/bin:$PATH"
 export BASE_PATH="$PATH"
