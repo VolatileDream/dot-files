@@ -10,4 +10,11 @@ if [ -x /usr/bin/dircolors ]; then
     alias egrep='egrep --color=auto'
 fi
 
-
+# If this is an xterm set the title to user@host:dir
+case "$TERM" in
+xterm*|rxvt*)
+    PS1="\[\e]0;\$(prompt-tag)\u@\h: \W\a\]$PS1"
+    ;;
+*)
+    ;;
+esac

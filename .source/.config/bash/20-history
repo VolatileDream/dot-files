@@ -13,11 +13,16 @@ HISTFILESIZE=2000
 ## Sourced: https://twitter.com/michaelhoffman/status/639178145673932800
 # this breaks CTRL-R
 HISTFILE="${HOME}/.history/$(date -u +%Y/%m/%d/%H.%M.%S)_${HOSTNAME}_$$"
+if [ -n "$VIM" ]; then
+    HISTFILE="${HOME}/.history/$(date -u +%Y/%m/%d/%H.%M.%S)_${HOSTNAME}_VIM"
+    echo "Loading VIM history"
+    history -r ` find "${HOME}/.history/" -type f -name VIM -not -size 0 `
+fi
 mkdir -p "${HISTFILE%/*}/"
 
+
 # append to the history file, don't overwrite it.
-# shouldn't be necessary in a single tty->histfile setup, but leave
-# it on any way.
+# This is necessary for VIM setup, the rest of the time it's fine.
 shopt -s histappend
 
 # include history files, attempt to restore "normal" history.

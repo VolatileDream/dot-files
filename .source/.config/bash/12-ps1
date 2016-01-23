@@ -14,27 +14,18 @@ prompt-tag(){
 	fi
 }
 
-path-prompt(){
+prompt-sigil(){
+    # VIM is set when the shell is started from inside vim
 	[ -n "$VIM" ] && echo -n "[vim] "
 	[ "$PATH" != "$BASE_PATH" ] && echo -en "\e[0;31m*\e[m"
 	echo ">"
 }
 
-if [ ${#FAST_PS1} -gt 0 ]; then
-    PS1='\u@\h:\W\$ '
+if [ -n "${FAST_PS1}" ]; then
+    path_bits="\w"
 else
     source "$HOME/bin/path-bits"
-    ps_tag='$(prompt-tag)'
     path_bits='$(path-bits)'
-    path_prompt='$(path-prompt)'
-    PS1="${ps_tag}\u@\h:${path_bits} ${path_prompt} "
 fi
+PS1="\$(prompt-tag)\u@\h:${path_bits} \$(prompt-sigil) "
 
-# If this is an xterm set the title to user@host:dir
-case "$TERM" in
-xterm*|rxvt*)
-    PS1="\[\e]0;${ps_tag}\u@\h: \w\a\]$PS1"
-    ;;
-*)
-    ;;
-esac
