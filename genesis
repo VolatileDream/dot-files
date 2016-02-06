@@ -37,7 +37,7 @@ line_out(){
 	# evaluated again or allowing other content to be injected
 	# (like " would, see variables ${} or subshells $() ), so we
 	# escape ' characters because we have to.
-	echo "${2}echo -n '${1//'/\'}'"
+	echo "${2}echo '${1//'/\'}'"
 }
 # the preamble is output before any other code is output, and is run only once.
 preamble(){
