@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 
-# audio command
+# a is for audio
 a(){
-    # run through inputs, if we have a directory, shuffle + loop
-    local only_files=1
+    # run through inputs, if we only have directories, shuffle + loop
+    local only_dirs=1
     for thing in "$@" ; do
-        if [ -d "$thing" ]; then
-            only_files=0
+        if [ -f "$thing" ]; then
+            only_dirs=0
         fi
     done
 
     local params="--no-video"
-    if [ "$only_files" -eq 0 ]; then
+    if [ "$only_dirs" -eq 1 ]; then
         params="$params --shuffle --loop inf"
     fi
     m "$@" $params
