@@ -1,0 +1,9 @@
+flush_history(){
+    if [ $((RANDOM % 10)) -eq 0 ]; then
+        history -a
+    fi
+}
+
+if [ -z "${FAST_PS1}" ]; then
+    PS1="\$(flush_history)${PS1}"
+fi

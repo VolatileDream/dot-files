@@ -1,183 +1,18 @@
 
-# History manipulation
-
-# include history files, attempt to restore history
-history-refresh(){
-    for file in ~/.history/*/*/*/* ; do
-        history -r "$file"
-    done
-}
-history-refresh
-
-# C-r breaks once you have a bunch of history files so we have to rebuild it
-hhg () { grep --recursive --no-filename "$@" ~/.history | uniq ; }
-hp () {
-
-    local tmp=`mktemp`
-        # 1/10_000 error for 1_000_000 elements
-        echo | bloom create "$tmp" 0.00001 1000000
-        # lines must be less than 255 characters
-        line=`cat ~/.history/*/*/*/* | bloom filter -n -u "$tmp" | pick`
-    rm "$tmp"
-
-    if [ -n "$line" ]; then
-        history -s "$line"
-        eval "$line"
-    fi
-}
-
-# Editting things in a shell pipeline
-__TTY=`tty`
+# Editting things in a shell pipeline, it only kind of works.
 es () {
     local tmp=`mktemp`
         cat > "$tmp"
         # --nonewlines  : don't append newlines to the end
         # --restricted  : don't allow file io to anything other than parameter
         # --tempfile    : don't prompt for saving
-        nano --nonewlines --restricted --tempfile "$tmp" < "$__TTY"
+        nano --nonewlines --restricted --tempfile "$tmp" < "/dev/tty"
         cat "$tmp"
     rm "$tmp"
-}
-
-# Colour stuff
-
-# enable color support of ls and also add handy aliases
-if [ -x /usr/bin/dircolors ]; then
-    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-    alias ls='ls --color=auto'
-
-    alias grep='grep --color=auto'
-    alias fgrep='fgrep --color=auto'
-    alias egrep='egrep --color=auto'
-fi
-
-# Add an "alert" alias for long running commands.  Use like so:
-#   sleep 10; alert
-alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
-
-# command aliases
-ndir(){
-    if [[ $# -eq 0 ]]; then
-        echo "Usage: $0 [dirs ...] last-dir"
-        echo " creates dirs, then creates and enters last-dir"
-        echo " uses -p on mkdir, so parents are implicitly created"
-        return
-    fi
-
-    while [ $# -gt 0 ]; do
-        mkdir -p "$1"
-        last="$1"
-        shift
-    done
-
-    cd "$last"
-}
-
-# path stuff
-path-reset(){
-	# reset the path to whatever it was before
-	export PATH="$BASE_PATH"
-}
-path-include(){
-	if [ $# -gt 0 ]; then
-		while [ $# -gt 0 ]; do
-			local ADD="$1" ; shift
-			if [[ "${ADD:0:1}" != "/" ]]; then
-				# relative paths must be made absolute.
-				ADD="${PWD}/${ADD}"
-			fi
-
-			PATH="$ADD:$PATH"; shift
-		done
-	else
-		# include the current directory in the path
-		export PATH="$PWD:$PATH"
-	fi
-}
-path-remove(){
-	local nPATH="$PATH"
-	select REMOVE in $(echo $nPATH | tr ':' ' ') ; do
-		nPATH="$(echo -n $nPATH |
-			tr ':' '\n' |
-			grep -vE "^$REMOVE\$" |
-			tr '\n' ':' )"
-		echo "$REMOVE removed from path"
-	done
-	nPATH="${nPATH%%:}" # remove trailing ':'
-	export PATH="$nPATH"
 }
 
 # stuff that doesn't count as a script
 null-term-lines(){
 	awk '{ printf( "%s%c", $0, 0 ); }'
 }
-
-# pass(2) stuff
-pass-here(){
-	PASSWORD_STORE_DIR="$(pwd)"
-}
-
-pass-restore(){
-	PASSWORD_STORE_DIR="$DEFAULT_PASSWORD_STORE"
-}
-
-alias aoeu='setxkbmap us'
-alias asdf='setxkbmap dvorak'
-
-alias lsall='lshal ; lshw ; lspci ; lsusb'
-alias jar='java -jar'
-alias tailf='tail -f'
-alias g='grep -E'
-alias sw='sudo iwlist scan'
-alias count='ls | wc -l'
-
-if [[ -n $(which xdg-open) ]]; then
-	alias open='xdg-open'
-fi
-
-if [[ -n $(which sshfs) ]];then
-	function ssh-mount(){
-		if [[ $# -lt 3 ]]; then
-			echo "Usage: ssh-mount host remote-dir local-dir <sshfs opts>";
-			return
-		fi
-		host="$1" ; shift
-		remote="$1" ; shift
-		local="$1" ; shift
-		sshfs "${host}:${remote}" "${local}" "$@"
-	}
-	function ssh-umount(){
-		fusermount -u ${1}
-	}
-else
-	function ssh-mount(){
-		echo "ssh-mount not supported (no ssh-fs)"
-		return
-	}
-fi
-
-# keyboard commands
-alias asdf='setxkbmap dvorak'
-alias aoeu='setxkbmap us'
-
-
-alias bkj='time=`date +%Y_%m_%d` ; 7z a -r ~/Documents/${time}_Journal.7z /media/jex/simulacrum/* ; gpg --default-recipient jex --encrypt-files ~/Documents/${time}_Journal.7z ; shred --remove --zero --iterations 17 ~/Documents/${time}_Journal.7z ; echo "Saved to: ${time}"'
-
-# nav aliases
-alias .=ls
-alias .a='ls -A'
-alias .l='ls -l'
-alias .d='ls -Al | grep "^d"'
-alias ..='cd ..'
-
-alias randnum='cat /dev/urandom | g -Eo --binary-files=text "[0-9]"'
-
-# Commands used for journal
-alias rec='arecord'
-alias play='aplay'
-alias alog='arecord $date ; cp $date /media/Giannis\ Key/Journal/Audio\ Log/ ; shred -u $date'
-
-if [[ "$(hostname -d)" = "$CS" ]]; then
-	alias mp=ncmpcpp
-fi
 

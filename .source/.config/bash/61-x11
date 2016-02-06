@@ -1,0 +1,7 @@
+# Make sure we can use a terminal even if our login environment gives us !dvorak
+
+# Also a quick change for when other people can't dvorak.
+alias aoeu='setxkbmap us'
+alias asdf='setxkbmap dvorak'
+
+

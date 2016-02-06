@@ -34,8 +34,6 @@ read -d '' script <<- EOF
 
 EOF
 
-#echo "$script"
-
 echo -n "$PWD" | awk -F "/" -- "$script"
 
 }

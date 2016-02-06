@@ -1,0 +1,53 @@
+# don't put duplicate lines or lines starting with space in the history.
+# See bash(1) for more options
+HISTCONTROL=ignoreboth
+
+# don't allow for editing of history lines (backspace after Ctrl-r)
+set revert-all-at-newline on
+
+# for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
+HISTSIZE=1000
+HISTFILESIZE=2000
+
+# do really fancy stuff with history (keep it "forever")
+## Sourced: https://twitter.com/michaelhoffman/status/639178145673932800
+# this breaks CTRL-R
+HISTFILE="${HOME}/.history/$(date -u +%Y/%m/%d/%H.%M.%S)_${HOSTNAME}_$$"
+if [ -n "$VIM" ]; then
+    HISTFILE="${HOME}/.history/$(date -u +%Y/%m/%d/%H.%M.%S)_${HOSTNAME}_VIM"
+    echo "Loading VIM history"
+    history -r ` find "${HOME}/.history/" -type f -name VIM -not -size 0 `
+fi
+mkdir -p "${HISTFILE%/*}/"
+
+
+# append to the history file, don't overwrite it.
+# This is necessary for VIM setup, the rest of the time it's fine.
+shopt -s histappend
+
+# include history files, attempt to restore "normal" history.
+# don't include by default, since we don't want to have bloated forever history,
+# unless we're explicitly sure we want it.
+history-refresh(){
+    for file in ~/.history/*/*/*/* ; do
+        history -r "$file"
+    done
+}
+
+# C-r breaks once you have a bunch of history files so we have to rebuild it
+hhg () { grep --recursive --no-filename "$@" ~/.history | uniq ; }
+hp () {
+
+    local tmp=`mktemp`
+        # 1/10_000 error for 1_000_000 elements
+        echo | bloom create "$tmp" 0.00001 1000000
+        # lines must be less than 255 characters
+        line=`cat ~/.history/*/*/*/* | bloom filter -n -u "$tmp" | pick`
+    rm "$tmp"
+
+    if [ -n "$line" ]; then
+        history -s "$line"
+        eval "$line"
+    fi
+}
+

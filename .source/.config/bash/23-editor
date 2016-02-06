@@ -1,0 +1,4 @@
+# source for extra variables
+source ~/.selected_editor
+export EDITOR=$SELECTED_EDITOR
+

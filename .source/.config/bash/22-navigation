@@ -1,0 +1,28 @@
+
+# command aliases
+ndir(){
+    if [[ $# -eq 0 ]]; then
+        echo "Usage: $0 [dirs ...] last-dir"
+        echo " creates dirs, then creates and enters last-dir"
+        echo " uses -p on mkdir, so parents are implicitly created"
+        return
+    fi
+
+    while [ $# -gt 0 ]; do
+        mkdir -p "$1"
+        last="$1"
+        shift
+    done
+
+    cd "$last"
+}
+
+alias .=ls
+alias .a='ls -A'
+alias .l='ls -l'
+alias ..='cd ..'
+alias g='grep -E'
+
+# make less more friendly for non-text input files, see lesspipe(1)
+[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
+
