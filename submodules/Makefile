@@ -1,6 +1,6 @@
 
 all : tup chronos bloom-filter no-tup
-no-tup : zzzcron rel roll-dice lookup pick scry extruder http2sh
+no-tup : zzzcron rel roll-dice lookup pick scry extruder http2sh ondir
 
 .PHONY: all no-tup
 .PHONY: tup chronos scry zzzcron roll-dice bloom-filter lookup pick http2sh
@@ -33,6 +33,11 @@ extruder : extruder/extruder
 extruder/extruder :
 	cd extruder ; git submodule init ; git submodule update
 	cd extruder ; make
+
+ondir : ondir/ondir
+
+ondir/ondir :
+	cd ondir ; make
 
 rel : python2-virtual-env
 	echo "source python2-virtual-env/bin/activate; \

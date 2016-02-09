@@ -37,3 +37,6 @@
 [submodule "submodules/http2sh"]
 	path = submodules/http2sh
 	url = git@github.com:VolatileDream/http2sh.git
+[submodule "submodules/ondir"]
+	path = submodules/ondir
+	url = git@github.com:alecthomas/ondir.git
