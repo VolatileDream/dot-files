@@ -1,5 +1,5 @@
 # For any initialization that has to occur for programs
 
-if __has_prog ondir ; then
+if which ondir > /dev/null ; then
     eval "$(ondir /)"
 fi

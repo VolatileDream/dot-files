@@ -1,13 +1,10 @@
-function __has_prog(){
-    [[ -n $(which "$prog") ]]
-    return $?
-}
+# For optional things with programs that may or may not exist
 
-if __has_prog xdg-open; then
+if which xdg-open > /dev/null ; then
 	alias open='xdg-open'
 fi
 
-if __has_prog ssh-fs ; then
+if which sshfs > /dev/null ; then
 	function ssh-mount(){
 		if [[ $# -lt 3 ]]; then
 			echo "Usage: ssh-mount host remote-dir local-dir <sshfs opts>";
@@ -30,13 +27,13 @@ fi
 
 function hardware_detect(){
     for prog in lshal lshw lspci lsusb ; do
-        if __has_prog $prog ; then
+        if which $prog > /dev/null ; then
             "$prog"
         fi
     done
 }
 
-if __has_prog ondir ; then
+if which ondir > /dev/null ; then
     cd(){
         builtin cd "$@" && eval "`ondir \"$OLDPWD\" \"$PWD\"`"
     }
