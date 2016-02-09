@@ -1,0 +1,17 @@
+enter /home/jex/workspace/([^/]+)
+    if [ -d "$ONDIRWD/.venv" ]; then
+        source "$ONDIRWD/.venv/bin/activate"
+    fi
+enter /home/jex/workspace/scratch/([^/]+)
+    if [ -d "$ONDIRWD/.venv" ]; then
+        source "$ONDIRWD/.venv/bin/activate"
+    fi
+
+leave /home/jex/workspace/([^/]+)
+    if [ -d "$ONDIRWD/.venv" ]; then
+        deactivate
+    fi
+leave /home/jex/workspace/scratch/([^/]+)
+    if [ -d "$ONDIRWD/.venv" ]; then
+        deactivate
+    fi
