@@ -41,7 +41,8 @@ do-linking(){
 
         output="$HOME/$file"
 
-        if [[ -L "$output" ]]; then
+        # it's either a link, or the file we want to replace it with
+        if [[ -L "$output" ]] || [[ "$output" -ef "$SRC_DIR/$file" ]]; then
             continue
         fi
 
