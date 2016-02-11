@@ -14,9 +14,7 @@ HISTFILESIZE=2000
 # this breaks CTRL-R
 HISTFILE="${HOME}/.history/$(date -u +%Y/%m/%d/%H.%M.%S)_${HOSTNAME}_$$"
 if [ -n "$VIM" ]; then
-    HISTFILE="${HOME}/.history/$(date -u +%Y/%m/%d/%H.%M.%S)_${HOSTNAME}_VIM"
-    echo "Loading VIM history"
-    history -r ` find "${HOME}/.history/" -type f -name VIM -not -size 0 `
+    HISTFILE="${HOME}/.history/$(date -u +%Y/%m/%d)/${HOSTNAME}_VIM_${PPID}"
 fi
 mkdir -p "${HISTFILE%/*}/"
 
