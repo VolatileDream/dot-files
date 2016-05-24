@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+usage(){
+	echo "usage: goto pattern"
+	echo " goto is a directory path shortcut tool"
+    echo
+}
+
+goto(){
+	if [ $# -lt 1 ]; then
+		usage > /dev/stderr
+		return 1
+	fi
+    local GOTO_CONFIG="$HOME/.config/goto.pyconfig"
+
+    case $1 in
+        -e|--edit) # add
+            selected-editor "$GOTO_CONFIG"
+            ;;
+        -l|--list) # list (takes in empty string)
+            cat "$GOTO_CONFIG"
+            ;;
+        *)  # alias!
+            NEXT=`python3 "$HOME/bin/goto.py" "$@"`
+            result=$?
+            if [ $result -eq 0 ]; then
+                # avoid problems with pipes and exit statuses
+                cd `echo "$NEXT" | sed "s_~_${HOME}_"`
+            fi
+            return $result
+            ;;
+    esac
+	return $?
+}
+
+if [ "$_" = "$0" ]; then
+	# this file wasn't sourced, execute.
+    # TODO: what does this mean? print out where it would have sent you?
+	goto "$@" && echo "$PWD"
+	exit $?
+fi
