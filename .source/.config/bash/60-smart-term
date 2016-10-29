@@ -12,7 +12,7 @@ fi
 
 # If this is an xterm set the title to user@host:dir
 case "$TERM" in
-xterm*|rxvt*)
+xterm*|rxvt*|screen)
     PS1="\[\e]0;\$(prompt-tag)\u@\h: \w\a\]$PS1"
     ;;
 *)
