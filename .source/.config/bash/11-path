@@ -15,7 +15,7 @@ path-include(){
 				# relative paths must be made absolute.
 				ADD="${PWD}/${ADD}"
 			fi
-
+            echo "added: $ADD"
 			PATH="$ADD:$PATH"; shift
 		done
 	else
@@ -24,14 +24,11 @@ path-include(){
 	fi
 }
 path-remove(){
-	local nPATH="$PATH"
-	select REMOVE in $(echo $nPATH | tr ':' ' ') ; do
-		nPATH="$(echo -n $nPATH |
-			tr ':' '\n' |
-			grep -vE "^$REMOVE\$" |
-			tr '\n' ':' )"
-		echo "$REMOVE removed from path"
-	done
-	nPATH="${nPATH%%:}" # remove trailing ':'
-	export PATH="$nPATH"
+    local nPath="$PATH"
+    for REMOVE in "$@" ; do
+        echo removing: "$REMOVE"
+        nPath="$( echo -n $nPath | tr ':' '\n' | grep -vE "$REMOVE" | tr '\n' ':' )";
+    done
+	nPath="${nPath%%:}"; # remove trailing ':'
+	export PATH="$nPath";
 }
