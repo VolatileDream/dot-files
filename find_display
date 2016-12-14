@@ -6,4 +6,4 @@ if [ $# -lt 1 ]; then
 	exit 1
 fi
 
-who | awk '{ print $1 " " $2 }' | grep -E "^$1 " | awk '{ print $2 }' | grep -E "^:"
+who | awk " /$1/ { print \$NF }" | tr -d '()'

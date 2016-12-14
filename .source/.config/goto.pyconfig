@@ -1,0 +1,10 @@
+@matcher
+@alias
+@regex("")
+def workspace(_ctx):
+    return "~/workspace"
+
+@matcher
+@alias
+def bin(_ctx):
+    return "~/bin/"
