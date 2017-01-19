@@ -3,52 +3,64 @@
 import argparse
 
 def args():
-	parser = argparse.ArgumentParser(description="plot characters on the command line")
-	parser.add_argument("characters", metavar="N", nargs="*",
-		help="Characters to use for plotting", default=["#"])
-	parser.add_argument("-w", "--width", type=int, default=80, nargs="?",
-		help="Pad rows to this length, defaults to tty length determination or 80")
-	parser.add_argument("-p", "--pad", default=None, help="pad to <width> with this character")
-	parser.add_argument("-f", "--files", nargs="*", help="input file[s]", default=[])
+    parser = argparse.ArgumentParser(description="plot characters on the command line")
+    parser.add_argument("characters", metavar="N", nargs="*",
+        help="Characters to use for plotting", default=["#"])
+    parser.add_argument("-w", "--width", type=int, default=80, nargs="?",
+        help="Pad rows to this length, defaults to tty length determination or 80")
+    parser.add_argument("-p", "--pad", default=None, help="pad to <width> with this character")
+    parser.add_argument("-f", "--fields", help="fields to replace, causes spaces to be inserted between fields", default="*")
+    parser.add_argument("-i", "--files", nargs="*", help="input file[s]", default=[])
 
-	return parser
+    return parser
 
 
-def plot_input( strings, padding, pad_char, out_stream, in_stream ):
-	str_count = len(strings)
-	for line in in_stream:
-		nums = line.split(" ")
-		index = 0
-		count = 0
-		for number in nums:
-			number = int(float(number))
-			out_stream.write( strings[index] * number );
-			index = (index + 1) % str_count
-			count += number
-		if padding - count > 0 and pad_char:
-			out_stream.write( pad_char * (padding - count) )
-		out_stream.write("\n")
-
+def plot_input( strings, padding, pad_char, field_map, out_stream, in_stream ):
+    str_count = len(strings)
+    for line in in_stream:
+        nums = line.split(" ")
+        index = 0
+        count = 0
+        for item_index, item in enumerate(nums):
+            if not field_map.get("*", False) and not field_map.get(item_index, False):
+                out_stream.write(item)
+            else:
+                number = int(float(item))
+                out_stream.write( strings[index] * number );
+                index = (index + 1) % str_count
+                count += number
+            if not field_map.get("*", False):
+                out_stream.write(" ")
+        if padding - count > 0 and pad_char:
+            out_stream.write( pad_char * (padding - count) )
+        out_stream.write("\n")
 
 import sys
 
-def plot( strings, pad_width, pad_char, files=[] ):
+def plot( strings, pad_width, pad_char, files=[], fields="*" ):
+    # single character strings only
+    strings = [ s[0] for s in strings ]
 
-	# single character strings only
-	strings = [ s[0] for s in strings ]
+    field_map = {}
+    if fields is not "*":
+        for f in map(int, fields.split(",")):
+            # for human readable values, subtract 1 (enumerate indexes at 0)
+            field_map[f - 1] = True
+    else:
+        field_map["*"] = True
 
-	for f in files:
-		with open(f) as file_input:
-			plot_input( strings, pad_width, pad_char, sys.stdout, file_input)
-	else:
-		plot_input( strings, pad_width, pad_char, sys.stdout, sys.stdin)
+    for f in files:
+        with open(f) as file_input:
+            plot_input( strings, pad_width, pad_char, field_map, sys.stdout, file_input)
+    else:
+        plot_input( strings, pad_width, pad_char, field_map, sys.stdout, sys.stdin)
 		
 
 
 if __name__ == "__main__":
-	parser = args()
+    parser = args()
 
-	args = parser.parse_args()
+    args = parser.parse_args()
 
-	plot( args.characters, args.width, args.pad, args.files )
+    plot( args.characters, args.width, args.pad, args.files, args.fields )
 
