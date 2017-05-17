@@ -1,0 +1,145 @@
+#!/usr/bin/env bash
+
+usage() {
+    echo "$0 is a small app to track time usage"
+    echo " $0 create"
+    echo "  creates a new instance"
+    echo " $0 start <event>"
+    echo "  starts tracking time taken for the event"
+    echo " $0 stop <event>"
+    echo "  stops tracking time taken for the event"
+    echo " $0 list"
+    echo "  lists every event ever used"
+    echo " $0 open"
+    echo "  lists all events that are currently being tracked"
+    echo
+    echo " --instance <directory>"
+    echo "  sets the directory to use as the storage location"
+}
+
+main() {
+    local cmd
+    if [ $# -eq 0 ]; then
+        cmd="open"
+    else
+        cmd="$1" ; shift
+    fi
+
+    declare -g INSTANCE="${COUNTER_CLOCK:-$HOME/.config/counter-clock/}"
+    local index=0
+    local -a ARGS=()
+
+    while [ $# -gt 0 ]; do
+        local next="$1" ; shift
+        case "$next" in
+            --instance|-i)
+                INSTANCE="$1"
+                shift
+                ;;
+            --help|-h)
+                cmd="help"
+                ;;
+            -*)
+                echo "unrecognized flag: $next"
+                exit 1
+                ;;
+            *)
+                ARGS[$index]="$next"
+                index=$((index+1))
+                ;;
+        esac
+    done
+
+    local event="${ARGS[*]}"
+    case "$cmd" in
+        create)
+            [ ! -d "$INSTANCE" ] && chronos init "$INSTANCE"
+            echo "export COUNTER_CLOCK='$INSTANCE'"
+            ;;
+        start)
+            if _is_open "$event" ; then
+                echo "Can't start '$event' already open"
+                exit 2
+            else
+                echo "+ $event" | chronos append "$INSTANCE"
+            fi
+            ;;
+        stop)
+            if ! _is_open "$event" ; then
+                echo "Can't stop '$event' not open"
+                exit 2
+            else
+                echo "- $event" | chronos append "$INSTANCE"
+            fi
+            ;;
+        count)
+            count
+            ;;
+        log)
+            chronos iterate "$INSTANCE" "%k %v" 
+            ;;
+        list)
+            list
+            ;;
+        open)
+            open
+            ;;
+        *)
+            echo "'$cmd' not recognized" > /dev/stderr
+            usage
+            exit 1
+            ;;
+        help)
+            usage
+            ;;
+    esac
+}
+
+_is_open() {
+    if [ $# -lt 1 ]; then
+        echo "No event provided to is_open"
+        exit 2
+    fi
+    open | grep -e "$1" > /dev/null 2> /dev/null
+}
+
+open() {
+    read -d '' OPEN_SCRIPT <<- AWK_SCRIPT
+        /^\\\\+/ { gsub("\\\\+ ", ""); vals[ \$0 ] += 1 }
+        /^\\-/ { gsub("- ", ""); vals[ \$0 ] -= 1 }
+        END {
+            for ( v in vals ) {
+                if ( vals[v] > 0 ) print v ;
+            }
+        }
+AWK_SCRIPT
+    chronos iterate "$INSTANCE" "%v" |
+        awk "$OPEN_SCRIPT"
+}
+
+list() {
+    chronos iterate "$INSTANCE" "%v" |
+     cut -d ' ' -f 2- |
+     sort -u
+}
+
+count() {
+    # Can't use AWK for non-trivial math, it uses floats.
+    # Output as "$time -- $task" for easier scripting intake
+    declare -A VALS=()
+    declare -A LAST=()
+     while read seconds sign rest; do
+        case "$sign" in
+            +) LAST[$rest]=$seconds;;
+            -)
+                local prev="${LAST[$rest]}"
+                VALS[$rest]=$((seconds-prev));;
+        esac
+     # funny redirect because of subshells. :/
+     done < <(chronos iterate "$INSTANCE" "%s %v")
+    for KEY in "${!VALS[@]}" ; do
+        echo "${VALS[$KEY]} -- $KEY"
+    done
+}
+
+main "$@"
