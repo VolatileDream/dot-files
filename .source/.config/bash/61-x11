@@ -4,4 +4,6 @@
 alias aoeu='setxkbmap us'
 alias asdf='setxkbmap dvorak'
 
+# This dead-keys right alt to use it for accents
+alias accents='setxkbmap -option compose:ralt'
 
