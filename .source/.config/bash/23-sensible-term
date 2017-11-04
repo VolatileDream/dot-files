@@ -3,4 +3,4 @@ source ~/.selected_editor
 export EDITOR=$SELECTED_EDITOR
 
 export PAGER="less"
-export LESS="--status-column --HILITE-UNREAD --chop-long-lines"
+export LESS="--status-column --HILITE-UNREAD --chop-long-lines --raw-control-chars"
