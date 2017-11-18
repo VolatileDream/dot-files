@@ -6,9 +6,6 @@ import sys
 
 DateTimeFormat="%Y-%m-%dT%H:%M"
 
-def hours_to_seconds(hours):
-    return hours*60*60
-
 for line in sys.stdin:
 
     # line format is:
@@ -17,6 +14,8 @@ for line in sys.stdin:
     #    , hour:min awake
     #    , time slept
     #    , notes
+    #
+    # it's guaranteed that asleep comes before awake
 
     if 'Date' in line:
         # first line has headers, skip
@@ -24,18 +23,21 @@ for line in sys.stdin:
 
     segments = line.split(',')
 
-    date_awake = dt.datetime.strptime(segments[0] + " " + segments[2], '%y/%m/%d %H:%M')
+    # Rebuild the time we woke up, it's in parts, so bleh.
+    dt_awake = dt.datetime.strptime(segments[0] + " " + segments[2], '%y/%m/%d %H:%M')
+ 
+    time_asleep = dt.datetime.strptime(segments[1], '%H:%M').time()
 
-    # just use the time delta to get the right date, parse the 3rd segment to get the real time.
-    hours_sleep = float(segments[3])
-    sleep_duration = dt.timedelta(0, hours_to_seconds(hours_sleep))
-    date_asleep = date_awake - sleep_duration
+    # the ingested format has shit accuracy for "time asleep" (segments[3]).
+    # so we ignore it entirely, and do temporal math by hand. :c fuck this shit.
 
-    # time we fell asleep
-    time_asleep = dt.datetime.strptime(segments[1], '%H:%M')
+    # times use a 24 hour clock, and the format guarantees that asleep comes before awake.
+    fraction_minutes = (dt_awake.minute - time_asleep.minute) / 60.0
+    increment_hours = (dt_awake.hour - time_asleep.hour) % 24
+    hours_asleep = dt.timedelta(hours=increment_hours + fraction_minutes)
 
-    date_asleep = dt.datetime(date_asleep.year, date_asleep.month, date_asleep.day, time_asleep.hour, time_asleep.minute)
+    dt_asleep = dt_awake - hours_asleep
 
-    print("asleep", date_asleep.strftime(DateTimeFormat))
-    print("awake", date_awake.strftime(DateTimeFormat))
+    print("asleep", dt_asleep.strftime(DateTimeFormat))
+    print("awake", dt_awake.strftime(DateTimeFormat))
 
