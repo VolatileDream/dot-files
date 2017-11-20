@@ -1,0 +1,206 @@
+#!/usr/bin/env python3
+#
+# To visualize a series of state changes with time.
+#
+# Takes a stream of:
+#
+# "$STATE $TIME"
+#
+# Outputs a graph like:
+#
+# $DATE1 : ________****___**_______@@@@_______
+# $DATE2 : ________*********__________@@@@____
+#
+# Given a map of STATE -> SYMBOL, and a stream of input lines of the form:
+# "STATE TIME", with time taking the fomat: "%Y-%m-%dT%H:%M", this outputs a graph.
+# each entry in the input denotes that state $STATE started at time $TIME, and ends
+# at the beginning of the next entry.
+#
+# Note: UNKNOWN, OMIT and " " are reserved. You can use UNKNOWN to denote time which is missing
+#  a state entry, but symbols MUST have a unique state mapping, so " " can not be reused. OMIT
+#  is used to remove dates entirely.
+#
+# State names:
+#   State names are normalized to lower case.
+#
+# Options:
+#  --states= STATE:SYMBOL   - add a state + symbol (space is reserved)
+#
+#  --state-gap-behaviour - change how a gap in state data is handled
+#   omit        : do not print it, start gaps filled with unknown
+#   unknown     : print, filling gaps with unknown
+#   continue    : print, continuing the last state that was seen (default)
+#
+# Foramtting the first / last (see also --state-gap-behaviour):
+#   Content of the first date is filled with " " until the first entry
+#   The last state continues to the end of the last date.
+#   NOTE: this applies 
+#
+
+import argparse
+
+def args():
+    parser = argparse.ArgumentParser(description="plot characters on the command line")
+
+    parser.add_argument("-s", "--states", type=parse_state, nargs="+", metavar="STATE", default=[])
+    parser.add_argument("--state-gap-behaviour", choices=["continue", "unknown", "omit"],
+        default="unknown", help="Changes handling of gaps in data.")
+
+    return parser
+
+from datetime import datetime, timedelta
+import sys
+
+next_day = timedelta(days=1)
+
+def parse_state(string_value):
+    first, second, *rest = string_value.split(":")
+    if len(second) > 1:
+        raise Exception("State symbol too long: '{}'".format(second))
+    elif len(second) < 1:
+        raise Exception("No state symbol supplied: '{}'".format(string_value))
+    return { first: second }
+
+def datetime_from_date(date):
+    return datetime(date.year, date.month, date.day)
+
+def generate_state_stream(in_stream, date_format):
+    for line in in_stream:
+        if len(line) <= 0:
+            continue
+        state, time = line.rstrip().split()
+        yield (state, datetime.strptime(time, date_format))
+
+
+def state_gap_decider(strategy):
+
+    assert (strategy in ["omit", "unknown", "continue"])
+
+    def decider(last_state, last_time, next_time=None):
+        if next_time is None:
+            # Invoked after a time skip
+            if strategy is "continue":
+                return last_state
+            return "unknown"
+
+        if last_time.date() + next_day == next_time.date():
+            return last_state
+        else:
+            if strategy == "continue":
+                return last_state
+            elif strategy == "omit":
+                return None
+            elif strategy == "unknown":
+                return "unknown"
+        raise Exception("Unknown strategy: {}".format(strategy))
+
+    return decider
+
+
+def calculate_state_changes(state_stream, gap_decider):
+    """
+    outputs a stream of state changes, possibly skipping dates, and changing states.
+
+    guaranteed to output a state for dates at midnight. ie: every date that appears will
+    have at least one state, with time midnight (before all other states).
+
+    yields: (state, datetime)
+    """
+
+    last_state, last_time = state_stream.send(None)
+    yield ("unknown", datetime(last_time.year, last_time.month, last_time.day))
+    while True:
+        try:
+            next_state, next_time = state_stream.send(None)
+        except StopIteration:
+            yield (last_state, last_time)
+            break
+
+        # assert the state stream is reasonable.
+        assert (last_time <= next_time), "State stream is not monotonically increasing."
+
+        time_skip = False
+        if last_time.date() != next_time.date() and last_time.date() + next_day != next_time.date():
+            time_skip = True
+
+        while last_time.date() < next_time.date():
+            if last_state:
+                yield (last_state, last_time)
+            last_state = gap_decider(last_state, last_time, next_time)
+            last_time = datetime_from_date(last_time.date() + next_day)
+
+        if time_skip:
+            # this outputs the first entry on a date after a timeskip.
+            # the entry just read is the next entry on this date.
+            yield (gap_decider(last_state, last_time), last_time)
+        else:
+            yield (last_state, last_time)
+        last_state, last_time = next_state, next_time
+
+
+def build_printer(state_map):
+
+    def func(items):
+        date = items[0][1].date()
+        items.append( ("_END_", datetime_from_date(date + next_day)) )
+        # convert into durations
+        state_durations = []
+        last = None
+        for next in items:
+            if not last:
+                last = next
+                continue
+            last_state, last_time = last
+            next_state, next_time = next
+            state_durations.append( (last_state, (next_time - last_time)) )
+            last = next
+
+        output = ""
+        while len(state_durations) > 0:
+            state, duration = state_durations.pop(0)
+            output += " {} {}".format(state_map[state], int(duration.total_seconds())) 
+            
+        output = date.strftime("%Y-%m-%d") + " :" + output
+        print(output)
+
+    return func
+
+
+def output_stream(nice_stream, printer):
+    last = nice_stream.send(None)
+    day = [last]
+    while True:
+        try:
+            next = nice_stream.send(None)
+        except StopIteration:
+            printer(day)
+            break
+
+        if last[1].date() == next[1].date():
+            day.append(next)
+        else:
+            printer(day)
+            day = [next]
+        last = next
+
+
+def plot(args):
+
+    states = { "unknown" : " " }
+    for state in args.states:
+        states.update(state)
+    printer = build_printer(states)
+
+    state_stream = generate_state_stream(sys.stdin, "%Y-%m-%dT%H:%M")
+    decider = state_gap_decider(args.state_gap_behaviour)
+    cleaned_stream = calculate_state_changes(state_stream, decider)
+
+    output_stream(cleaned_stream, printer)
+
+
+if __name__ == "__main__":
+    parser = args()
+
+    args = parser.parse_args()
+
+    plot(args)
