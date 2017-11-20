@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-
+#
+# Reads in sleepbot data in CSV format, and turns it into a format that
+# state-stream-vis can understand.
+#
 import datetime as dt
 
 import sys
