@@ -1,60 +1,118 @@
 #!/usr/bin/env python3
+#
+# To visualize a series of data as bar graph.
+#
+# Takes data of the form:
+#
+#   $LABEL : ($SYMBOL $COUNT) *
+#
+# Such that:
+#  * label does not contain ":"
+#  * symbol is a length 1 string
+#  * count is an string representation of an integer
+#   * The sum of every count entry in a row sums to a fixed value (across all rows)
+#
+# And outputs data like:
+#
+# $LABEL : ${S1}${S1}${S2}...${SN}
+#
 
 import argparse
 
 def args():
-    parser = argparse.ArgumentParser(description="plot characters on the command line")
-    parser.add_argument("characters", metavar="N", nargs="*",
-        help="Characters to use for plotting", default=["#"])
-    parser.add_argument("-w", "--width", type=int, default=80, nargs="?",
-        help="Pad rows to this length, defaults to tty length determination or 80")
-    parser.add_argument("-p", "--pad", default=None, help="pad to <width> with this character")
-    parser.add_argument("-f", "--fields", help="fields to replace, causes spaces to be inserted between fields", default="*")
-    parser.add_argument("-i", "--files", nargs="*", help="input file[s]", default=[])
+    parser = argparse.ArgumentParser(description="plot bar graphs on the command line")
+    parser.add_argument("-w", "--width", type=int, default=None, nargs="?",
+        help="Render width for the bargraph, defaults to terminal width - 20).")
+    parser.add_argument("-s", "--sum", type=int, default=None, nargs="?",
+        help="Expected sum of the data in a row, defaults to unset, taking the value of the first row.")
 
     return parser
 
-
-def plot_input( strings, padding, pad_char, field_map, out_stream, in_stream ):
-    str_count = len(strings)
-    for line in in_stream:
-        nums = line.split(" ")
-        index = 0
-        count = 0
-        for item_index, item in enumerate(nums):
-            if not field_map.get("*", False) and not field_map.get(item_index, False):
-                out_stream.write(item)
-            else:
-                number = int(float(item))
-                out_stream.write( strings[index] * number );
-                index = (index + 1) % str_count
-                count += number
-            if not field_map.get("*", False):
-                out_stream.write(" ")
-        if padding - count > 0 and pad_char:
-            out_stream.write( pad_char * (padding - count) )
-        out_stream.write("\n")
-
 import sys
 
-def plot( strings, pad_width, pad_char, files=[], fields="*" ):
-    # single character strings only
-    strings = [ s[0] for s in strings ]
+def adjacent(iterable):
+    first = None
+    for item in iterable:
+        if not first:
+            first = item
+        else:
+            yield (first, item)
+            first = None
 
-    field_map = {}
-    if fields is not "*":
-        for f in map(int, fields.split(",")):
-            # for human readable values, subtract 1 (enumerate indexes at 0)
-            field_map[f - 1] = True
-    else:
-        field_map["*"] = True
 
-    for f in files:
-        with open(f) as file_input:
-            plot_input( strings, pad_width, pad_char, field_map, sys.stdout, file_input)
-    else:
-        plot_input( strings, pad_width, pad_char, field_map, sys.stdout, sys.stdin)
-		
+class LineData(object):
+
+    def __init__(self, label, symbol_counts, sum):
+        self.label = label
+        self.symbol_counts = symbol_counts
+        self.sum = sum
+
+    def __repr__(self):
+        return "LineData(\"{}\", {}, {})".format(self.label, self.symbol_counts, self.sum)
+
+    @staticmethod
+    def parse(line, sum=None):
+        label, rest = line.split(" : ")
+        split = rest.split()
+        translated = []
+        acc = 0
+        for symbol, count in adjacent(split):
+            if len(symbol) > 1:
+                raise Exception("Symbol has length longer than 1: {}".format(symbol))
+            count = int(count)
+
+            acc += count
+            translated.append(symbol)
+            translated.append(count)
+
+        if sum and acc != sum:
+            raise Exception("Sum of counts ({}) not equal to expected ({})".format(acc, sum))
+        return LineData(label, translated, acc)
+
+
+def plot_data(sum, width, stream, data):
+    count_per_char = sum / width
+    stream.write(data.label)
+    stream.write(" : ")
+    sum_out_char = 0
+    sum_out_count = 0
+    for symbol, count in adjacent(data.symbol_counts):
+        length = int(count / count_per_char)
+        stream.write(symbol * int(count / count_per_char))
+
+        sum_out_char += length
+        sum_out_count += count
+        if sum_out_char < int(sum_out_count / count_per_char):
+            # to handle cases where the width does not nicely divide the sum
+            # occasionally output an extra character as needed.
+            sum_out_char += 1
+            stream.write(symbol)
+    stream.write("\n")
+
+
+def plot(sum, width):
+    with sys.stdin as stream:
+        for line in stream:
+            line = line.strip()
+            data = None
+            try:
+                data = LineData.parse(line, sum)
+                if sum is None:
+                    sum = data.sum
+            except Exception as e:
+                sys.stderr.write("Error with line:\n  '{}'\n".format(line))
+                sys.stderr.write(str(e))
+                sys.stderr.write("\n")
+                raise
+            else:
+                plot_data(sum, width, sys.stdout, data)
+
+
+def terminal_width(default_width):
+    if default_width is not None:
+        return default_width
+    import shutil
+    return shutil.get_terminal_size()[0] - 20
 
 
 if __name__ == "__main__":
@@ -62,5 +120,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    plot( args.characters, args.width, args.pad, args.files, args.fields )
-
+    plot(args.sum, terminal_width(args.width))
