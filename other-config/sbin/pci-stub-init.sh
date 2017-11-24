@@ -1,4 +1,5 @@
 #!/bin/sh
+# Install this into sbin, chown to root:root, and set the attributes to u=rwx, g=rx, o=r
 
 # List of devices to override with pci-stub, this allows them to be claimed
 # by a guest VM, and avoid issues with being initialized by the host.
