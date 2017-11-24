@@ -3,14 +3,12 @@
 
 # List of devices to override with pci-stub, this allows them to be claimed
 # by a guest VM, and avoid issues with being initialized by the host.
-DEVICES=(
-    # _SECOND_ nvidia GPU (and audio subcomponent)
-    # address can be found using "lspci -nnvvv"
-    # Can also be found using nvidia-settings (look for the GPU info & bus id)
-    "0000:03:00.0" "0000:03:00.1"
-)
+# _SECOND_ nvidia GPU (and audio subcomponent)
+# address can be found using "lspci -nnvvv"
+# Can also be found using nvidia-settings (look for the GPU info & bus id)
+DEVICES="0000:03:00.0 0000:03:00.1"
 
-for DEV in "${DEVICES[@]}" ; do
+for DEV in ${DEVICES} ; do
     echo "pci-stub" > "/sys/bus/pci/devices/${DEV}/driver_override"
 done
 
