@@ -1,12 +1,17 @@
 #!/bin/sh
-# Install this into sbin, chown to root:root, and set the attributes to u=rwx, g=rx, o=r
+# Install this into sbin, chown to root:root, and set the attributes
+# to u=rwx, g=rx, o=r
 
-# List of devices to override with pci-stub, this allows them to be claimed
-# by a guest VM, and avoid issues with being initialized by the host.
-# _SECOND_ nvidia GPU (and audio subcomponent)
+# List of devices to release from pci-stub, this allows them to be claimed by
+# pci-stub initially, and then released to the nvidia driver to use by the
+# host system.
+#
+# Otherwise, pci-stub appears to be unable to grab the video component of the
+# graphics cards.
+#
 # address can be found using "lspci -nnvvv"
 # Can also be found using nvidia-settings (look for the GPU info & bus id)
-DEVICES="0000:03:00.0 0000:03:00.1"
+DEVICES="0000:02:00.0 0000:02:00.1"
 
 for DEV in ${DEVICES} ; do
     echo "pci-stub" > "/sys/bus/pci/devices/${DEV}/driver_override"
