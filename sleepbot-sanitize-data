@@ -4,43 +4,65 @@
 # state-stream-vis can understand.
 #
 import datetime as dt
-
 import sys
 
 DateTimeFormat="%Y-%m-%dT%H:%M"
 
-for line in sys.stdin:
 
-    # line format is:
-    #    date-awake
-    #    , hour:min asleep (this might be the date before)
-    #    , hour:min awake
-    #    , time slept
-    #    , notes
-    #
-    # it's guaranteed that asleep comes before awake
+class SleepBotDatum(object):
+    def __init__(self, dt_awake, time_slept_hours):
+        self.awake = dt_awake
+        self.hours_duration = time_slept_hours
 
-    if 'Date' in line:
-        # first line has headers, skip
-        continue;
+    @staticmethod
+    def parse(line):
+        # line format is:
+        #    date-awake
+        #    , hour:min asleep (this might be the date before)
+        #    , hour:min awake
+        #    , time slept
+        #    , notes
+        #
+        # it's guaranteed that asleep comes before awake
 
-    segments = line.split(',')
+        segments = line.split(',')
+        dt_awake = dt.datetime.strptime(segments[0] + " " + segments[2], '%y/%m/%d %H:%M')
+        # Rebuild the time we woke up, it's in parts, so bleh.
+        dt_awake = dt.datetime.strptime(segments[0] + " " + segments[2], '%y/%m/%d %H:%M')
 
-    # Rebuild the time we woke up, it's in parts, so bleh.
-    dt_awake = dt.datetime.strptime(segments[0] + " " + segments[2], '%y/%m/%d %H:%M')
- 
-    time_asleep = dt.datetime.strptime(segments[1], '%H:%M').time()
+        time_asleep = dt.datetime.strptime(segments[1], '%H:%M').time()
 
-    # the ingested format has shit accuracy for "time asleep" (segments[3]).
-    # so we ignore it entirely, and do temporal math by hand. :c fuck this shit.
+        # the ingested format has shit accuracy for "time asleep" (segments[3]).
+        # so we ignore it entirely, and do temporal math by hand. :c fuck this shit.
 
-    # times use a 24 hour clock, and the format guarantees that asleep comes before awake.
-    fraction_minutes = (dt_awake.minute - time_asleep.minute) / 60.0
-    increment_hours = (dt_awake.hour - time_asleep.hour) % 24
-    hours_asleep = dt.timedelta(hours=increment_hours + fraction_minutes)
+        # times use a 24 hour clock, and the format guarantees that asleep comes before awake.
+        fraction_minutes = (dt_awake.minute - time_asleep.minute) / 60.0
+        increment_hours = (dt_awake.hour - time_asleep.hour) % 24
+        hours_asleep = dt.timedelta(hours=increment_hours + fraction_minutes)
+        return SleepBotDatum(dt_awake, hours_asleep)
 
-    dt_asleep = dt_awake - hours_asleep
 
-    print("asleep", dt_asleep.strftime(DateTimeFormat))
-    print("awake", dt_awake.strftime(DateTimeFormat))
+def sanitize():
 
+    last = None
+
+    for line in sys.stdin:
+
+        if 'Date' in line:
+            # first line has headers, skip
+            continue
+
+        datum = SleepBotDatum.parse(line)
+
+        # For some reason the data is stupid...
+        if last is not None and last.awake.date() == datum.awake.date():
+            continue
+
+        dt_asleep = datum.awake - datum.hours_duration
+
+        last = datum
+        print("asleep", dt_asleep.strftime(DateTimeFormat))
+        print("awake", datum.awake.strftime(DateTimeFormat))
+
+if __name__ == "__main__":
+    sanitize()
