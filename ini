@@ -1,17 +1,26 @@
-#!/usr/bin/env sh
+#!/usr/bin/env python3
 
-if [ $# -lt 3 ]; then
-	echo "Not enough args for $0, requires at least 3 ($#: $@)." > /dev/stderr
-	exit 1
-else
-	FILE="$1" ; shift
-	SECTION="$1" ; shift
-	KEY="$1" ; shift
+import sys
+import configparser
 
-	# we've modified $#, check it against 0
-	if [ $# -eq 0 ]; then
-		inifile -f "$FILE" -s "$SECTION" -k "$KEY"
-	elif [ $# -gt 0 ]; then
-		inifile -f "$FILE" -s "$SECTION" -k "$KEY" -v "$*"
-	fi
-fi
+if __name__ == "__main__":
+
+  if len(sys.argv) < 4:
+    sys.stderr.write("wrong number of args for ini, requires 3 or more\n")
+    sys.stderr.write(" usage: ini <file> <section> <key> [opt-value opt-value-list] \n")
+    exit(1)
+
+  _ignored, file_name, section, key, *opt_value = sys.argv
+  cfg = configparser.ConfigParser()
+  cfg.read([file_name])
+
+  if len(opt_value) is 0:
+    print(cfg[section][key])
+  else: # len(opt_value) is 1
+    if section not in cfg:
+      cfg.add_section(section)
+    cfg[section][key] = " ".join(opt_value)
+    with open(file_name, "w") as f:
+      cfg.write(f)
+
+
