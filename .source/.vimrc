@@ -37,12 +37,3 @@ set hidden	        " Hide buffers when they are abandoned
     " On commit, spellcheck
     autocmd FileType gitcommit setlocal spell
 
-" Plugins
-
-    " Check for pathogen plugins
-    call pathogen#infect()
-    if exists("g:loaded_pathogen")
-        nnoremap <F5> :GundoToggle<CR>
-    endif
-
-
