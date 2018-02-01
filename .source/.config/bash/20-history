@@ -12,12 +12,18 @@ HISTFILESIZE=2000
 # do really fancy stuff with history (keep it "forever")
 ## Sourced: https://twitter.com/michaelhoffman/status/639178145673932800
 # this breaks CTRL-R
-HISTFILE="${HOME}/.history/$(date -u +%Y/%m/%d/%H.%M.%S)_${HOSTNAME}_$$"
-if [ -n "$VIM" ]; then
-    HISTFILE="${HOME}/.history/$(date -u +%Y/%m/%d)/${HOSTNAME}_VIM_${PPID}"
+HISTFILE="${HOME}/.history/$(date -u +%Y/%m/%d)/${HOSTNAME}_$$_$(date -u +%H-%M)"
+if [ -z "$HIST_PARENT" ]; then
+    # This is required because there's no simpler way to pass the
+    # PID of the top level history to any children.
+    export HIST_PARENT="$$"
+else
+    # Child shells will have their own history. This is nice for things like
+    # vim, where we can continue to run the same command set as we work on
+    # various files and things.
+    HISTFILE="${HOME}/.history/$(date -u +%Y/%m/%d)/${HOSTNAME}_${HIST_PARENT}_child"
 fi
 mkdir -p "${HISTFILE%/*}/"
-
 
 # append to the history file, don't overwrite it.
 # This is necessary for VIM setup, the rest of the time it's fine.
@@ -33,9 +39,7 @@ history-refresh(){
 }
 
 # C-r breaks once you have a bunch of history files so we have to rebuild it
-hhg () { grep --recursive --no-filename "$@" ~/.history | uniq ; }
 hp () {
-
     local tmp=`mktemp`
         # 1/10_000 error for 1_000_000 elements
         echo | bloom create "$tmp" 0.00001 1000000
@@ -48,4 +52,6 @@ hp () {
         eval "$line"
     fi
 }
+# define an alternative for systems where we may not have 'bloom' and 'pick'
+hhg () { grep --recursive --no-filename "$@" ~/.history | uniq ; }
 

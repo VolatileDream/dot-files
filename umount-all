@@ -1,8 +1,0 @@
-#!/bin/sh
-
-# assumes /media/user mount point,
-# not all distros have this setup.
-
-if [ -d "/media/$USER/" ]; then
-	umount "/media/$USER/"*
-fi
