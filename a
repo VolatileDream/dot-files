@@ -12,7 +12,7 @@ a(){
 
     local params="--no-video"
     if [ "$only_dirs" -eq 1 ]; then
-        params="$params --shuffle --loop inf"
+        params="$params --shuffle --loop-playlist inf"
     fi
     m "$@" $params
 }
