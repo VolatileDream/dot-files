@@ -3,4 +3,4 @@ source ~/.selected_editor
 export EDITOR=$SELECTED_EDITOR
 
 export PAGER="less"
-export LESS="--HILITE-UNREAD --chop-long-lines --RAW-CONTROL-CHARS"
+export LESS="--HILITE-UNREAD --RAW-CONTROL-CHARS"
