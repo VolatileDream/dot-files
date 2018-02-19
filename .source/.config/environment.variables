@@ -1,0 +1,10 @@
+source ~/.selected_editor
+export EDITOR=$SELECTED_EDITOR
+
+export PAGER="less"
+export LESS="--HILITE-UNREAD --RAW-CONTROL-CHARS"
+
+# by default we use this directory for the pass(2) store.
+export PASSWORD_STORE_DIR="/media/$(whoami)/simulacrum/Keys"
+
+export PATH="$HOME/bin:$PATH"

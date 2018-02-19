@@ -1,6 +1,0 @@
-# source for extra variables
-source ~/.selected_editor
-export EDITOR=$SELECTED_EDITOR
-
-export PAGER="less"
-export LESS="--HILITE-UNREAD --RAW-CONTROL-CHARS"

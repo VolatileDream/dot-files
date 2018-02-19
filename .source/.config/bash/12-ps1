@@ -4,7 +4,7 @@
 [ -x /usr/bin/awk ] || FAST_PS1="yes"
 
 ps_prompt=""
-prompt-tag(){
+prompt(){
 	if [ $# -gt 0 ] ; then
 		ps_prompt="$*"
 	else
@@ -27,5 +27,5 @@ else
     source "$HOME/bin/path-bits"
     path_bits='$(path-bits)'
 fi
-PS1="\$(prompt-tag)\u@\h:${path_bits} \$(prompt-sigil) "
+PS1="\$(prompt)\u@\h:${path_bits} \$(prompt-sigil) "
 

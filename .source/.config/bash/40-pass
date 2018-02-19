@@ -1,8 +1,8 @@
-# by default we use this directory for the pass(2) store.
-# but also provide some shell aliases to muck about with it
-export PASSWORD_STORE_DIR="/media/$(whoami)/simulacrum/Keys"
-export DEFAULT_PASSWORD_STORE="$PASSWORD_STORE_DIR"
+# provide some shell aliases to muck about with pass
+# related variables.
 
+# This allows us to fiddle with PASSWORD_STORE_DIR
+export DEFAULT_PASSWORD_STORE="$PASSWORD_STORE_DIR"
 pass-here(){
 	PASSWORD_STORE_DIR="$(pwd)"
 }

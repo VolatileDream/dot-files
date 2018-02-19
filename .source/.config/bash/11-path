@@ -1,6 +1,8 @@
 # important variables to have set
-export PATH="$HOME/bin:$PATH"
 export BASE_PATH="$PATH"
+
+# This is set in .config/environment.variables
+#export PATH="$HOME/bin:$PATH"
 
 # path stuff
 path-reset(){
