@@ -1,0 +1,13 @@
+# this file is sourced by X11 startup
+
+# Change capslock to backspace
+setxkbmap -option caps:backspace
+# needed to get capslock key repeat to work right.
+setxkbmap -option shift:both_capslock
+xmodmap -e "clear Lock"
+
+# Start the GPG agent, and set it up for SSH_AUTH_SOCK
+eval `/usr/bin/gpg-agent --homedir /home/jex/.gnupg --daemon`
+
+# All of the environment variables.
+source $HOME/.config/environment.variables
