@@ -14,9 +14,15 @@ m(){
         shift
     done
 
-    # need at least 1 input file/dir
-    if [ ${#inputs[@]} -gt 0 ] ; then
-
+    # No input -> exit
+    # one input file -> play directly
+    # else -> build playlist
+    if [ ${#inputs[@]} -eq 0 ]; then
+      echo "m: input-file-or-dir <mpv options...>"
+      return 1
+    elif [ ${#inputs[@]} -eq 1 -a -f "${inputs[0]}" ]; then
+      mpv "${options[@]}" "${inputs[0]}"
+    else
         # create a playlist out of the files and dirs,
         # attempt to preserve order across inputs.
 
@@ -35,13 +41,10 @@ m(){
 
         mpv "${options[@]}" --playlist "$playlist"
         rm "$playlist"
-    else
-        echo "m: input-file-or-dir <mpv options...>"
-        return 1
     fi
 }
 
-if [ "$_" = "$0" ]; then
+if [ "${FUNCNAME[0]}" = "main" ]; then
 	# this file wasn't sourced, execute.
 	m "$@"
 	exit $?

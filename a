@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source $HOME/bin/m
+
 # a is for audio
 a(){
     # run through inputs, if we only have directories, shuffle + loop
@@ -17,7 +19,7 @@ a(){
     m "$@" $params
 }
 
-if [ "$_" = "$0" ]; then
+if [ "${FUNCNAME[0]}" = "main" ]; then
 	# this file wasn't sourced, execute.
 	a "$@"
 	exit $?
