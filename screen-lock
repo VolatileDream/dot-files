@@ -1,0 +1,11 @@
+#!/bin/bash
+
+run() {
+  local file=`mktemp /tmp/screen-lock.XXXXXXXXX.png`
+  scrot "$file"
+  convert "$file" -scale 50% -blur 5x5 -scale 200% "$file"
+  i3lock -i "$file" --nofork
+  rm "$file"
+}
+
+run
