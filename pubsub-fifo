@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+
+pubsub::usage() {
+  echo "Usage: $0 (publish|subscribe) EVENT [--for-count COUNT]"
+  echo
+  echo "A command line pubsub implementation which uses named pipes (aka fifos)"
+  echo "stored in /tmp to communicate. Uses stdin/stdout to relay content."
+  echo
+  echo "Given the name of an event, subscribes or publishes to the event feed."
+  echo "EVENT must be a valid file path. This allows directory level prefix"
+  echo "matching, eg:"
+  echo "> subscribe hello/world"
+  echo "> publish hello # seen by previous subscription"
+  echo "> publish hello/world # also seen"
+  echo
+  echo "When subscribing, also takes optional --for-count flag to specify the"
+  echo "number of events to listen for."
+}
+
+pubsub::subscribe_cleanup() {
+  rm "${PUBSUB_PATH}/$$"
+  exit "$?"
+}
+
+pubsub::subscribe() {
+  pubsub::init
+  local events_remaining="-1"
+
+  if [ $# -eq 2 -a "$1" = "--for-count" ] ; then
+    events_remaining="$2"
+  elif [ $# -ne 2 -a $# -ne 0 ] ; then
+    echo error
+    exit 1
+  fi
+
+  # trap control-c to cleanup, set this up just before we create the fifo
+  # because if we get SIGINT before this, we could safely exit.
+  trap pubsub::subscribe_cleanup SIGINT
+
+  # Use the process id as part of the fifo name. Easiest way to generate a
+  # unique fifo for this instance.
+  mkfifo "${PUBSUB_PATH}/$$"
+
+  while true ; do
+    # decrement the number of events we want to get
+    if [ $events_remaining -eq 0 ]; then
+      break;
+    elif [ $events_remaining -gt 0 ]; then
+      events_remaining=$((events_remaining-1))
+    fi
+    # This blocks waiting for a publisher to write content to it.
+    cat "${PUBSUB_PATH}/$$"
+  done
+
+  pubsub::subscribe_cleanup
+}
+
+pubsub::publish() {
+  pubsub::init
+
+  # create a temporary file and put all of stdin into it. this is desirable
+  # because we might be writing to a bunch of different files. in which case
+  # there would be no way to replay stdin.
+  local -r tmp=`mktemp`
+  cat - > "$tmp"
+
+  find "${PUBSUB_PATH}" -type p \
+    | while read file ; do
+        # If we start writting to a pipe when it has not been opened
+        # for reading, and it then gets deleted, there is no way to
+        # recover.
+
+        # A process might exit and delete it's pipe after we've
+        # starting writing to it (having been opened for read), this is
+        # ok. The kernel will error the write(2) call with EPIPE. cat
+        # handles this correctly.
+        cat "$tmp" >> "$file"
+        echo "notified: ${file}"
+      done
+  rm "$tmp"
+}
+
+pubsub::init() {
+  PUBSUB_ROOT="/tmp/pubsub-fifo"
+  PUBSUB_PATH="${PUBSUB_ROOT}/${EVENT}"
+  mkdir -p "${PUBSUB_PATH}" > /dev/null 2> /dev/null
+}
+
+main() {
+  local -r command="$1" ; shift
+  EVENT="$1" ; shift
+
+  case "$command" in
+    publish) pubsub::publish ;;
+    subscribe) pubsub::subscribe "$@" ;;
+    *) pubsub::usage ;;
+  esac
+}
+
+main "$@"

@@ -28,36 +28,34 @@ usage(){
 	echo "  /string/to/fill/in/end/of/path//file.extension"
 }
 
-first-match(){
-	STR="$1" ; shift
-	MATCH="$1" ; shift
-	echo "$STR" | grep -oE "$MATCH" | head -n 1
-}
-
-config-fill(){
-	VAR="$1" ; shift
-	INITIAL="$VAR"
+conch::fill(){
+	readonly COMMAND="$1" ; shift
+	local VAR="$1" ; shift
+	readonly INITIAL="$VAR"
 	while echo "$VAR" | grep --silent '\$' ; do
 		# replace each "${...}" group with it's config value
 
-		# find the "${...}" group, extract the "..."
-		match="$(first-match "$VAR" '\${[^}]+}' )"
-		segment="$(echo $match | tr -d '${}' )"
+		# find the first "${...}" group, and then extract the "..."
+		local match="$(echo "$VAR" | grep -oE '\${[^}]+}' | head -n 1)"
+		local segment="$(echo $match | tr -d '${}' )"
 
+    # Check that exactly 1 dot exists, as we need two args to invoke the user
+    # provided configuration tool.
 		if [ `echo $segment | grep -c '.'` -ne 1 ]; then
-			echo "error: can't fill in config value, bad group '$segment' in $INITIAL" > /dev/stderr
+			echo "error: can't fill in config value" > /dev/stderr
+      echo  "bad group '$segment' in $INITIAL" > /dev/stderr
 			exit 2
 		fi
 
 		# split into the parts
-		args="$( echo $segment | tr '.' ' ' )"
+		readonly args="$(echo $segment | tr '.' ' ' )"
 
 		# go and fetch the parts
-		replace="$( config $args )"
+		readonly replace="$(conch::config "$COMMAND" $args)"
 
 		# annoying subshell handling stuff...
 		# otherwise the exit value gets swallowed
-		local EXIT_VAL=$?
+		readonly EXIT_VAL=$?
 		if [ $EXIT_VAL -ne 0 ]; then
 			exit $EXIT_VAL
 		fi
@@ -67,34 +65,35 @@ config-fill(){
 	echo "$VAR"
 }
 
-config(){
-	# echo $COMMAND "$@" > /dev/stderr
-	ARGS="$( $COMMAND "$@" )"
+conch::config(){
+	readonly COMMAND="$1" ; shift
+	readonly ARGS="$( $COMMAND "$@" )"
 
 	# check if the lookup worked
-	local EXIT_VAL=$?
+	readonly EXIT_VAL=$?
 	if [ $EXIT_VAL -ne 0 ]; then
 		echo "Error looking up '$@'" > /dev/stderr
 		exit $EXIT_VAL
 	fi
 
-	config-fill $ARGS
+	conch::fill $ARGS
 }
 
-conch(){
+conch::main(){
 	if [ $# -lt 2 ]; then
 		usage > /dev/stderr
 		return 1
 	fi
 
-	COMMAND="$1" ; shift
+  # define the command that is run to fetch the config variables.
+	local COMMAND="$1" ; shift
 
 	if [ $# -gt 1 ]; then
 		# they're asking for the key, value
-		config "$@"
+		conch::config "$COMMAND" "$@"
 	else
 		# they're asking for the string to get filled in
-		config-fill "$1"
+		conch::fill "$COMMAND" "$1"
 	fi
 
 	return $?
@@ -102,6 +101,6 @@ conch(){
 
 if [ "$_" = "$0" ]; then
 	# this file wasn't sourced, execute.
-	conch "$@"
+	conch::main "$@"
 	exit $?
 fi
