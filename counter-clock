@@ -76,7 +76,7 @@ main() {
             count
             ;;
         log)
-            chronos iterate "$INSTANCE" "%k %v" 
+            log
             ;;
         list)
             list
@@ -105,7 +105,7 @@ _is_open() {
 
 open() {
     read -d '' OPEN_SCRIPT <<- AWK_SCRIPT
-        /^\\\\+/ { gsub("\\\\+ ", ""); vals[ \$0 ] += 1 }
+        /^\\\\+/ { gsub("\\+ ", ""); vals[ \$0 ] += 1 }
         /^\\-/ { gsub("- ", ""); vals[ \$0 ] -= 1 }
         END {
             for ( v in vals ) {
@@ -123,23 +123,63 @@ list() {
      sort -u
 }
 
+log() {
+    chronos iterate "$INSTANCE" "%s %v" 
+}
+
 count() {
+    log | sum
+}
+
+sum() {
     # Can't use AWK for non-trivial math, it uses floats.
     # Output as "$time -- $task" for easier scripting intake
     declare -A VALS=()
     declare -A LAST=()
-     while read seconds sign rest; do
+    declare -A COUNTS=()
+     while read time sign event; do
         case "$sign" in
-            +) LAST[$rest]=$seconds;;
+            +) LAST[$event]=$time;;
             -)
-                local prev="${LAST[$rest]}"
-                VALS[$rest]=$((seconds-prev));;
+                local prev="${LAST[$event]}"
+                local delta=`diff_times ${time} ${prev}`
+                VALS[$event]=`add_times ${VALS[$event]} ${delta}`
+                COUNT[$event]=$(( COUNT[$event] + 1))
+              ;;
         esac
      # funny redirect because of subshells. :/
-     done < <(chronos iterate "$INSTANCE" "%s %v")
+     done
     for KEY in "${!VALS[@]}" ; do
         echo "${VALS[$KEY]} -- $KEY"
     done
+}
+
+diff_times() {
+    declare first="$1"
+    declare second="$2"
+
+    declare seconds=$((${first%.*} - ${second%.*}))
+    # Explicitly set base 10, because these have leading zeros.
+    declare micros=$((10#${first#*.} - 10#${second#*.}))
+    if [ $micros -lt 0 ]; then
+        micros=$((micros+10**9))
+        seconds=$((seconds-1))
+    fi
+    echo "${seconds}.${micros}"
+}
+
+add_times() {
+    declare micros=0
+    declare seconds=0
+
+    while [ $# -gt 0 ]; do
+        local time="$1" ; shift
+        # Chronos guarantees zero padding
+        micros=$((micros + 10#${time#*.}))
+        seconds=$((seconds + ${time%.*}))
+    done
+
+    echo "$((seconds + micros / 10**9)).$((micros % 10**9))"
 }
 
 main "$@"
