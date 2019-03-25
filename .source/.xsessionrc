@@ -4,6 +4,7 @@
 setxkbmap -option caps:backspace
 # needed to get capslock key repeat to work right.
 setxkbmap -option shift:both_capslock
+setxkbmap -option compose:ralt
 xmodmap -e "clear Lock"
 
 # Start the GPG agent, and set it up for SSH_AUTH_SOCK

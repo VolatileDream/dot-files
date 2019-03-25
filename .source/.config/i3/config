@@ -188,4 +188,4 @@ bindsym $mod+l exec xautolock -locknow
 exec --no-startup-id /usr/bin/xautolock -time 10 -locker /home/jex/bin/screen-lock &
 exec --no-startup-id /usr/bin/pulseaudio --start --log-target=syslog
 # This /could/ be more specific, but privacy because this gets uploaded to github.
-exec --no-startup-id /usr/bin/redshift -l 37:-122 -b 1.0:0.7 -t 6000:3000 &
+exec --no-startup-id /usr/bin/redshift -l 47:8 -b 1.0:0.8 -t 6000:3000 &
