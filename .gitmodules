@@ -40,3 +40,6 @@
 [submodule "submodules/tomb-pass"]
 	path = submodules/tomb-pass
 	url = https://github.com/roddhjav/pass-tomb.git
+[submodule "submodules/bloom-filter"]
+	path = submodules/bloom-filter
+	url = git@github.com:VolatileDream/bloom-filter.git
