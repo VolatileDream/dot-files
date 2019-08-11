@@ -1,0 +1,68 @@
+{
+    "border": "normal",
+    "floating": "auto_off",
+    "layout": "splitv",
+    "percent": 0.5,
+    "type": "con",
+    "nodes": [
+        {
+            "border": "normal",
+            "current_border_width": 2,
+            "floating": "auto_off",
+            "geometry": {
+               "height": 452,
+               "width": 962,
+               "x": 0,
+               "y": 0
+            },
+            "name": "jex@litigo: ~/.config/i3",
+            "percent": 0.5,
+            "swallows": [
+               {
+               "class": "^[lL]xterminal$"
+               }
+            ],
+            "type": "con"
+        },
+        {
+            "border": "none",
+            "current_border_width": 2,
+            "floating": "auto_off",
+            "geometry": {
+               "height": 756,
+               "width": 810,
+               "x": 555,
+               "y": 162
+            },
+            "name": "512 GB Disk",
+            "percent": 0.5,
+            "swallows": [
+               {
+               "class": "^Gnome\\-disks$"
+               }
+            ],
+            "type": "con"
+        }
+    ]
+}
+
+{
+    "border": "normal",
+    "current_border_width": 2,
+    "floating": "auto_off",
+    "geometry": {
+       "height": 452,
+       "width": 962,
+       "x": 0,
+       "y": 0
+    },
+    "name": "jex@litigo: ~",
+    "percent": 0.5,
+    "swallows": [
+       {
+        "class": "^[lL]xterminal$"
+       }
+    ],
+    "type": "con"
+}
+

@@ -189,3 +189,6 @@ exec --no-startup-id /usr/bin/xautolock -time 10 -locker /home/jex/bin/screen-lo
 exec --no-startup-id /usr/bin/pulseaudio --start --log-target=syslog
 # This /could/ be more specific, but privacy because this gets uploaded to github.
 exec --no-startup-id /usr/bin/redshift -l 47:8 -b 1.0:0.8 -t 6000:3000 &
+
+# Call the autostart program, that sets up all the normal apps I have open.
+exec --no-startup-id $HOME/.config/i3/autostart.sh &

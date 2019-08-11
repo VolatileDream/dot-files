@@ -1,0 +1,50 @@
+// Discord is here twice because it can't behave.
+// The first time catches the placeholder window it creates, and the second
+// catches the second window it creates. Why it creates and destroys a
+// window during setup, I'll never understand. Worse, unlike steam, which
+// has a separate login prompt with distinguishable attributes, the two
+// Discord windows look the same as far as I can tell (given that they
+// appear and disappear very quickly).
+{
+    "border": "normal",
+    "current_border_width": 2,
+    "floating": "auto_off",
+    "geometry": {
+       "height": 1041,
+       "width": 956,
+       "x": 2882,
+       "y": 18
+    },
+    "name": "- Discord$",
+    "percent": 1,
+    "swallows": [
+       {
+        "class": "^discord$",
+        "instance": "^discord$",
+        "window_role": "^browser\\-window$"
+       }
+    ],
+    "type": "con"
+}
+
+{
+    "border": "normal",
+    "current_border_width": 2,
+    "floating": "auto_off",
+    "geometry": {
+       "height": 1041,
+       "width": 956,
+       "x": 2882,
+       "y": 18
+    },
+    "name": "- Discord$",
+    "percent": 1,
+    "swallows": [
+       {
+        "class": "^discord$",
+        "instance": "^discord$",
+        "window_role": "^browser\\-window$"
+       }
+    ],
+    "type": "con"
+}

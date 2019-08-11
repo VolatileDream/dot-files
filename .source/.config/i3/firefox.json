@@ -1,0 +1,21 @@
+{
+    "border": "normal",
+    "current_border_width": 2,
+    "floating": "auto_off",
+    "geometry": {
+       "height": 1041,
+       "width": 1916,
+       "x": 0,
+       "y": 0
+    },
+    "name": "i3: IPC interface (interprocess communication) - Mozilla Firefox",
+    "percent": 1,
+    "swallows": [
+       {
+       "class": "^Firefox$",
+       "window_role": "^browser$"
+       }
+    ],
+    "type": "con"
+}
+

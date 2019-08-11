@@ -1,4 +1,5 @@
 source ~/.selected_editor
+export TERMINAL=lxterminal
 export EDITOR=$SELECTED_EDITOR
 export BROWSER=w3m
 export PAGER="less"

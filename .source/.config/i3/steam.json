@@ -1,0 +1,44 @@
+{
+    "border": "normal",
+    "current_border_width": 2,
+    "floating": "auto_off",
+    "geometry": {
+       "height": 452,
+       "width": 962,
+       "x": 0,
+       "y": 0
+    },
+    "name": "Steam",
+    "percent": 1,
+    "swallows": [
+       {
+        "class": "^Steam$",
+        "instance": "^Steam$",
+        "title": "^Steam\\ Login$"
+       }
+    ],
+    "type": "con"
+}
+{
+    "border": "normal",
+    "current_border_width": 2,
+    "floating": "auto_off",
+    "geometry": {
+       "height": 452,
+       "width": 962,
+       "x": 0,
+       "y": 0
+    },
+    "name": "Steam",
+    "percent": 1,
+    "swallows": [
+       {
+        "class": "^Steam$",
+        "instance": "^Steam$",
+        // Title is required to not swallow steam login
+        "title": "^Steam$"
+       }
+    ],
+    "type": "con"
+}
+
