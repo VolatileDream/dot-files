@@ -40,3 +40,6 @@
 [submodule "submodules/ondir"]
 	path = submodules/ondir
 	url = git@github.com:alecthomas/ondir.git
+[submodule "submodules/tomb-pass"]
+	path = submodules/tomb-pass
+	url = https://github.com/roddhjav/pass-tomb.git
