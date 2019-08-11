@@ -13,9 +13,6 @@
 [submodule "submodules/roll-dice"]
 	path = submodules/roll-dice
 	url = git@github.com:VolatileDream/roll-dice.git
-[submodule "submodules/bloom-filter"]
-	path = submodules/bloom-filter
-	url = git@github.com:VolatileDream/bloom-filter.git
 [submodule "submodules/lookup"]
 	path = submodules/lookup
 	url = git@github.com:VolatileDream/lookup.git
