@@ -21,6 +21,7 @@ m(){
       echo "m: input-file-or-dir <mpv options...>"
       return 1
     elif [ ${#inputs[@]} -eq 1 -a -f "${inputs[0]}" ]; then
+      echo mpv "${options[@]}" "${inputs[0]}"
       mpv "${options[@]}" "${inputs[0]}"
     else
         # create a playlist out of the files and dirs,
@@ -39,12 +40,13 @@ m(){
             fi
         done >> "$playlist"
 
+        echo mpv "${options[@]}" --playlist "$playlist"
         mpv "${options[@]}" --playlist "$playlist"
         rm "$playlist"
     fi
 }
 
-if [ "${FUNCNAME[0]}" = "main" ]; then
+if [ "${FUNCNAME[0]}" = "main" -o "${FUNCNAME[0]}" = "main" ]; then
 	# this file wasn't sourced, execute.
 	m "$@"
 	exit $?
