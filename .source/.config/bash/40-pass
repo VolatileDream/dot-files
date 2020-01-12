@@ -4,7 +4,16 @@
 # This allows us to fiddle with PASSWORD_STORE_DIR
 export DEFAULT_PASSWORD_STORE="$PASSWORD_STORE_DIR"
 pass-here(){
-	PASSWORD_STORE_DIR="$(pwd)"
+  if [[ "$DEFAULT_PASSWORD_STORE" == "$PASSWORD_STORE_DIR" ]] \
+      && [[ -h "$PASSWORD_STORE_DIR" ]]; then
+    # Uses symbolic link default, we can move the symbolic link rather than
+    # change the variable.
+    rm "$PASSWORD_STORE_DIR" && ln --symbolic "$PWD" "$PASSWORD_STORE_DIR"
+  else
+    # Either not in sync with the default, or not a symlink. change the variable.
+    echo "can't change password storage globally: not symlink or synced to default" >> /dev/stderr
+	  PASSWORD_STORE_DIR="$(pwd)"
+  fi
 }
 
 pass-restore(){

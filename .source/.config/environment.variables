@@ -6,6 +6,8 @@ export PAGER="less"
 export LESS="--HILITE-UNREAD --RAW-CONTROL-CHARS"
 
 # by default we use this directory for the pass(2) store.
-export PASSWORD_STORE_DIR="/media/$(whoami)/simulacrum/Keys"
+# See .config/bash/40-pass for how this is manipulated.
+# hint: it's a symbolic link.
+export PASSWORD_STORE_DIR="$HOME/passwords"
 
 export PATH="$HOME/bin:$PATH"
