@@ -1,4 +1,4 @@
-// Discord is here twice because it can't behave.
+// Discord is here three times because it can't behave.
 // The first time catches the placeholder window it creates, and the second
 // catches the second window it creates. Why it creates and destroys a
 // window during setup, I'll never understand. Worse, unlike steam, which

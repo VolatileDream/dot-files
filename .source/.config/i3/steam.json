@@ -13,8 +13,7 @@
     "swallows": [
        {
         "class": "^Steam$",
-        "instance": "^Steam$",
-        "title": "^Steam\\ Login$"
+        "instance": "^Steam$"
        }
     ],
     "type": "con"
@@ -34,9 +33,7 @@
     "swallows": [
        {
         "class": "^Steam$",
-        "instance": "^Steam$",
-        // Title is required to not swallow steam login
-        "title": "^Steam$"
+        "instance": "^Steam$"
        }
     ],
     "type": "con"
