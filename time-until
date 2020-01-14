@@ -1,0 +1,56 @@
+#!/bin/bash
+
+seconds_until() {
+  # ew. Nested evaluations. :s
+  local -r time=$(date --date "$1" +%s)
+  if [ $? -ne 0 ]; then
+    return 2
+  fi
+  local -r now=$(date +%s)
+  echo "$((time - now))"
+}
+
+unit() {
+  case $1 in
+    s|second|seconds) echo 1 ;;
+    m|minute|minutes) echo 60 ;;
+    h|hour|hours) echo 3600 ;;
+    d|day|days) echo 86400 ;;
+    w|week|weeks) echo 604800 ;;
+    y|year|years) echo 31536000 ;;
+    *)
+      echo "bad unit: $1" >> /dev/stderr
+      return 2 ;;
+  esac
+}
+
+main() {
+  local spec="$1"; shift
+  local unit="seconds"
+  if [ $# -eq 1 ]; then
+    unit="$1"
+  elif [ $# -eq 2 ]; then
+    if [ "$1" != "in" ]; then
+      echo "bad time unit specification (expected 'in'): $@" >> /dev/stderr
+      exit 1
+    fi
+    unit="$2"
+  elif [ $# -gt 2 ]; then
+    echo "invalid params (too many): $@" >> /dev/stderr
+    exit 1
+  fi
+
+  local -r devisor=$(unit "$unit") || exit 2
+  local -r until=$(seconds_until "$spec") || exit 2
+  if [ $devisor -eq 1 ]; then
+    echo "$until"
+  elif which -a bc > /dev/null ; then
+    # Bash doesn't support floats. :(
+    echo "scale=2; ${until} / ${devisor};" | bc -l
+  else
+    echo "time-until: no float math, result truncated" >> /dev/stderr
+    echo $((until / devisor))
+  fi
+}
+
+main "$@"
