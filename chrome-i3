@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+#
+# An i3 wrapper for Google Chrome, which doesn't pawn a window soon
+# enough to stay on the workspace that it was intended to open on.
+#
+# This uses i3-msg to create placeholder window that will capture the
+# window created by Chrome, so that it gets pulled to the right 
+# workspace.
+#
+
+main() {
+  read -d '' i3_layout << EOF
+    {
+      "border": "normal",
+      "floating": "auto_off",
+      "percent": 1,
+      "swallows": [
+        {
+          "class": "Google-chrome",
+          "instance": "google-chrome",
+          "window_role": "browser"
+        }
+      ],
+      "type": "con"
+    }
+EOF
+
+  local tmp=`mktemp -t i3-layout.XXXXXXXX`
+  echo "${i3_layout}" > "${tmp}"
+  i3-msg "append_layout ${tmp};"
+  google-chrome &
+  rm "${tmp}"
+}
+
+main "$@"
