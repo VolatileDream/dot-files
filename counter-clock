@@ -96,7 +96,7 @@ main() {
 }
 
 _is_open() {
-    if [ $# -lt 1 ]; then
+    if [ $# -lt 1 ] || [ -z "${1// }" ]; then
         echo "No event provided to is_open"
         exit 2
     fi

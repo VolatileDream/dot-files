@@ -4,7 +4,7 @@
 # 1: command (space escaped)
 # 2: string to complete
 
-usage(){
+conch::usage(){
 	echo "usage: conch <command> <string>"
 	echo " Conch is a recursive string completion engine"
 	echo
@@ -57,7 +57,7 @@ conch::fill(){
 		# otherwise the exit value gets swallowed
 		readonly EXIT_VAL=$?
 		if [ $EXIT_VAL -ne 0 ]; then
-			exit $EXIT_VAL
+			return $EXIT_VAL
 		fi
 
 		VAR="$( echo "$VAR" | sed "s_${match}_${replace}_" )"
@@ -81,7 +81,7 @@ conch::config(){
 
 conch::main(){
 	if [ $# -lt 2 ]; then
-		usage > /dev/stderr
+		conch::usage > /dev/stderr
 		return 1
 	fi
 

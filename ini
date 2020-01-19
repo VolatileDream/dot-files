@@ -15,7 +15,10 @@ if __name__ == "__main__":
   cfg.read([file_name])
 
   if len(opt_value) is 0:
-    print(cfg[section][key])
+    try:
+      print(cfg[section][key])
+    except KeyError:
+      exit(2)
   else: # len(opt_value) is 1
     if section not in cfg:
       cfg.add_section(section)
