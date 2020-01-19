@@ -19,6 +19,13 @@ if ! shopt -oq posix; then
   fi
 fi
 
+if [ -z "$DISPLAY" ]; then
+  # No X11.
+  # X11 imports .xsessionrc which will source this.
+  # Without x11, we don't inherit this, so we must source it.
+  source .config/environment.variables
+fi
+
 export BASH_CONF="$HOME/.config/bash"
 
 for bash_file in "$BASH_CONF"/* ; do
