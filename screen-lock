@@ -2,7 +2,7 @@
 
 run() {
   local file=`mktemp /tmp/screen-lock.XXXXXXXXX.png`
-  scrot "$file"
+  scrot -o "$file"
   convert "$file" -scale 25% -blur 5x5 -scale 400% "$file"
   i3lock -i "$file" --nofork
   rm "$file"
