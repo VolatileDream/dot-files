@@ -28,6 +28,7 @@ start_programs() {
   lxterminal &
   gnome-disks &
   discord &
+  run_keybase &
   steam &
 }
 

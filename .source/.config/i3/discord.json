@@ -1,4 +1,4 @@
-// Discord is here three times because it can't behave.
+// Discord is here two times because it can't behave.
 // The first time catches the placeholder window it creates, and the second
 // catches the second window it creates. Why it creates and destroys a
 // window during setup, I'll never understand. Worse, unlike steam, which
@@ -28,23 +28,77 @@
 }
 
 {
+    // This is actually where discord lives.
     "border": "normal",
+    "floating": "auto_off",
+    "layout": "splitv",
+    "percent": 0.5,
+    "type": "con",
+    "nodes": [
+        {
+            "border": "normal",
+            "current_border_width": 2,
+            "floating": "auto_off",
+            "geometry": {
+               "height": 1041,
+               "width": 956,
+               "x": 2882,
+               "y": 18
+            },
+            "name": " - Discord",
+            "percent": 0.5,
+            "swallows": [
+               {
+                "class": "^discord$",
+                "instance": "^discord$",
+                "window_role": "^browser\\-window$"
+               }
+            ],
+            "type": "con"
+        },
+        {
+            "border": "normal",
+            "current_border_width": 2,
+            "floating": "auto_off",
+            "geometry": {
+               "height": 511,
+               "width": 956,
+               "x": 1922,
+               "y": 548
+            },
+            "name": "Keybase",
+            "percent": 0.5,
+            "swallows": [
+               {
+                "class": "^Keybase$",
+                "instance": "^keybase$",
+                "title": "^Keybase$"
+               }
+            ],
+            "type": "con"
+        }
+    ]
+}
+
+{
+    "border": "none",
     "current_border_width": 2,
     "floating": "auto_off",
     "geometry": {
-       "height": 1041,
-       "width": 956,
-       "x": 2882,
-       "y": 18
+       "height": 1061,
+       "width": 960,
+       "x": 2880,
+       "y": 0
     },
-    "name": "- Discord$",
-    "percent": 1,
+    "name": "Friends List",
+    "percent": 0.5,
     "swallows": [
        {
-        "class": "^discord$",
-        "instance": "^discord$",
-        "window_role": "^browser\\-window$"
+        "class": "^Steam$",
+        "instance": "^Steam$",
+        "title": "^Friends\\ List$"
        }
     ],
     "type": "con"
 }
+
