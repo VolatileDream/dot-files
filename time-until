@@ -2,11 +2,10 @@
 
 seconds_until() {
   # ew. Nested evaluations. :s
-  local -r time=$(date --date "$1" +%s)
-  if [ $? -ne 0 ]; then
-    return 2
-  fi
-  local -r now=$(date +%s)
+  local time # declared for return value below
+  local now
+  time=$(date --date "$1" +%s) || return 2
+  now=$(date +%s) || return 2
   echo "$((time - now))"
 }
 
@@ -25,8 +24,9 @@ unit() {
 }
 
 main() {
-  local spec="$1"; shift
+  local -r spec="$1"; shift
   local unit="seconds"
+
   if [ $# -eq 1 ]; then
     unit="$1"
   elif [ $# -eq 2 ]; then
@@ -40,8 +40,10 @@ main() {
     exit 1
   fi
 
-  local -r devisor=$(unit "$unit") || exit 2
-  local -r until=$(seconds_until "$spec") || exit 2
+  local devisor
+  local until
+  devisor=$(unit "$unit") || exit 2
+  until=$(seconds_until "$spec") || exit 2
   if [ $devisor -eq 1 ]; then
     echo "$until"
   elif which -a bc > /dev/null ; then
