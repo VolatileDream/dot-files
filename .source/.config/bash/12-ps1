@@ -35,9 +35,27 @@ move-to-ps1() {
 
   # Evaluate the PS1 command to get the length. This strips out most of the
   # special characters to get a real length for the prompt. If the prompt
-  # were multi-line (which is not the case here) then there should also be
-  # a `tail -n 1` here as well.
-  readonly prompt=`echo "${PS1@P}" | sed "s/\x01[^\x02]*\x02//g" `
+  # were multi-line (not the case here) then there would need to be extra
+  # logic to find out which line of the prompt needs the time, and where it is
+  # positioned.
+  read -d '' prompt_awk <<- EOF
+    BEGIN {lines=0;row=0;col=0;last=0;}
+    {lines+=1;last=length();}
+    /--:--/ {
+      if (row) { next; }
+      gsub(/--:--.*\$/, "");
+      col=length();
+      row=lines;
+    }
+    END {
+      print(col " " (lines - row) " " last);
+    }
+EOF
+  readonly -a pos=(`echo "${PS1@P}" | sed "s/\x01[^\x02]*\x02//g" | gawk -- "$prompt_awk" `)
+  # Rework the array indicies
+  readonly time_offset="${pos[0]}"
+  readonly prompt_line="${pos[1]}"
+  readonly prompt_len="${pos[2]}"
 
   # Convert the history into a series of line lengths.
   # Convert the line lengths into the number of rendered lines.
@@ -54,7 +72,8 @@ move-to-ps1() {
         # Strip out the history entry text from the line.
         gsub(/^\\\\s*[0-9]*\\\\s*/, "");
         # We have to add the length of the prompt to the first line.
-        l=length() + ${#prompt};
+        l=length() + ${prompt_len};
+        sum += $prompt_line;
       }
       # Lines wrap after $COLUMNS characters.
       lines=ceil(l / $COLUMNS);
@@ -68,9 +87,8 @@ EOF
 
   # Unfortunately, some things modify the PS1 and might move the time spec
   # from the beginning of the prompt. Figure out where it is & move to it.
-  readonly prefix="${prompt%%--:--*}"
-  if [ ${#prefix} -gt 0 ]; then
-    echo -en "\e[${#prefix}C"
+  if [ ${time_offset} -gt 0 ]; then
+    echo -en "\e[${time_offset}C"
   fi
 }
 
