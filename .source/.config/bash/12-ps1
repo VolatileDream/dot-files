@@ -37,38 +37,29 @@ move-to-ps1() {
   # special characters to get a real length for the prompt.
   readonly prompt=`echo "${PS1@P}" | sed "s/\x01[^\x02]*\x02//g" `
 
-  # Converting the history entry into a series of line lengths & processing
-  # them is done in awk, because it's easier than bash. :(
+  # Convert the history into a series of line lengths.
+  # Convert the line lengths into the number of rendered lines.
+  # Output the sum of rendered lines.
   read -d '' linelength_awk <<- EOF
-    BEGIN { first=1; }
-    {
-      if (first) {
-        first=0;
-        gsub(/^\\\\s*[0-9]*\\\\s*/, "");
-        # We have to add the length of the prompt to the first line.
-        print(length() + ${#prompt});
-      } else {
-        print(length());
-      }
-    }
-EOF
-  # Convert the length of each entered line into a number of "real" lines
-  # that got displayed in the terminal, and sum together.
-  read -d '' numlines_awk <<- EOF
     function ceil(val) {
       return (val == int(val)) ? val : int(val) + 1;
     }
-    BEGIN {sum=0; ROUNDMODE=U;}
+    BEGIN { first=1; sum=0;}
     {
-      chars=\$1;
-      lines=ceil(chars / $COLUMNS);
-      sum+=lines;
+      l=length();
+      if (first) {
+        first=0;
+        # Strip out the history entry text from the line.
+        gsub(/^\\\\s*[0-9]*\\\\s*/, "");
+        # We have to add the length of the prompt to the first line.
+        l=length() + ${#prompt};
+      }
+      lines=ceil(l / $COLUMNS);
+      sum += lines;
     }
-    END {print(sum);}
+    END { print(sum);}
 EOF
-  readonly rows=`HISTTIMEFORMAT= history 1 |\
-   gawk -- "$linelength_awk" |\
-   gawk -- "$numlines_awk"`
+  readonly rows=`HISTTIMEFORMAT= history 1 | gawk -- "$linelength_awk"`
   echo -e "\e[${rows}A"
 }
 
