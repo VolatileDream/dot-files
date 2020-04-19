@@ -33,11 +33,11 @@ move-to-ps1() {
   # We need to reconstruct the number of lines that have been printed based
   # on the prompt & the input provided by the user.
 
-  # Evaluate the PS1 command to get the length. This strips out most of the
-  # special characters to get a real length for the prompt. If the prompt
-  # were multi-line (not the case here) then there would need to be extra
-  # logic to find out which line of the prompt needs the time, and where it is
-  # positioned.
+  # Evaluate the PS1 command, and strip out most of the special characters
+  # to get only the printed characters from the prompt.
+  #
+  # Also handles multi-line prompts and time positioning off from the
+  # beginning.
   read -d '' prompt_awk <<- EOF
     BEGIN {lines=0;row=0;col=0;last=0;}
     {lines+=1;last=length();}
@@ -85,8 +85,7 @@ EOF
   # Since the input flows down, we have to move up.
   echo -en "\e[${rows}A"
 
-  # Unfortunately, some things modify the PS1 and might move the time spec
-  # from the beginning of the prompt. Figure out where it is & move to it.
+  # Move if time isn't at the beginning.
   if [ ${time_offset} -gt 0 ]; then
     echo -en "\e[${time_offset}C"
   fi
