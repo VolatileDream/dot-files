@@ -29,12 +29,14 @@ move-to-ps1() {
   # Problem: we want to go to the beginning of the PS1 string.
   # All we know, is that we're executed as part of PS0: after the
   # command is entered, but before it's executed.
-
+  #
   # We need to reconstruct the number of lines that have been printed based
   # on the prompt & the input provided by the user.
 
   # Evaluate the PS1 command to get the length. This strips out most of the
-  # special characters to get a real length for the prompt.
+  # special characters to get a real length for the prompt. If the prompt
+  # were multi-line (which is not the case here) then there should also be
+  # a `tail -n 1` here as well.
   readonly prompt=`echo "${PS1@P}" | sed "s/\x01[^\x02]*\x02//g" `
 
   # Convert the history into a series of line lengths.
@@ -54,13 +56,22 @@ move-to-ps1() {
         # We have to add the length of the prompt to the first line.
         l=length() + ${#prompt};
       }
+      # Lines wrap after $COLUMNS characters.
       lines=ceil(l / $COLUMNS);
       sum += lines;
     }
     END { print(sum);}
 EOF
   readonly rows=`HISTTIMEFORMAT= history 1 | gawk -- "$linelength_awk"`
-  echo -e "\e[${rows}A"
+  # Since the input flows down, we have to move up.
+  echo -en "\e[${rows}A"
+
+  # Unfortunately, some things modify the PS1 and might move the time spec
+  # from the beginning of the prompt. Figure out where it is & move to it.
+  readonly prefix="${prompt%%--:--*}"
+  if [ ${#prefix} -gt 0 ]; then
+    echo -en "\e[${#prefix}C"
+  fi
 }
 
 if [ -n "${FAST_PS1}" ]; then
