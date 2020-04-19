@@ -2,6 +2,9 @@
 # See bash(1) for more options
 HISTCONTROL=ignoreboth
 
+# Set the time format to empty, to force bash to write the timestamp to storage.
+HISTTIMEFORMAT=" "
+
 # don't allow for editing of history lines (backspace after Ctrl-r)
 set revert-all-at-newline on
 
