@@ -1,4 +1,8 @@
-# PS1 this file is for all things related to PS1 changes
+# this file is for all things related to prompt changes
+# Includes things for PS0, PS1, PS2, and PS4.
+
+# Note: do not use \[ and \] for non printing characters (eg escape sequences).
+#       Instead use \001 and \002, these work correctly in more situations.
 
 # if we don't have awk, enable fast PS1
 [ -x /usr/bin/awk ] || FAST_PS1="yes"
@@ -15,10 +19,57 @@ prompt(){
 }
 
 prompt-sigil(){
-    # VIM is set when the shell is started from inside vim
+  # VIM is set when the shell is started from inside vim
 	[ -n "$VIM" ] && echo -n "[vim] "
-	[ "$PATH" != "$BASE_PATH" ] && echo -en "\e[0;31m*\e[m"
+	[ "$PATH" != "$BASE_PATH" ] && echo -en "\001\e[0;31m\002*\001\e[m\002"
 	echo ">"
+}
+
+move-to-ps1() {
+  # Problem: we want to go to the beginning of the PS1 string.
+  # All we know, is that we're executed as part of PS0: after the
+  # command is entered, but before it's executed.
+
+  # We need to reconstruct the number of lines that have been printed based
+  # on the prompt & the input provided by the user.
+
+  # Evaluate the PS1 command to get the length. This strips out most of the
+  # special characters to get a real length for the prompt.
+  readonly prompt=`echo "${PS1@P}" | sed "s/\x01[^\x02]*\x02//g" `
+
+  # Converting the history entry into a series of line lengths & processing
+  # them is done in awk, because it's easier than bash. :(
+  read -d '' linelength_awk <<- EOF
+    BEGIN { first=1; }
+    {
+      if (first) {
+        first=0;
+        gsub(/^\\\\s*[0-9]*\\\\s*/, "");
+        # We have to add the length of the prompt to the first line.
+        print(length() + ${#prompt});
+      } else {
+        print(length());
+      }
+    }
+EOF
+  # Convert the length of each entered line into a number of "real" lines
+  # that got displayed in the terminal, and sum together.
+  read -d '' numlines_awk <<- EOF
+    function ceil(val) {
+      return (val == int(val)) ? val : int(val) + 1;
+    }
+    BEGIN {sum=0; ROUNDMODE=U;}
+    {
+      chars=\$1;
+      lines=ceil(chars / $COLUMNS);
+      sum+=lines;
+    }
+    END {print(sum);}
+EOF
+  readonly rows=`HISTTIMEFORMAT= history 1 |\
+   gawk -- "$linelength_awk" |\
+   gawk -- "$numlines_awk"`
+  echo -e "\e[${rows}A"
 }
 
 if [ -n "${FAST_PS1}" ]; then
@@ -27,5 +78,6 @@ else
     source "$HOME/bin/path-bits"
     path_bits='$(path-bits)'
 fi
-PS1="\$(prompt)\u@\h:${path_bits} \$(prompt-sigil) "
+PS1="--:-- \$(prompt)\u@\h:${path_bits} \$(prompt-sigil) "
+PS0="\001\e[s\002\$(move-to-ps1)\A\001\e[u\002"
 
