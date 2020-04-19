@@ -7,3 +7,9 @@ flush_history(){
 if [ -z "${FAST_PS1}" ]; then
     PS1="\$(flush_history)${PS1}"
 fi
+
+# This interacts with PS0 expansion. It makes bash print out the expanded hist
+# entry to a new prompt, and forces the user to confirm if they want to execute
+# it. This avoids running the wrong thing, and also cleans up an edge case
+# where PS0 printing would go wrong.
+shopt -s histverify
