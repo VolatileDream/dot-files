@@ -5,7 +5,7 @@
 #       Instead use \001 and \002, these work correctly in more situations.
 
 # if we don't have awk, enable fast PS1
-[ -x /usr/bin/awk ] || FAST_PS1="yes"
+[ -x /usr/bin/gawk ] || FAST_PS1="yes"
 
 ps_prompt=""
 prompt(){
@@ -93,10 +93,12 @@ EOF
 
 if [ -n "${FAST_PS1}" ]; then
     path_bits="\w"
+    time_bit="xx:xx"
 else
     source "$HOME/bin/path-bits"
     path_bits='$(path-bits)'
+    time_bit="--:--"
+    PS0="\001\e[s\002\$(move-to-ps1)\A\001\e[u\002"
 fi
-PS1="--:-- \$(prompt)\u@\h:${path_bits} \$(prompt-sigil) "
-PS0="\001\e[s\002\$(move-to-ps1)\A\001\e[u\002"
+PS1="${time_bit} \$(prompt)\u@\h:${path_bits} \$(prompt-sigil) "
 
