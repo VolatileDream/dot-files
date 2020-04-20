@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+#
+# Outputs all the subkeys usable (not expired, not revoked) for SSH.
+#
+# This is probably incorrect, as the output format (SSH key) is not capable of
+# containing information related to time based expiry (as far as I can tell).
+# So if you use this script to add ssh keys to a service, then the expiry state
+# is not going to be handled. It would be better to incorperate this command
+# into AuthorizedKeysCommand instead of an AuthorizedKeys file.
+#
+gpg2ssh() {
+  local -r key="$1";
+  # Get GPG to output the keys in a stable machine readable format.
+  # Then, match the key types we're looking for:
+  #   type   = subkey
+  #   expiry = fully valid, ultimate validity
+  #   use    = authentication, and not disabled
+  # Then pass the subkey fingerprint to GPG for export.
+  gpg2 --list-keys --with-colons -- "${key}" | \
+    awk -F : \
+      'match($1, "sub") \
+        && (match($2, "u") || match($2, "f")) \
+        && match($12, "a") && !match($12, "D") { print $5 }' |\
+    xargs -L1  gpg2 --export-ssh-key
+}
+
+gpg2ssh "$@"
