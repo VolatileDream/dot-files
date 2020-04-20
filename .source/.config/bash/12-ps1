@@ -102,3 +102,5 @@ else
 fi
 PS1="${time_bit} \$(prompt)\u@\h:${path_bits} \$(prompt-sigil) "
 
+unset path_bits
+unset time_bit
