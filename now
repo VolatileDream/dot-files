@@ -21,7 +21,8 @@ cleanup(){
 }
 trap cleanup SIGINT
 
-read -t 1 <&1
+#  The latency is required, and invalid FD = bad.
+sleep 2 | read -t 1
 timeout=$?
 
 did_timeout=0
