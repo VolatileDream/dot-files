@@ -43,3 +43,6 @@
 [submodule "submodules/bloom-filter"]
 	path = submodules/bloom-filter
 	url = git@github.com:VolatileDream/bloom-filter.git
+[submodule "submodules/count-distinct"]
+	path = submodules/count-distinct
+	url = https://github.com/VolatileDream/count-distinct.git
