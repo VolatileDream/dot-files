@@ -23,6 +23,7 @@ EOF
 }
 
 start_programs() {
+  redshift &
   firefox &
   lxterminal &
   lxterminal &
