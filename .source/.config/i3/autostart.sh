@@ -30,7 +30,7 @@ start_programs() {
   gnome-disks &
   discord &
   run_keybase &
-  steam &
+  # steam &
 }
 
 i3_setup && start_programs && i3-msg "workspace 1;"
