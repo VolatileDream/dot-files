@@ -47,7 +47,7 @@ submit(){
 	fi
 
 	local tmp=`mktemp`
-	cat "$IN" | trim > "$tmp"
+	cat "$IN" | trim --newlines > "$tmp"
 
 	cat "$tmp" | chronos append "$ARCHIVE" -t "${DATE}"
 

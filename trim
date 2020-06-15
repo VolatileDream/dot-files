@@ -1,3 +1,53 @@
-#!/usr/bin/env sh
+#!/bin/bash
 
-sed -e :a -e '/./,$!d;/^\n*$/{$d;N;};/\n$/ba'
+err_exit() {
+  echo "$1" >> /dev/stderr
+  exit ${2:-1}
+}
+
+whitespace() {
+  # Removes leading and trailing whitespace from a line.
+  sed -e 's/^[[:space:]]*//g' -e 's/[[:space:]]*$//g'
+}
+
+newlines() {
+  awk '
+    BEGIN { printing=0; newlines=0; }
+    !/^$/ {
+      # Non empty line
+      printing = 1
+      for (i=0; i < newlines; i++) print("");
+      newlines = 0
+      print
+    }
+    printing && /^$/ {
+      # Count newlines in case these are not at the end of the file.
+      newlines += 1
+    }
+  '
+}
+
+length() {
+  local length="$1"; shift
+  [ "$length" -gt 0 ] || err_exit "bad length"
+  sed -e "s/^\(.\{0,${length}\}\).*$/\1/g"
+}
+
+usage() {
+  echo "trim options"
+  echo "  -w | --whitespace  : leading trailing whitespace"
+  echo "  -n | --newlines    : leading trailing newlines"
+  echo "  -l | --length \$len : limit the line length to \$len"
+}
+
+main() {
+  local com="$1"; shift
+  case "$com" in
+    -w|--whitespace) whitespace ;;
+    -n|--newlines) newlines ;;
+    -l|--length) length "$@" ;;
+    *) usage ; err_exit "bad value: $com" ;;
+  esac
+}
+
+main "$@"
