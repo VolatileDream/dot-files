@@ -1,0 +1,12 @@
+#!/bin/bash
+
+run_discord() {
+  /usr/bin/discord
+}
+
+notify_dead() {
+  notify-send --urgency=normal Discord "Discord died, restarting."
+  play -q -n synth sine %-12 sine %-9 sine %-5 sine %-2 fade h 0.5 1 0.5
+}
+
+while ! run_discord ; do notify_dead ; done
