@@ -43,9 +43,9 @@ history-refresh(){
 
 # C-r breaks once you have a bunch of history files so we have to rebuild it
 hp () {
-    # 1/10_000 error for 1_000_000 elements
-    # lines must be less than 4096 characters
-    local line=`cat ~/.history/*/*/*/* | bloom --false-positive 0.00001 --elements 1000000 --remove-duplicates | pick`
+    # 1/10_000 error, use count-distinct to approximate the number of elements we expect.
+    local approx_count=$(cat ~/.history/*/*/*/* | count-distinct)
+    local line=`cat ~/.history/*/*/*/* | bloom --false-positive 0.00001 --elements $((approx_count*2)) --remove-duplicates | pick`
 
     if [ -n "$line" ]; then
         history -s "$line"
