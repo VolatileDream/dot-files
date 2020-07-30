@@ -40,8 +40,8 @@ m(){
             fi
         done >> "$playlist"
 
-        echo mpv "${options[@]}" --playlist "$playlist"
-        mpv "${options[@]}" --playlist "$playlist"
+        echo mpv "${options[@]}" --playlist="$playlist"
+        mpv "${options[@]}" --playlist="$playlist"
         rm "$playlist"
     fi
 }
