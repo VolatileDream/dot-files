@@ -32,20 +32,16 @@ mkdir -p "${HISTFILE%/*}/"
 # This is necessary for VIM setup, the rest of the time it's fine.
 shopt -s histappend
 
-# include history files, attempt to restore "normal" history.
-# don't include by default, since we don't want to have bloated forever history,
-# unless we're explicitly sure we want it.
-history-refresh(){
-    for file in ~/.history/*/*/*/* ; do
-        history -r "$file"
-    done
+# Output all of the history from every history file ever.
+history::all() {
+  find ~/.history/ -type f | xargs cat
 }
 
 # C-r breaks once you have a bunch of history files so we have to rebuild it
-hp () {
+history::pick () {
     # 1/10_000 error, use count-distinct to approximate the number of elements we expect.
-    local approx_count=$(cat ~/.history/*/*/*/* | count-distinct)
-    local line=`cat ~/.history/*/*/*/* | bloom --false-positive 0.00001 --elements $((approx_count*2)) --remove-duplicates | pick`
+    local approx_count=$(history::all | count-distinct)
+    local line=$(history::all | bloom -p 0.00001 -n ${approx_count} -r | pick)
 
     if [ -n "$line" ]; then
         history -s "$line"
@@ -53,5 +49,5 @@ hp () {
     fi
 }
 # define an alternative for systems where we may not have 'bloom' and 'pick'
-hhg () { grep --recursive --no-filename "$@" ~/.history | uniq ; }
+history::grep () { grep --recursive --no-filename "$@" ~/.history | uniq ; }
 
