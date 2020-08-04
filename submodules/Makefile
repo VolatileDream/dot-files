@@ -21,7 +21,7 @@ lookup :
 	cd lookup ; make
 
 pick :
-	cd pick ; if [ ! -e Makefile ]; then ./autogen.sh ; ./configure ; fi ; make
+	cd pick ; if [ ! -e Makefile ]; then ./configure ; fi ; make
 
 scry : inotify-tools/libinotify-tools/src/scry
 
