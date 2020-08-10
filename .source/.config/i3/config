@@ -15,6 +15,13 @@ set $mod Mod4
 # is used in the bar {} block below.
 font pango:monospace 8
 
+# Colour settings.
+# Almost certainly want `border == background == child_border`
+# class                 border  backgr. text    indicator child_border
+# Use a bright purple for focus, shows up nicely when things are redshifted.
+client.focused          #ef2fef #ef2fef #ffffff #2e9ef4   #ef2fef
+# See https://i3wm.org/docs/userguide.html#_changing_colors for defaults.
+
 # This font is widely installed, provides lots of unicode glyphs, right-to-left
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
 #font pango:DejaVu Sans Mono 8
@@ -25,6 +32,13 @@ font pango:monospace 8
 # clear in small sizes. However, its unicode glyph coverage is limited, the old
 # X core fonts rendering does not support right-to-left and this being a bitmap
 # font, it doesn’t scale on retina/hidpi displays.
+
+# Save a few pixels on monitors where there's only one window displayed.
+hide_edge_borders smart
+# I like to not have titles by default.
+default_border pixel 1
+# Toggle borders, mostly to remove titlebars on "full screen" windows.
+bindsym $mod+Control+b border toggle
 
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
