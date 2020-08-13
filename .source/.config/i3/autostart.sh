@@ -2,7 +2,8 @@
 
 i3_setup() {
   # Setup all the screens.
-  # remember that workspaces 1 and 2 exist before any of this starts.
+  # Remember that workspaces 1 to n exist, where n is the number of monitors.
+  # Swap them to n + 99 so we can remap the workspaces
   read -d '' i3_reset << EOF
   workspace 1;
   workspace 100;
@@ -10,6 +11,7 @@ i3_setup() {
   workspace 101;
 EOF
 
+  # Go to specific monitors and swap around the workspaces.
   read -d '' i3_set << EOF
   focus output DP-4;
     workspace 1; append_layout $HOME/.config/i3/term-disks.json;
