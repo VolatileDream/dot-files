@@ -11,7 +11,6 @@
 main() {
   read -d '' i3_layout << EOF
     {
-      "border": "normal",
       "floating": "auto_off",
       "percent": 1,
       "swallows": [

@@ -36,7 +36,7 @@ client.focused          #ef2fef #ef2fef #ffffff #2e9ef4   #ef2fef
 # Save a few pixels on monitors where there's only one window displayed.
 hide_edge_borders smart
 # I like to not have titles by default.
-default_border pixel 1
+default_border pixel 2
 # Toggle borders, mostly to remove titlebars on "full screen" windows.
 bindsym $mod+Control+b border toggle
 

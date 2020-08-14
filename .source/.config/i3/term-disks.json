@@ -1,13 +1,10 @@
 {
-    "border": "normal",
     "floating": "auto_off",
     "layout": "splitv",
     "percent": 0.5,
     "type": "con",
     "nodes": [
         {
-            "border": "normal",
-            "current_border_width": 2,
             "floating": "auto_off",
             "geometry": {
                "height": 452,
@@ -25,8 +22,6 @@
             "type": "con"
         },
         {
-            "border": "none",
-            "current_border_width": 2,
             "floating": "auto_off",
             "geometry": {
                "height": 756,
@@ -47,8 +42,6 @@
 }
 
 {
-    "border": "normal",
-    "current_border_width": 2,
     "floating": "auto_off",
     "geometry": {
        "height": 452,

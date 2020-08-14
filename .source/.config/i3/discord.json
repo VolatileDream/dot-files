@@ -6,8 +6,6 @@
 // Discord windows look the same as far as I can tell (given that they
 // appear and disappear very quickly).
 {
-    "border": "normal",
-    "current_border_width": 2,
     "floating": "auto_off",
     "geometry": {
        "height": 1041,
@@ -29,15 +27,12 @@
 
 {
     // This is actually where discord lives.
-    "border": "normal",
     "floating": "auto_off",
     "layout": "splitv",
     "percent": 0.5,
     "type": "con",
     "nodes": [
         {
-            "border": "normal",
-            "current_border_width": 2,
             "floating": "auto_off",
             "geometry": {
                "height": 1041,
@@ -57,8 +52,6 @@
             "type": "con"
         },
         {
-            "border": "normal",
-            "current_border_width": 2,
             "floating": "auto_off",
             "geometry": {
                "height": 511,
@@ -81,8 +74,6 @@
 }
 
 {
-    "border": "none",
-    "current_border_width": 2,
     "floating": "auto_off",
     "geometry": {
        "height": 1061,
