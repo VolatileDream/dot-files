@@ -14,6 +14,7 @@ def create_parser():
   p.add_argument("-c", "--count", action="store_true", help="Computes number of lines")
   p.add_argument("-a", "--average", action="store_true", help="Computes average")
   p.add_argument("-v", "--variance", action="store_true", help="Computes variance")
+  p.add_argument("-m", "--min-max", action="store_true", help="Computes min & max values")
 
   p.add_argument("-t", "--terse", action="store_true", help="Terse output")
   return p
@@ -33,6 +34,9 @@ def stats(ins, args, printer):
   # But found a useful explanation that is ellided from the wikipedia entry.
   # https://jonisalonen.com/2013/deriving-welfords-method-for-computing-variance/
 
+  minv = None
+  maxv = None
+
   sum = 0
   product = 1
 
@@ -41,17 +45,32 @@ def stats(ins, args, printer):
   variance = 0
 
   for i in ins:
+    # Simple things
     sum += i
     product *= i
+    if minv is None:
+      minv = i
+    else:
+      minv = min(minv, i)
+    if maxv is None:
+      maxv = i
+    else:
+      maxv = max(maxv, i)
+
+    # Interesting variance stuff.
     count += 1
     delta = i - mean
     mean += delta / count
     delta2 = i - mean  # yes, calculate new delta with the new mean.
     variance += delta * delta2
 
+  # Done looping, do cleanup & print output.
   if count < 2:
     variance = float("nan")
 
+  if args.min_max:
+    printer("min =", minv)
+    printer("max =", maxv)
   if args.count:
     printer("count =",count)
   if args.sum:
