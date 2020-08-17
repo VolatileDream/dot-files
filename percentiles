@@ -1,0 +1,35 @@
+#!/home/jex/bin/submodules/python3-virtual-env/bin/python3
+
+import argparse
+import sys
+from tdigest import TDigest
+
+def create_parser():
+  p = argparse.ArgumentParser()
+  p.add_argument("percentiles", type=float, nargs='*', default=[90.0],
+                 help="Percentiles to compute, default: 90")
+  return p
+
+def lines():
+  for line in sys.stdin:
+    try:
+      i = float(line)
+      yield i
+    except ValueError as e:
+      print("bad line:", line, file=sys.stderr)
+
+
+if __name__ == "__main__":
+  ps = create_parser().parse_args().percentiles
+
+  for p in ps:
+    if not (0 < p and p < 100):
+      raise Exception("bad percentile value: " + p)
+
+  digest = TDigest()
+
+  for l in lines():
+    digest.update(l)
+
+  for p in ps:
+    print(p, "=", digest.percentile(p))
