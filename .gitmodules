@@ -25,9 +25,6 @@
 [submodule "submodules/tomb"]
 	path = submodules/tomb
 	url = git@github.com:dyne/Tomb.git
-[submodule "submodules/rel"]
-	path = submodules/rel
-	url = git@github.com:VolatileDream/rel.git
 [submodule "submodules/extruder"]
 	path = submodules/extruder
 	url = git@github.com:VolatileDream/extruder.git

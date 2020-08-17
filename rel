@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-
-source $HOME/bin/submodules/python2-virtual-env/bin/activate
-$HOME/bin/submodules/python2-virtual-env/bin/rel "$@"

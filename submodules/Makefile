@@ -42,11 +42,6 @@ ondir : ondir/ondir
 ondir/ondir :
 	cd ondir ; make
 
-rel : python2-virtual-env
-	echo "source python2-virtual-env/bin/activate; \
-		pip install -r rel/requirements.txt;  \
-		pip install --editable rel" | bash
-
 http2sh : python3-virtual-env
 	echo "source python3-virtual-env/bin/activate; \
 		pip install -r http2sh/requirements.txt;" | bash
@@ -65,7 +60,4 @@ python3-virtual-env :
 	virtualenv -p python3 python3-virtual-env
 	echo "source python3-virtual-env/bin/activate; \
     pip install tdigest" | bash
-
-python2-virtual-env : 
-	virtualenv -p python2 python2-virtual-env
 
