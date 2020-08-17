@@ -9,18 +9,13 @@ def create_parser():
   p = argparse.ArgumentParser()
 
   # Exclusive modes of operation
-  g = p.add_mutually_exclusive_group(required=True)
-  g.add_argument("-s", "--sum", action="store_true", help="Computes sum")
-  g.add_argument("-p", "--product", action="store_true", help="Computes product")
-  g.add_argument("-c", "--count", action="store_true", help="Computes number of lines")
-  g.add_argument("-a", "--average", action="store_true", help="Computes average")
-  g.add_argument("-v", "--variance", action="store_true", help="Computes variance, requires --expected-average, ")
+  p.add_argument("-s", "--sum", action="store_true", help="Computes sum")
+  p.add_argument("-p", "--product", action="store_true", help="Computes product")
+  p.add_argument("-c", "--count", action="store_true", help="Computes number of lines")
+  p.add_argument("-a", "--average", action="store_true", help="Computes average")
+  p.add_argument("-v", "--variance", action="store_true", help="Computes variance")
 
-  # Parameters for the various modes
-  p.add_argument("--expected-average", type=float,
-      help="Sets the expected average, used to compute one pass variance.")
-  p.add_argument("--average-threshold", type=float, default=1.0,
-      help="Allowed difference between computed average and --expected-average value.")
+  p.add_argument("-t", "--terse", action="store_true", help="Terse output")
   return p
 
 
@@ -33,30 +28,21 @@ def lines():
       print("bad line:", line, file=sys.stderr)
 
 
-def sum(ins, args=None):
-  total = 0
-  for i in ins:
-    total += i
-  print(total)
-
-
-def product(ins, args=None):
-  p = 1
-  for i in ins:
-    p *= i
-  print(p)
-
-
-def stats(ins, args=None):
+def stats(ins, args, printer):
   # Mostly from https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm
   # But found a useful explanation that is ellided from the wikipedia entry.
   # https://jonisalonen.com/2013/deriving-welfords-method-for-computing-variance/
+
+  sum = 0
+  product = 1
 
   count = 0
   mean = 0
   variance = 0
 
   for i in ins:
+    sum += i
+    product *= i
     count += 1
     delta = i - mean
     mean += delta / count
@@ -66,31 +52,30 @@ def stats(ins, args=None):
   if count < 2:
     variance = float("nan")
 
+  if args.count:
+    printer("count =",count)
+  if args.sum:
+    printer("sum =",sum)
+  if args.product:
+    printer("product =",product)
   if args.average:
-    print(mean)
-  elif args.variance:
-    print(math.sqrt(variance / (count - 1)))
-  elif args.count:
-    print(count)
+    printer("average =",mean)
+  if args.variance:
+    printer("variance =", math.sqrt(variance / (count - 1)))
+
+
+def terse_print(name, value):
+  print(value)
 
 
 if __name__ == "__main__":
 
   args = create_parser().parse_args()
+  printer = print
+  if args.terse:
+    printer = terse_print
 
-  fn = None
-  if args.sum:
-    fn = sum
-  elif args.product:
-    fn = product
-  elif args.count:
-    fn = stats
-  elif args.average:
-    fn = stats
-  elif args.variance:
-    fn = stats
-
-  r = fn(lines(), args=args)
+  r = stats(lines(), args, printer)
   if r is not None:
     sys.exit(r)
 
