@@ -20,7 +20,9 @@ def lines():
 
 
 if __name__ == "__main__":
-  ps = create_parser().parse_args().percentiles
+  args = create_parser().parse_args()
+
+  ps = args.percentiles
 
   for p in ps:
     if not (0 <= p and p <= 100):

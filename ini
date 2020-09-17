@@ -14,7 +14,7 @@ if __name__ == "__main__":
   cfg = configparser.ConfigParser()
   cfg.read([file_name])
 
-  if len(opt_value) is 0:
+  if len(opt_value) == 0:
     try:
       print(cfg[section][key])
     except KeyError:
