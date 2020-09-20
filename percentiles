@@ -23,6 +23,7 @@ if __name__ == "__main__":
   args = create_parser().parse_args()
 
   ps = args.percentiles
+  ps.sort() # clever ux thing
 
   for p in ps:
     if not (0 <= p and p <= 100):
