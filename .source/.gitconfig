@@ -1,12 +1,19 @@
 [user]
 	name = Gianni Gambetti
 	email = gianni@gambetti.ca
-	signingkey = 9C9F9B75
+	signingkey = AD880C27
 [push]
 	default = simple
+  recurseSubmodules = check
 [grep]
 	lineNumber = true
 [alias]
 	graph = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%C(bold blue)<%an>%Creset' --abbrev-commit
 [fetch]
-	recurseSubmodules = on-demand
+	recurseSubmodules = yes
+[submodule]
+	recurse = true
+[diff]
+	submodule = log
+[init]
+	defaultBranch = main
