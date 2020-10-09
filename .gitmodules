@@ -43,3 +43,6 @@
 [submodule "submodules/count-distinct"]
 	path = submodules/count-distinct
 	url = https://github.com/VolatileDream/count-distinct.git
+[submodule "submodules/git-subrepo"]
+	path = submodules/git-subrepo
+	url = https://github.com/ingydotnet/git-subrepo.git
