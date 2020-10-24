@@ -77,7 +77,7 @@ def state_gap_decider(strategy):
     assert (strategy in ["omit", "unknown", "continue"])
 
     def decider(last_state, last_time, next_time=None):
-        if next_time is None:
+        if next_time == None:
             # Invoked after a time skip
             if strategy is "continue":
                 return last_state
