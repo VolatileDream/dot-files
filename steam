@@ -1,0 +1,103 @@
+#!/bin/bash
+
+# Steam wrapper, because fossilize_replay is broken:
+# https://github.com/ValveSoftware/Fossilize/issues/84
+#
+# This wrapper works by starting a fake steam game that we use to detect
+# when steam is done starting. Once the fake game runs, we do our setup, and
+# then normal steam things can happen.
+#
+
+#### SETUP ####
+#
+# To setup add `tools/steam-fake-game` to steam. It's important it keeps the
+# name 'steam-fake-game'.
+#
+# Then in a terminal run:
+# $ grep --recursive ~/.steam/steam/userdata/ --regexp steam-fake-game
+# You should get something like this:
+#
+#                                               filename                   game id      steam game name
+# /----------------------------------------------------|    /--------------------|    /---------------|
+# ~/.steam/steam/userdata/<steamid>/760/screenshots.vdf:		"16201299119438823424"		"steam-fake-game"
+#
+# Replace the game id below with what you find.
+#
+####  END  ####
+STEAM_GAME_ID=16201299119438823424 # REPLACE ME
+
+fake_game_detect_changes() {
+  # This relies on having setup a small script to run as a steam "game" and 
+  # attempting to start it through steam. Steam will eventually run it once
+  # it's all done updating and doing book keeping, at that point it is safe
+  # to make our changes to the steam binaries.
+
+  # tiny pub-sub implementation that uses fifos.
+  pubsub-fifo subscribe steam-running --for-count 1
+}
+
+# Starts steam and waits for it to be running.
+wait_for_steam() {
+  # Spawn steam in a stopped subshell so we can setup & block other things.
+  (kill -s STOP ${BASHPID} ; exec /usr/games/steam "$@" "steam://rungameid/${STEAM_GAME_ID}" ) &
+  local -r steam_pid=$!
+
+  fake_game_detect_changes &
+  local -r settle_pid=$!
+
+  # Let steam start.
+  kill -s CONT $steam_pid
+  echo "starting steam & waiting for it to stop changing files"
+  # Wait for settle to exit
+  wait -f $settle_pid
+  echo "done waiting for steam to settle"
+}
+
+main() {
+  # 3 steps:
+  #  * check / deploy the wrapper
+  #  * wait for steam to start
+  #  * check / wrap the original
+
+  # Determine 32 / 64 bit status.
+  local bin_dir="$HOME/.steam/bin32"
+  uname -m | grep 64 > /dev/null
+  if [[ $? -eq 0 ]]; then
+    bin_dir="$HOME/.steam/bin64"
+  fi
+
+  # Attempt to deploy wrapper
+  if ! same-file "$HOME/bin/tools/steam-fossilize-wrap" "${bin_dir}/steam-fossilize-wrap"; then
+    # try to hardlink first, then copy.
+    # Because of the way the script uses readlink we can't symlink.
+    ln "$HOME/bin/tools/steam-fossilize-wrap" "${bin_dir}/steam-fossilize-wrap" ||
+      cp "$HOME/bin/tools/steam-fossilize-wrap" "${bin_dir}/steam-fossilize-wrap"
+    echo "deployed steam-fossilize-wrap"
+  fi
+
+  # Hopefully the way we actually start steam doesn't ruin the way the passed
+  # arguments work. Attempting to run multiple "steam://" urls is probably
+  # broken by this script.
+  if [[ $@ -gt 0 ]]; then
+    zenity --info --no-wrap --text "Steam options provided,\n wrapper may break them:\n$@"
+  fi
+  wait_for_steam "$@"
+
+  # Setup the wrapper in place of steams tool.
+  local -r fossilize="${bin_dir}/fossilize_replay"
+  local -r wrapper="${bin_dir}/steam-fossilize-wrap"
+  if ! same-file "${fossilize}" "${wrapper}" ; then
+    same-file "${fossilize}" "${fossilize}.real" || echo "new fossilize binary"
+    mv "${fossilize}" "${fossilize}.real" && ln -s "${wrapper}" "${fossilize}"
+    echo "setup fossilize_replay wrapper"
+  fi
+
+  # Setup is done, but because of our strategy steam hasn't opened all the
+  # windows it normally does. Open them now.
+  #
+  # If steam exited in the mean time, these will block. :(
+  /usr/games/steam steam://open/games
+  /usr/games/steam steam://open/friends
+}
+
+main "$@"
