@@ -1,6 +1,6 @@
-#!/usr/bin/env bash
+#!/bin/bash
 #
-# An i3 wrapper for Google Chrome, which doesn't pawn a window soon
+# An i3 wrapper for Google Chrome, which doesn't spawn a window soon
 # enough to stay on the workspace that it was intended to open on.
 #
 # This uses i3-msg to create placeholder window that will capture the
@@ -27,8 +27,9 @@ EOF
   local tmp=`mktemp -t i3-layout.XXXXXXXX`
   echo "${i3_layout}" > "${tmp}"
   i3-msg "append_layout ${tmp};"
-  google-chrome &
   rm "${tmp}"
+
+  exec google-chrome
 }
 
 main "$@"
