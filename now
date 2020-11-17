@@ -23,7 +23,7 @@ trap cleanup SIGINT
 
 #  The latency is required, and invalid FD = bad.
 sleep 2 | read -t 1
-timeout=$?
+timeout_status=$?
 
 did_timeout=0
 print_timeout(){
@@ -32,35 +32,47 @@ print_timeout(){
                 did_timeout=0
         fi
 }
-#
-#	loop forever
-#
-while true
-do
-	#
-	#	relay stdin to stdout
-	#
-        while true
-        do
-                IFS= read -r -t 1 line; rc=$?
-                if [ $rc != 0 ]; then break; fi
-                # because otherwise we overwrite the time output, and that looks bad
-                print_timeout
-                echo "$line"
-        done
-	#
-	#	exit status is greater than 128 if the timeout is exceeded
-	#
-	if [ $rc != $timeout ]; then break; fi
 
-	#
-	#	print the timestamp
-	#
-        now=`date ${1:++"$1"}`
-        echo -ne "$now\r" >&2
-        did_timeout=1
-done
+main() {
+  local timeout=1
 
-# handle exiting the stream without printing the last newline
-print_timeout
+  local c
+  while [[ $# -gt 0 ]]; do
+    c="$1" ; shift
+    case "$c" in
+      --timeout|-t) timeout="$1" ; shift ;;
+      *) echo "unrecognized command: $c" ; exit 1 ;;
+    esac
+  done
+  #
+  #	loop forever
+  #
+  while true ; do
+	  #
+  	#	relay stdin to stdout
+  	#
+    while true ; do
+      IFS= read -r -t "$timeout" line; rc=$?
+      if [ $rc != 0 ]; then break; fi
+      # because otherwise we overwrite the time output, and that looks bad
+      print_timeout
+      echo "$line"
+    done
+  	#
+  	#	exit status is greater than 128 if the timeout is exceeded
+  	#
+	  if [ $rc != $timeout_status ]; then break; fi
 
+  	#
+    #	print the timestamp
+    #
+    now=`date ${1:++"$1"}`
+    echo -ne "$now\r" >&2
+    did_timeout=1
+  done
+
+  # handle exiting the stream without printing the last newline
+  print_timeout
+}
+
+main "$@"
