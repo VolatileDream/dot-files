@@ -1,0 +1,48 @@
+#!/bin/bash
+
+usage() {
+  echo "usage: same-file file1 file2"
+  echo
+  echo "  Check if two files are actually the same."
+  echo "  Attempts to use inode comparison and readlink to check if they"
+  echo "  are the same inode, falling back to hash comparison to check"
+  echo "  for content equality."
+  echo
+  echo "  Returns 0 if the files are the same."
+  echo "  Positive values indicate the files differ."
+  echo "  Negative values indicate failure of some sort."
+}
+
+main() {
+  local -r f1="$1"; shift
+  local -r f2="$1"; shift
+
+  if [[ -z "$f1" ]] || [[ -z "$f2" ]]; then
+    echo "Require two files to compare, got: '$f1' '$f2'" > /dev/stderr
+    return -1
+  fi
+
+  local -r f1_full="$(readlink -f "$f1")"
+  local -r f2_full="$(readlink -f "$f2")"
+
+  # Try simple comparisons first.
+  if [[ "$f1_full" == "$f2_full" ]]; then
+    return 0
+  elif [[ "$f1_full" -ef "$f2_full" ]]; then
+    return 0
+  fi
+
+  # Use md5 for speed, not for security.
+  local -r HASH=md5sum
+
+  local -r f1_hash="$(cat "${f1_full}" | "${HASH}")"
+  local -r f2_hash="$(cat "${f2_full}" | "${HASH}")"
+ 
+  if [[ "$f1_hash" == "$f2_hash" ]] ; then
+    return 0
+  fi
+ 
+  return 1
+}
+
+main "$@"
