@@ -19,7 +19,7 @@
 #
 #                                               filename                   game id      steam game name
 # /----------------------------------------------------|    /--------------------|    /---------------|
-# ~/.steam/steam/userdata/<steamid>/760/screenshots.vdf:		"16201299119438823424"		"steam-fake-game"
+# ~/.steam/steam/userdata/<steamid>/760/screenshots.vdf:    "16201299119438823424"    "steam-fake-game"
 #
 # Replace the game id below with what you find.
 #
