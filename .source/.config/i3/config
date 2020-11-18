@@ -40,6 +40,11 @@ default_border pixel 2
 # Toggle borders, mostly to remove titlebars on "full screen" windows.
 bindsym $mod+Control+b border toggle
 
+# In multi-monitor mode focus gets pulled around to other monitors when
+# some applications ask for it. I don't like that at all. Mark the windows
+# as urgent instead.
+focus_on_window_activation urgent
+
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
 
