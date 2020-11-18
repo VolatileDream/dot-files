@@ -9,12 +9,47 @@
 # Because of this, this script can't be symlinked.
 dir="$(dirname "$(readlink -f "$0")")"
 
-# Write some debugging info out to our fifo pubsub stuff.
-(date --iso-8601=seconds | tr '\n' ' ' ; echo "=> fossilize_replay: $@") |
-  pubsub-fifo publish steam/fossilize 2>&1 > /dev/null
+cpu_set() {
+  local -r last_cpu="$(
+    cat /proc/cpuinfo |
+      grep -E '^processor[[:space:]]*: [0-9]+' |
+      tail -n 1 |
+      cut -d: -f 2 |
+      tr -d ' ')"
 
-nice --adjust 10 ionice -c 3 prlimit --as=6442450944 "${dir}/fossilize_replay.real" "$@"
-rc=$?  # it will eventually exit
+  if [[ "$last_cpu" -gt 0 ]]; then
+    # if there's more than 1 cpu, schedule on ever other cpu.
+    echo "1-${last_cpu}:2"
+  else
+    # not much of a point to run taskset with only 1 cpu...
+    echo "$last_cpu"
+  fi
+}
 
-(date --iso-8601=seconds | tr '\n' ' ' ; echo "=> fossilize_replay exited: $rc") |
-  pubsub-fifo publish steam/fossilize 2>&1 > /dev/null
+main() {
+  # variable to match the commands we're running.
+  local -r STRATEGIES="taskset nice chrt ionice prlimit"
+  # Write some debugging info out to our fifo pubsub stuff.
+  (date --iso-8601=seconds | tr '\n' ' ' ; echo "=> fossilize_replay (${STRATEGIES}): $@") |
+    pubsub-fifo publish steam/fossilize 2>&1 > /dev/null
+
+  # Doing lots of things here:
+  # taskset - pin to a single cpu.
+  # nice    - lower CPU priority.
+  # chrt    - set scheduling affinity to "batch", kernel hint that we're CPU intensive.
+  # ionice  - lower disk priority to idle, eg: only do io when no other process is.
+  # prlimit - limit the maximum ram we can use.
+  local rc
+  taskset --cpu-list "$(cpu_set)" \
+    nice --adjust 10 \
+    chrt --batch 0 \
+    ionice -c 3 \
+    prlimit --as=6442450944 \
+    "${dir}/fossilize_replay.real" "$@" 2>> /tmp/fossilize_replay
+  rc=$?  # it will eventually exit
+
+  (date --iso-8601=seconds | tr '\n' ' ' ; echo "=> fossilize_replay exited: $rc") |
+    pubsub-fifo publish steam/fossilize 2>&1 > /dev/null
+}
+
+main "$@"
