@@ -9,7 +9,7 @@ pubsub::usage() {
   echo "Given the name of an event, subscribes or publishes to the event feed."
   echo "EVENT must be a valid file path. This allows directory level prefix"
   echo "matching, eg:"
-  echo "> subscribe hello/world"
+  echo "> subscribe hello"
   echo "> publish hello # seen by previous subscription"
   echo "> publish hello/world # also seen"
   echo
@@ -55,6 +55,19 @@ pubsub::subscribe() {
   pubsub::subscribe_cleanup
 }
 
+pubsub::subdirs() {
+  local dir="${EVENT}"
+  local prev="$dir"
+  while true; do
+    echo "${PUBSUB_ROOT}/${dir}"
+    dir="${dir%/*}"
+    if [[ "$prev" == "$dir" ]]; then
+      break
+    fi
+    prev="$dir"
+  done
+}
+
 pubsub::publish() {
   pubsub::init
 
@@ -64,8 +77,10 @@ pubsub::publish() {
   local -r tmp=`mktemp`
   cat - > "$tmp"
 
-  find "${PUBSUB_PATH}" -type p \
-    | while read file ; do
+  # Publish to events starting with where we are and above.
+  pubsub::subdirs |
+    xargs --replace=@ -- find @ -maxdepth 1 -type p |
+      while read file ; do
         # If we start writting to a pipe when it has not been opened
         # for reading, and it then gets deleted, there is no way to
         # recover.
@@ -77,6 +92,7 @@ pubsub::publish() {
         cat "$tmp" >> "$file"
         echo "notified: ${file}"
       done
+
   rm "$tmp"
 }
 
