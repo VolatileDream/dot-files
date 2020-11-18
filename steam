@@ -33,7 +33,7 @@ fake_game_detect_changes() {
   # to make our changes to the steam binaries.
 
   # tiny pub-sub implementation that uses fifos.
-  pubsub-fifo subscribe steam-running --for-count 1
+  pubsub-fifo subscribe steam/running --for-count 1
 }
 
 # Starts steam and waits for it to be running.
@@ -68,6 +68,8 @@ main() {
 
   # Attempt to deploy wrapper
   if ! same-file "$HOME/bin/tools/steam-fossilize-wrap" "${bin_dir}/steam-fossilize-wrap"; then
+    # the wrapper shouldn't already exist, delete it if it does.
+    [[ ! -e "${bin_dir}/steam-fossilize-wrap" ]] || rm "${bin_dir}/steam-fossilize-wrap"
     # try to hardlink first, then copy.
     # Because of the way the script uses readlink we can't symlink.
     ln "$HOME/bin/tools/steam-fossilize-wrap" "${bin_dir}/steam-fossilize-wrap" ||

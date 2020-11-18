@@ -1,5 +1,5 @@
 #!/bin/bash
 
 (date --iso-8601=seconds | tr '\n' ' ' ; echo "=> steam fake game $@") |
-  pubsub-fifo publish steam-running 2>&1 > /dev/null
+  pubsub-fifo publish steam/running 2>&1 > /dev/null
 

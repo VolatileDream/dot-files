@@ -11,6 +11,6 @@ dir="$(dirname "$(readlink -f "$0")")"
 
 # Write some debugging info out to our fifo pubsub stuff.
 (date --iso-8601=seconds | tr '\n' ' ' ; echo "=> fossilize_replay $@") |
-  pubsub-fifo publish fossilize_replay 2>&1 > /dev/null
+  pubsub-fifo publish steam/fossilize 2>&1 > /dev/null
 
 exec nice --adjust 10 ionice -c 3 prlimit -rss 6442450944 "${dir}/fossilize_replay.real" "$@"
