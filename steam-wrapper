@@ -39,7 +39,7 @@ fake_game_detect_changes() {
 # Starts steam and waits for it to be running.
 wait_for_steam() {
   # Spawn steam in a stopped subshell so we can setup & block other things.
-  (kill -s STOP ${BASHPID} ; exec /usr/games/steam "$@" "steam://rungameid/${STEAM_GAME_ID}" ) &
+  (kill -s STOP ${BASHPID} ; exec steam "$@" "steam://rungameid/${STEAM_GAME_ID}" ) &
   local -r steam_pid=$!
 
   fake_game_detect_changes &
@@ -98,8 +98,8 @@ main() {
   # windows it normally does. Open them now.
   #
   # If steam exited in the mean time, these will block. :(
-  /usr/games/steam steam://open/games
-  /usr/games/steam steam://open/friends
+  steam steam://open/games
+  steam steam://open/friends
 }
 
 main "$@"
