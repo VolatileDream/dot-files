@@ -1,7 +1,6 @@
 #!/bin/bash
 
 run_discord() {
-  # Set us as a volunteer for death by oom.
   /usr/bin/discord "$@"
 }
 
