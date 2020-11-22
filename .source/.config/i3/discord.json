@@ -73,6 +73,7 @@
     ]
 }
 
+// Steam is also poorly behaved.
 {
     "floating": "auto_off",
     "geometry": {
@@ -87,7 +88,26 @@
        {
         "class": "^Steam$",
         "instance": "^Steam$",
-        "title": "^Friends\\ List$"
+        "title": "^Friends\\ List"
+       }
+    ],
+    "type": "con"
+}
+{
+    "floating": "auto_off",
+    "geometry": {
+       "height": 1061,
+       "width": 960,
+       "x": 2880,
+       "y": 0
+    },
+    "name": "Friends List",
+    "percent": 0.5,
+    "swallows": [
+       {
+        "class": "^Steam$",
+        "instance": "^Steam$",
+        "title": "^Friends\\ List"
        }
     ],
     "type": "con"

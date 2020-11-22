@@ -1,12 +1,6 @@
 {
     "floating": "auto_off",
-    "geometry": {
-       "height": 452,
-       "width": 962,
-       "x": 0,
-       "y": 0
-    },
-    "name": "Steam",
+    "name": "Steam1",
     "percent": 1,
     "swallows": [
        {
@@ -18,13 +12,19 @@
 }
 {
     "floating": "auto_off",
-    "geometry": {
-       "height": 452,
-       "width": 962,
-       "x": 0,
-       "y": 0
-    },
-    "name": "Steam",
+    "name": "Steam2",
+    "percent": 1,
+    "swallows": [
+       {
+        "class": "^Steam$",
+        "instance": "^Steam$"
+       }
+    ],
+    "type": "con"
+}
+{
+    "floating": "auto_off",
+    "name": "Steam3",
     "percent": 1,
     "swallows": [
        {
