@@ -3,7 +3,3 @@
 CS='csclub.uwaterloo.ca'
 UW='linux.student.cs.uwaterloo.ca'
 
-if [[ "$(hostname -d)" = "$CS" ]]; then
-	alias mp=ncmpcpp
-fi
-

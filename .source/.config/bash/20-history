@@ -15,18 +15,28 @@ HISTFILESIZE=2000
 # do really fancy stuff with history (keep it "forever")
 ## Sourced: https://twitter.com/michaelhoffman/status/639178145673932800
 # this breaks CTRL-R
-HISTFILE="${HOME}/.history/$(date -u +%Y/%m/%d)/${HOSTNAME}_$$_$(date -u +%H-%M)"
-if [ -z "$HIST_PARENT" ]; then
-    # This is required because there's no simpler way to pass the
-    # PID of the top level history to any children.
-    export HIST_PARENT="$$"
-else
-    # Child shells will have their own history. This is nice for things like
-    # vim, where we can continue to run the same command set as we work on
-    # various files and things.
-    HISTFILE="${HOME}/.history/$(date -u +%Y/%m/%d)/${HOSTNAME}_${HIST_PARENT}_child"
-fi
-mkdir -p "${HISTFILE%/*}/"
+setup-history() {
+  local -r day="$(date -u +%Y/%m/%d)"
+  local -r prefix="${HOME}/.history/${day}/${HOSTNAME}"
+
+  local suffix=""
+  if [ -z "$HIST_PARENT" ]; then
+      # This is required because there's no simpler way to pass the
+      # PID of the top level history to any children.
+      export HIST_PARENT="$$"
+      suffix="$(date -u +%H-%M)"
+  else
+      # Child shells will have their own history. This is nice for things like
+      # vim, where we can continue to run the same command set as we work on
+      # various files and things.
+      suffix="_child"
+  fi
+  HISTFILE="${prefix}_${HIST_PARENT}_${suffix}"
+  # Save some time and only invoke mkdir if the directory doesn't exist.
+  [ -d "${HISTFILE%/*}" ] || mkdir -p "${HISTFILE%/*}/"
+}
+setup-history
+unset -f setup-history
 
 # append to the history file, don't overwrite it.
 # This is necessary for VIM setup, the rest of the time it's fine.
