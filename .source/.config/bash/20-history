@@ -16,7 +16,7 @@ HISTFILESIZE=2000
 ## Sourced: https://twitter.com/michaelhoffman/status/639178145673932800
 # this breaks CTRL-R
 setup-history() {
-  local -r day="$(date -u +%Y/%m/%d)"
+  local -r day="$(printf '%(%Y/%m/%d)T' )"
   local -r prefix="${HOME}/.history/${day}/${HOSTNAME}"
 
   local suffix=""
@@ -24,7 +24,7 @@ setup-history() {
       # This is required because there's no simpler way to pass the
       # PID of the top level history to any children.
       export HIST_PARENT="$$"
-      suffix="$(date -u +%H-%M)"
+      suffix="$(printf '%(%H-%M)T' )"
   else
       # Child shells will have their own history. This is nice for things like
       # vim, where we can continue to run the same command set as we work on
