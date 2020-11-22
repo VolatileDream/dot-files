@@ -40,12 +40,17 @@ main() {
   # ionice  - lower disk priority to idle, eg: only do io when no other process is.
   # prlimit - limit the maximum ram we can use.
   local rc
+
+  # Max 1 gigabytes per process. Assuming fossilize eats all the ram we allow
+  # it to get, we need to assume it gets (1 * cores) gigabytes. Hopefully we
+  # can run without that...
+  local -r ram_limit=$((1 * 1024 * 1024 * 1024))
   taskset --cpu-list "$(cpu_set)" \
     nice --adjust 10 \
     chrt --batch 0 \
     ionice -c 3 \
-    prlimit --as=6442450944 \
-    "${dir}/fossilize_replay.real" "$@" 2>> /tmp/fossilize_replay
+    prlimit --as=$ram_limit \
+    "${dir}/fossilize_replay.real" "${args[@]}" 2>> /tmp/fossilize_replay
   rc=$?  # it will eventually exit
 
   (date --iso-8601=seconds | tr '\n' ' ' ; echo "=> fossilize_replay exited: $rc") |
