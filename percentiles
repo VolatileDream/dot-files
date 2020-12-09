@@ -6,8 +6,8 @@ from tdigest import TDigest
 
 def create_parser():
   p = argparse.ArgumentParser()
-  p.add_argument("percentiles", type=float, nargs='*', default=[90.0],
-                 help="Percentiles to compute, default: 90")
+  p.add_argument("percentiles", type=float, nargs='*', default=[50, 90.0, 99.0],
+                 help="Percentiles to compute, default: 50, 90, 99")
   return p
 
 def lines():
