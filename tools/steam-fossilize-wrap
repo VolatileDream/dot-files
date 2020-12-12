@@ -50,7 +50,7 @@ main() {
     chrt --batch 0 \
     ionice -c 3 \
     prlimit --as=$ram_limit \
-    "${dir}/fossilize_replay.real" "${args[@]}" 2>> /tmp/fossilize_replay
+    "${dir}/fossilize_replay.real" "$@" 2>> /tmp/fossilize_replay
   rc=$?  # it will eventually exit
 
   (date --iso-8601=seconds | tr '\n' ' ' ; echo "=> fossilize_replay exited: $rc") |
