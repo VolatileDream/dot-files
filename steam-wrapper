@@ -26,6 +26,9 @@
 ####  END  ####
 STEAM_GAME_ID=16201299119438823424 # REPLACE ME
 
+# Gets set to the pid of steam when started
+STEAM_PID="unset"
+
 fake_game_detect_changes() {
   # This relies on having setup a small script to run as a steam "game" and 
   # attempting to start it through steam. Steam will eventually run it once
@@ -40,13 +43,14 @@ fake_game_detect_changes() {
 wait_for_steam() {
   # Spawn steam in a stopped subshell so we can setup & block other things.
   (kill -s STOP ${BASHPID} ; exec steam "$@" "steam://rungameid/${STEAM_GAME_ID}" ) &
-  local -r steam_pid=$!
+  # this is global to pass it out of this function.
+  STEAM_PID=$!
 
   fake_game_detect_changes &
   local -r settle_pid=$!
 
   # Let steam start.
-  kill -s CONT $steam_pid
+  kill -s CONT $STEAM_PID
   echo "starting steam & waiting for it to stop changing files"
   # Wait for settle to exit
   wait -f $settle_pid
@@ -83,7 +87,7 @@ main() {
   if [[ $@ -gt 0 ]]; then
     zenity --info --no-wrap --text "Steam options provided,\n wrapper may break them:\n$@"
   fi
-  wait_for_steam "$@"
+  wait_for_steam "$@" # sets STEAM_PID
 
   # Setup the wrapper in place of steams tool.
   local -r fossilize="${bin_dir}/fossilize_replay"
@@ -100,6 +104,15 @@ main() {
   # If steam exited in the mean time, these will block. :(
   steam steam://open/games
   steam steam://open/friends
+
+  wait -f $STEAM_PID
+  # Once steam exits we revert the fossilize-wrap symlinks.
+  # Otherwise steam updates itself every single time we open it,
+  # and that's slow, so we should try to avoid that.
+  if same-file "${fossilize}" "${wrapper}" ; then
+    mv "${fossilize}.real" "${fossilize}"
+    echo "unsetting fossilize_replay wrapper"
+  fi
 }
 
 main "$@"
