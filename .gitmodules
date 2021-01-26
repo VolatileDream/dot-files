@@ -46,3 +46,6 @@
 [submodule "submodules/git-subrepo"]
 	path = submodules/git-subrepo
 	url = https://github.com/ingydotnet/git-subrepo.git
+[submodule "submodules/age"]
+	path = submodules/age
+	url = https://github.com/FiloSottile/age.git

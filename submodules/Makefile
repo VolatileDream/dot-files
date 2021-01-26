@@ -1,12 +1,17 @@
 
 all : tup chronos bloom-filter no-tup
-no-tup : zzzcron rel roll-dice lookup pick scry extruder http2sh ondir
+no-tup : zzzcron rel roll-dice lookup pick scry extruder http2sh ondir age
 
 .PHONY: all no-tup
 .PHONY: tup chronos scry zzzcron roll-dice bloom-filter lookup pick http2sh
 
 tup :
 	cd tup ; if [ ! -e ./tup ]; then ./bootstrap.sh ; else ./tup ; fi
+
+age : age/age
+
+age/age :
+	cd age ; go build -o . filippo.io/age/cmd/...
 
 bloom-filter : tup
 	cd bloom-filter ; tup
