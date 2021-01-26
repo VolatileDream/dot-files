@@ -4,6 +4,7 @@ import argparse
 import enum
 import hashlib
 import itertools
+import logging
 import os
 import pathlib
 import socket
@@ -51,12 +52,13 @@ class PubSubSocket:
       while True:
         name = base_hash.hexdigest()[0:8]
         path_name = root_path.joinpath(name).with_suffix(".S")
+        logging.info("subscribe: trying to use %s as socket name", str(path_name))
         try:
           receiver.bind(str(path_name))
           receiver.listen()
           return PubSubSocket(receiver, path_name, SocketMode.SUB)
         except OSError as e:
-          print(e)
+          logging.debug("subscribe: socket name collision")
           # add more randomness into the hash because we hit a collision.
           base_hash.update(os.urandom(8))
           pass
@@ -71,6 +73,7 @@ class PubSubSocket:
       publisher.connect(str(path))
       return PubSubSocket(publisher, path, SocketMode.PUB)
     except ConnectionRefusedError:
+      logging.debug("publish: path %s refused connection", str(path))
       # perfectly ok, nothing listening on the other end.
       return PubSubSocket(None, path, SocketMode.DISCONNECT)
 
@@ -80,11 +83,14 @@ class PubSubSocket:
     self.mode = mode
 
   def close(self):
+    logging.debug("closing socket %s", self.path)
     if self.socket:
+      logging.debug("socket shutdown and closed")
       # unset if mode == DISCONNECT
       self.socket.shutdown(socket.SHUT_RDWR)
       self.socket.close()
     if self.mode == SocketMode.SUB:
+      logging.debug("unlinking path: %s", self.path)
       # reader created the socket, so reader deletes it.
       self.path.unlink(missing_ok=True)
 
@@ -92,18 +98,20 @@ class PubSubSocket:
     assert self.mode == SocketMode.SUB
     socket, _ = self.socket.accept()
     try:
+      logging.debug("subscribe: recv connected")
       return socket.recv(PubSubSocket.BUFFER_SIZE)
     finally:
       socket.close()
 
   def send(self, data):
     if self.mode == SocketMode.DISCONNECT:
+      logging.debug("publish: send to disconnected socket: %s", self.path)
       return
     assert self.mode == SocketMode.PUB
     assert len(data) <= PubSubSocket.BUFFER_SIZE
 
     sent = self.socket.send(data)
-    
+
 
 def publish(root, topic, data):
   # iterate over all files in root looking for sockets.
@@ -117,7 +125,7 @@ def publish(root, topic, data):
     for f in files:
       if not f.is_socket():
         continue
-      #print("sending to", f)
+      logging.info("attempt sending to %s", f)
 
       with closing(PubSubSocket.open_for_publish(f)) as publisher:
         publisher.send(data)
@@ -131,10 +139,8 @@ def subscribe(root, topic, count, msg_func):
 
   with closing(PubSubSocket.create_subscriber(path)) as subscriber:
 
-    while True:
+    while count is None or count > 0:
       if count is not None:
-        if count <= 0:
-          break
         count -= 1
 
       data = subscriber.recv()
@@ -150,16 +156,47 @@ def stdout_data(msg):
   sys.stdout.flush()
 
 
+def setup_logger(v, verbose):
+  if v > 0 and verbose is not None:
+    raise Exception("can't specify both -v and --verbose flags")
+
+  if v > 3:
+    v = 3
+
+  # Fatal > Warning > Info > Debug
+  log_map = {
+    1: logging.WARN,
+    2: logging.INFO,
+    3: logging.DEBUG,
+
+    'WARNING': logging.WARN,
+    'WARN': logging.WARN,
+    'INFO': logging.INFO,
+    'DEBUG': logging.DEBUG,
+  }
+
+  # default logging is fatal.
+  level = log_map.get(v or verbose, logging.CRITICAL)
+  logging.basicConfig(level=level)
+
+
 def main(args):
+  setup_logger(args.v, args.verbose)    
+
   if args.command == "publish":
     publish(args.root, args.topic, sys.stdin.read().encode())
   elif args.command == "subscribe":
+    if args.count and args.for_count:
+      raise Exception("can only specify one of --count or --for-count")
     subscribe(args.root, args.topic, args.count or args.for_count, stdout_data)
 
 
 def _parser():
   p = argparse.ArgumentParser()
-  p.add_argument("-r", "--root", default="/tmp/pubsub-ipc/root/", help="Root directory under which to bind unix sockets.")
+  p.add_argument("-r", "--root", default="/tmp/pubsub-ipc/root/",
+                 help="Root directory under which to bind unix sockets.")
+  p.add_argument("-v", action='count', default=0)
+  p.add_argument("--verbose", choices=['DEBUG', 'INFO', 'WARN', 'WARNING'], default=None)
 
   p2 = p.add_subparsers(dest='command', required=True)
 
