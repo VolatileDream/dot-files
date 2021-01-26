@@ -29,6 +29,10 @@ STEAM_GAME_ID=16201299119438823424 # REPLACE ME
 # Gets set to the pid of steam when started
 STEAM_PID="unset"
 
+error() {
+  tee /dev/stderr | pubsub-fifo publish steam/info
+}
+
 fake_game_detect_changes() {
   # This relies on having setup a small script to run as a steam "game" and 
   # attempting to start it through steam. Steam will eventually run it once
@@ -41,20 +45,23 @@ fake_game_detect_changes() {
 
 # Starts steam and waits for it to be running.
 wait_for_steam() {
+  echo "spawning subshell to run steam" | error
   # Spawn steam in a stopped subshell so we can setup & block other things.
   (kill -s STOP ${BASHPID} ; exec steam "$@" "steam://rungameid/${STEAM_GAME_ID}" ) &
   # this is global to pass it out of this function.
   STEAM_PID=$!
+
+  echo "created steam subprocess: ${STEAM_PID}" | error
 
   fake_game_detect_changes &
   local -r settle_pid=$!
 
   # Let steam start.
   kill -s CONT $STEAM_PID
-  echo "starting steam & waiting for it to stop changing files"
+  echo "starting steam & waiting for it to stop changing files" | error
   # Wait for settle to exit
-  wait -f $settle_pid
-  echo "done waiting for steam to settle"
+  wait $settle_pid
+  echo "done waiting for steam to settle" | error
 }
 
 main() {
@@ -78,7 +85,7 @@ main() {
     # Because of the way the script uses readlink we can't symlink.
     ln "$HOME/bin/tools/steam-fossilize-wrap" "${bin_dir}/steam-fossilize-wrap" ||
       cp "$HOME/bin/tools/steam-fossilize-wrap" "${bin_dir}/steam-fossilize-wrap"
-    echo "deployed steam-fossilize-wrap"
+    echo "deployed steam-fossilize-wrap" | error
   fi
 
   # Hopefully the way we actually start steam doesn't ruin the way the passed
@@ -95,7 +102,7 @@ main() {
   if ! same-file "${fossilize}" "${wrapper}" ; then
     same-file "${fossilize}" "${fossilize}.real" || echo "new fossilize binary"
     mv "${fossilize}" "${fossilize}.real" && ln -s "${wrapper}" "${fossilize}"
-    echo "setup fossilize_replay wrapper"
+    echo "setup fossilize_replay wrapper" | error
   fi
 
   # Setup is done, but because of our strategy steam hasn't opened all the
@@ -111,7 +118,7 @@ main() {
   # and that's slow, so we should try to avoid that.
   if same-file "${fossilize}" "${wrapper}" ; then
     mv "${fossilize}.real" "${fossilize}"
-    echo "unsetting fossilize_replay wrapper"
+    echo "unsetting fossilize_replay wrapper" | error
   fi
 }
 
