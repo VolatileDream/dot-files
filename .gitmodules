@@ -1,45 +1,45 @@
 [submodule "submodules/chronos"]
 	path = submodules/chronos
-	url = git@github.com:VolatileDream/chronos.git
+	url = https://github.com/VolatileDream/chronos.git
 [submodule "submodules/tup"]
 	path = submodules/tup
 	url = https://github.com/gittup/tup.git
 [submodule "submodules/inotify-tools"]
 	path = submodules/inotify-tools
-	url = git@github.com:VolatileDream/inotify-tools
+	url = https://github.com/VolatileDream/inotify-tools
 [submodule "submodules/zzzcron"]
 	path = submodules/zzzcron
-	url = git@github.com:VolatileDream/zzzcron.git
+	url = https://github.com/VolatileDream/zzzcron.git
 [submodule "submodules/roll-dice"]
 	path = submodules/roll-dice
-	url = git@github.com:VolatileDream/roll-dice.git
+	url = https://github.com/VolatileDream/roll-dice.git
 [submodule "submodules/lookup"]
 	path = submodules/lookup
-	url = git@github.com:VolatileDream/lookup.git
+	url = https://github.com/VolatileDream/lookup.git
 [submodule "submodules/pick"]
 	path = submodules/pick
-	url = git@github.com:thoughtbot/pick.git
+	url = https://github.com/thoughtbot/pick.git
 [submodule "submodules/mwiki"]
 	path = submodules/mwiki
-	url = git@github.com:VolatileDream/mwiki.git
+	url = https://github.com/VolatileDream/mwiki.git
 [submodule "submodules/tomb"]
 	path = submodules/tomb
-	url = git@github.com:dyne/Tomb.git
+	url = https://github.com/dyne/Tomb.git
 [submodule "submodules/extruder"]
 	path = submodules/extruder
-	url = git@github.com:VolatileDream/extruder.git
+	url = https://github.com/VolatileDream/extruder.git
 [submodule "submodules/http2sh"]
 	path = submodules/http2sh
-	url = git@github.com:VolatileDream/http2sh.git
+	url = https://github.com/VolatileDream/http2sh.git
 [submodule "submodules/ondir"]
 	path = submodules/ondir
-	url = git@github.com:alecthomas/ondir.git
+	url = https://github.com/alecthomas/ondir.git
 [submodule "submodules/tomb-pass"]
 	path = submodules/tomb-pass
 	url = https://github.com/roddhjav/pass-tomb.git
 [submodule "submodules/bloom-filter"]
 	path = submodules/bloom-filter
-	url = git@github.com:VolatileDream/bloom-filter.git
+	url = https://github.com/VolatileDream/bloom-filter.git
 [submodule "submodules/count-distinct"]
 	path = submodules/count-distinct
 	url = https://github.com/VolatileDream/count-distinct.git
