@@ -1,6 +1,7 @@
 
 all : tup chronos bloom-filter no-tup
-no-tup : zzzcron rel roll-dice lookup pick scry extruder http2sh ondir age
+go-build: age gron
+no-tup : zzzcron rel roll-dice lookup pick scry extruder http2sh ondir go-build
 
 .PHONY: all no-tup
 .PHONY: tup chronos scry zzzcron roll-dice bloom-filter lookup pick http2sh
@@ -21,6 +22,11 @@ count-distinct : tup
 
 chronos : tup
 	cd chronos ; tup
+
+gron : gron/gron
+
+gron/gron :
+	cd gron ; go build -o . github.com/tomnomnom/gron
 
 lookup :
 	cd lookup ; make

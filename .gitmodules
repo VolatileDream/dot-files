@@ -49,3 +49,6 @@
 [submodule "submodules/age"]
 	path = submodules/age
 	url = https://github.com/FiloSottile/age.git
+[submodule "submodules/gron"]
+	path = submodules/gron
+	url = https://github.com/tomnomnom/gron.git
