@@ -43,15 +43,15 @@ unset -f setup-history
 shopt -s histappend
 
 # Output all of the history from every history file ever.
-history::all() {
+history::cat() {
   find ~/.history/ -type f | xargs cat
 }
 
 # C-r breaks once you have a bunch of history files so we have to rebuild it
 history::pick () {
     # 1/10_000 error, use count-distinct to approximate the number of elements we expect.
-    local approx_count=$(history::all | count-distinct)
-    local line=$(history::all | bloom -p 0.00001 -n ${approx_count} -r | pick)
+    local approx_count=$(history::cat | count-distinct)
+    local line=$(history::cat | bloom -p 0.00001 -n ${approx_count} -r | pick)
 
     if [ -n "$line" ]; then
         history -s "$line"
