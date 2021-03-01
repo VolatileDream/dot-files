@@ -1,7 +1,7 @@
 #!/bin/bash
 
 run_discord() {
-  /usr/bin/discord "$@" --no-webrtc-event-logging
+  /usr/bin/discord "$@" > /dev/null 2>/dev/null
 }
 
 notify_dead() {
