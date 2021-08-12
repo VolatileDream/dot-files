@@ -1,4 +1,41 @@
-#!/usr/bin/env sh
+#!/usr/bin/env python3
 
-python -m SimpleHTTPServer $@
+# Replicated from http.server. The defaults are changed because they don't
+# match the way I tend to use this (local server only).
+
+import contextlib
+import http.server
+import os
+
+from functools import partial
+
+if __name__ == '__main__':
+  import argparse
+
+  parser = argparse.ArgumentParser()
+  parser.add_argument('--all-interfaces', action='store_true', default=False,
+                      help='Bind to all interfaces (default: only localhost)')
+  parser.add_argument('port', action='store', default=8000, type=int,
+                      nargs='?', help='Specify alternate port (default: 8000)')
+  args = parser.parse_args()
+
+
+  # ensure dual-stack is not disabled; ref #38907
+  class DualStackServer(http.server.ThreadingHTTPServer):
+    def server_bind(self):
+      # suppress exception when protocol is IPv4
+      with contextlib.suppress(Exception):
+        self.socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
+      return super().server_bind()
+
+  bind = 'localhost'
+  if args.all_interfaces:
+    bind = None
+
+  http.server.test(
+      HandlerClass=partial(http.server.SimpleHTTPRequestHandler, directory=os.getcwd()),
+      ServerClass=DualStackServer,
+      port=args.port,
+      bind=bind,
+  )
 
