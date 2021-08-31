@@ -34,9 +34,6 @@
 [submodule "submodules/count-distinct"]
 	path = submodules/count-distinct
 	url = https://github.com/VolatileDream/count-distinct.git
-[submodule "submodules/age"]
-	path = submodules/age
-	url = https://github.com/FiloSottile/age.git
 [submodule "submodules/gron"]
 	path = submodules/gron
 	url = https://github.com/tomnomnom/gron.git
