@@ -49,8 +49,10 @@ class Deployer:
         print("Removing {}".format(dest))
         if not self.dry_run:
           dest.unlink()
+      elif not dest.readlink().samefile(source):
+        print("Bad link at {} points to {}".format(dest, dest.readlink()))
       else:
-        print("Link at {} already exists.".format(dest))
+        print("Already linked {}".format(dest))
         return
 
     print("Linking {} to {}".format(dest, source))
