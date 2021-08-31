@@ -1,0 +1,25 @@
+.bash_logout -> /
+.bashrc -> /
+.gitconfig -> /
+.ondirrc -> /
+.selected_editor -> /
+.vimrc -> /
+.xsession -> /
+.xsessionrc -> /
+
+.config/bash -> .config/bash
+.config/dunst -> .config/dunst
+.config/environment.variables -> .config/
+.config/i3/ -> .config/i3/
+.config/i3status/ -> .config/i3status/
+.config/lxterminal/lxterminal.conf -> .config/lxterminal/
+.config/mwiki-journal-config.ini -> .config/
+.config/openbox/lubuntu-rc.xml -> .config/openbox/
+.config/redshift.conf -> .config/
+.gnupg/gpg-agent.conf -> .gnupg/
+.gnupg/gpg.conf -> .gnupg/
+.irssi/config -> .irssi/
+.mplayer/config -> .mplayer/
+.ssh/authorized_keys -> .ssh/
+.ssh/config -> .ssh/
+.ssh/known_hosts -> .ssh/

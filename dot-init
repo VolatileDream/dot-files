@@ -6,52 +6,14 @@ cd "`dirname "$(readlink -f "$0")"`"
 # Source the config stuff
 source ".config/dot-config"
 
-mirror-dir-structure(){
-
-    if [[ $# -lt 2 ]] ; then
-        echo "mirror-dir-structure requires input + output directories"
-        return
-    fi
-
-    # first setup directories
-    for dir in ` cd $1 ; find . -type d ` ; do
-        if [[ ! -d "$2/$dir" ]]; then
-            # directory doesn't exist
-            mkdir -p "$2/$dir"
-        fi
-    done # directories
-}
-
 do-submodules(){
     # submodules are symlinked using git
     cd "$BIN_DIR/submodules/" ; make --no-builtin-rules --no-builtin-variables
 }
 
 do-linking(){
-
     mkdir -p $SRC_DIR
-
-    mirror-dir-structure "$SRC_DIR" "$HOME"
-
-    for file in ` cd $SRC_DIR ; find . -type f ` ; do
-
-        output="$HOME/$file"
-
-        # it's either a link, or the file we want to replace it with
-        if [[ -L "$output" ]] || [[ "$output" -ef "$SRC_DIR/$file" ]]; then
-            continue
-        fi
-
-        # remove the file if the user will let us
-        if [[ -f "$output" ]]; then
-            rm -i "$output"
-        fi
-
-        # do a second check to see if the file was removed.
-        if [[ ! -f "$output" ]]; then
-            ln -s "$SRC_DIR/$file" "$output"
-        fi
-    done
+    cat "$SRC_DIR/MAPPING" | dot-deploy --config "$SRC_DIR" --root "$HOME"
 }
 
 do-linking
