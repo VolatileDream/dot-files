@@ -9,8 +9,8 @@ do-submodules(){
 }
 
 do-linking(){
-    mkdir -p $SRC_DIR
-    cat ".source/MAPPING" | dot-deploy --config "$SRC_DIR" --root "$HOME"
+    config_dir=".source"
+    cat "${config_dir}/MAPPING" | dot-deploy --config "${config_dir}" --root "$HOME"
 }
 
 do-linking
