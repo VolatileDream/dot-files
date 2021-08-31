@@ -15,6 +15,7 @@
 	recurse = true
 [diff]
 	submodule = log
+	ignoreSubmodules = dirty
 [init]
 	defaultBranch = main
 [pull]
