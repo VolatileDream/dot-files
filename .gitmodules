@@ -13,9 +13,6 @@
 [submodule "submodules/roll-dice"]
 	path = submodules/roll-dice
 	url = https://github.com/VolatileDream/roll-dice.git
-[submodule "submodules/lookup"]
-	path = submodules/lookup
-	url = https://github.com/VolatileDream/lookup.git
 [submodule "submodules/pick"]
 	path = submodules/pick
 	url = https://github.com/thoughtbot/pick.git
@@ -43,9 +40,6 @@
 [submodule "submodules/count-distinct"]
 	path = submodules/count-distinct
 	url = https://github.com/VolatileDream/count-distinct.git
-[submodule "submodules/git-subrepo"]
-	path = submodules/git-subrepo
-	url = https://github.com/ingydotnet/git-subrepo.git
 [submodule "submodules/age"]
 	path = submodules/age
 	url = https://github.com/FiloSottile/age.git
