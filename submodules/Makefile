@@ -1,10 +1,10 @@
 
 all : tup chronos bloom-filter no-tup
 go-build: age gron
-no-tup : zzzcron rel roll-dice lookup pick scry extruder http2sh ondir go-build
+no-tup : zzzcron rel roll-dice lookup pick scry extruder ondir go-build
 
 .PHONY: all no-tup
-.PHONY: tup chronos scry zzzcron roll-dice bloom-filter lookup pick http2sh
+.PHONY: tup chronos scry zzzcron roll-dice bloom-filter lookup pick 
 
 tup :
 	cd tup ; if [ ! -e ./tup ]; then ./bootstrap.sh ; else ./tup ; fi
@@ -52,10 +52,6 @@ ondir : ondir/ondir
 
 ondir/ondir :
 	cd ondir ; make
-
-http2sh : python3-virtual-env
-	echo "source python3-virtual-env/bin/activate; \
-		pip install -r http2sh/requirements.txt;" | bash
 
 roll-dice : python3-virtual-env
 	echo "source python3-virtual-env/bin/activate; \

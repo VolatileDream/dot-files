@@ -1,9 +1,0 @@
-#!/bin/sh
-
-if [ $# -lt 2 ]; then
-	echo "usage: $0 <input> <output>"
-	echo "    Strips all video tracks from <input> and writes to <output>"
-	exit
-fi
-
-avconv -i "$1" -c:a copy -vn "$2"

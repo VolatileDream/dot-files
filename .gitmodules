@@ -22,9 +22,6 @@
 [submodule "submodules/extruder"]
 	path = submodules/extruder
 	url = https://github.com/VolatileDream/extruder.git
-[submodule "submodules/http2sh"]
-	path = submodules/http2sh
-	url = https://github.com/VolatileDream/http2sh.git
 [submodule "submodules/ondir"]
 	path = submodules/ondir
 	url = https://github.com/alecthomas/ondir.git
