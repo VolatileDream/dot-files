@@ -7,8 +7,8 @@ vimrc -> /.vimrc
 xsession -> /.xsession
 xsessionrc -> /.xsessionrc
 
-config/bash -> .config/bash
-config/dunst -> .config/dunst
+config/bash/ -> .config/bash/
+config/dunst/ -> .config/dunst/
 config/environment.variables -> .config/
 config/i3/ -> .config/i3/
 config/i3status/ -> .config/i3status/
@@ -18,8 +18,8 @@ config/openbox/lubuntu-rc.xml -> .config/openbox/
 config/redshift.conf -> .config/
 gnupg/gpg-agent.conf -> .gnupg/
 gnupg/gpg.conf -> .gnupg/
-irssi/config -> .irssi/
-mplayer/config -> .mplayer/
+irssi -> .irssi/config
+mplayer -> .mplayer/config
 ssh/authorized_keys -> .ssh/
 ssh/config -> .ssh/
 ssh/known_hosts -> .ssh/
