@@ -9,7 +9,7 @@ do-submodules(){
 }
 
 do-linking(){
-    config_dir=".source"
+    config_dir="config"
     cat "${config_dir}/MAPPING" | dot-deploy --config "${config_dir}" --root "$HOME"
 }
 
