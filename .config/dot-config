@@ -1,6 +1,0 @@
-# This file isn't to be executed, but is to be sourced by other dot-* commands
-
-BIN_DIR="$HOME/bin"
-
-SRC_DIR="$BIN_DIR/.source"
-

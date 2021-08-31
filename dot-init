@@ -3,17 +3,14 @@
 
 cd "`dirname "$(readlink -f "$0")"`"
 
-# Source the config stuff
-source ".config/dot-config"
-
 do-submodules(){
     # submodules are symlinked using git
-    cd "$BIN_DIR/submodules/" ; make --no-builtin-rules --no-builtin-variables
+    cd "submodules/" ; make --no-builtin-rules --no-builtin-variables
 }
 
 do-linking(){
     mkdir -p $SRC_DIR
-    cat "$SRC_DIR/MAPPING" | dot-deploy --config "$SRC_DIR" --root "$HOME"
+    cat ".source/MAPPING" | dot-deploy --config "$SRC_DIR" --root "$HOME"
 }
 
 do-linking
