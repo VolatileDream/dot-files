@@ -1,11 +1,7 @@
 #!/bin/bash
 #    init-dot-files - creates hard links to dot files, and generates others
 
-if ! ls dot-init >/dev/null 2>/dev/null; then
-	# sneaky way to check we're executing in the dot file repo
-	echo "dot-init can only be used inside the dot file repo" 
-	exit
-fi
+cd "`dirname "$(readlink -f "$0")"`"
 
 # Source the config stuff
 source ".config/dot-config"
