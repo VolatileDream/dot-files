@@ -7,16 +7,12 @@
         {
             "floating": "auto_off",
             "geometry": {
-               "height": 452,
-               "width": 962,
-               "x": 0,
-               "y": 0
             },
-            "name": "jex@litigo: ~/.config/i3",
+            "name": "Disks",
             "percent": 0.5,
             "swallows": [
                {
-               "class": "^[lL]xterminal$"
+               "class": "^Gnome\\-disks$"
                }
             ],
             "type": "con"
@@ -24,16 +20,12 @@
         {
             "floating": "auto_off",
             "geometry": {
-               "height": 756,
-               "width": 810,
-               "x": 555,
-               "y": 162
             },
-            "name": "512 GB Disk",
+            "name": "terminal",
             "percent": 0.5,
             "swallows": [
                {
-               "class": "^Gnome\\-disks$"
+               "class": "^[lL]xterminal$"
                }
             ],
             "type": "con"
@@ -44,10 +36,6 @@
 {
     "floating": "auto_off",
     "geometry": {
-       "height": 452,
-       "width": 962,
-       "x": 0,
-       "y": 0
     },
     "name": "jex@litigo: ~",
     "percent": 0.5,

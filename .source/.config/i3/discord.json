@@ -8,10 +8,6 @@
 {
     "floating": "auto_off",
     "geometry": {
-       "height": 1041,
-       "width": 956,
-       "x": 2882,
-       "y": 18
     },
     "name": "- Discord$",
     "percent": 1,
@@ -35,10 +31,6 @@
         {
             "floating": "auto_off",
             "geometry": {
-               "height": 1041,
-               "width": 956,
-               "x": 2882,
-               "y": 18
             },
             "name": " - Discord",
             "percent": 0.5,
@@ -54,10 +46,6 @@
         {
             "floating": "auto_off",
             "geometry": {
-               "height": 511,
-               "width": 956,
-               "x": 1922,
-               "y": 548
             },
             "name": "Keybase",
             "percent": 0.5,
@@ -77,10 +65,6 @@
 {
     "floating": "auto_off",
     "geometry": {
-       "height": 1061,
-       "width": 960,
-       "x": 2880,
-       "y": 0
     },
     "name": "Friends List",
     "percent": 0.5,
@@ -96,10 +80,6 @@
 {
     "floating": "auto_off",
     "geometry": {
-       "height": 1061,
-       "width": 960,
-       "x": 2880,
-       "y": 0
     },
     "name": "Friends List",
     "percent": 0.5,
@@ -112,4 +92,3 @@
     ],
     "type": "con"
 }
-
