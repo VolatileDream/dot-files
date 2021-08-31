@@ -17,3 +17,5 @@
 	submodule = log
 [init]
 	defaultBranch = main
+[pull]
+	ff = only
