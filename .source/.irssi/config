@@ -1,13 +1,13 @@
 servers = (
   { 
-    address = "irc.freenode.net";
-    chatnet = "Freenode";
+    address = "irc.libera.chat";
+    chatnet = "librachat";
     port = "6667";
   }
 );
 
 chatnets = {
-  Freenode = { type = "IRC"; };
+  liberachat = { type = "IRC"; };
   LinkNet = {
     type = "IRC";
     max_kicks = "1";
@@ -17,7 +17,7 @@ chatnets = {
   SILC = { type = "SILC"; };
 };
 
-channels = ( { name = "#csc"; chatnet = "freenode"; autojoin = "No"; } );
+channels = ( { name = "#csc"; chatnet = "liberachat"; autojoin = "No"; } );
 
 aliases = {
   J = "join";
