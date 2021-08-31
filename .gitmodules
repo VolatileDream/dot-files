@@ -19,9 +19,6 @@
 [submodule "submodules/mwiki"]
 	path = submodules/mwiki
 	url = https://github.com/VolatileDream/mwiki.git
-[submodule "submodules/tomb"]
-	path = submodules/tomb
-	url = https://github.com/dyne/Tomb.git
 [submodule "submodules/extruder"]
 	path = submodules/extruder
 	url = https://github.com/VolatileDream/extruder.git
@@ -31,9 +28,6 @@
 [submodule "submodules/ondir"]
 	path = submodules/ondir
 	url = https://github.com/alecthomas/ondir.git
-[submodule "submodules/tomb-pass"]
-	path = submodules/tomb-pass
-	url = https://github.com/roddhjav/pass-tomb.git
 [submodule "submodules/bloom-filter"]
 	path = submodules/bloom-filter
 	url = https://github.com/VolatileDream/bloom-filter.git
