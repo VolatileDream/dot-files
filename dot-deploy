@@ -34,6 +34,12 @@ class Deployer:
     except ValueError as e:
       raise Exception("Bad line, needs to contain ' -> ': {}".format(line)) from e
 
+  def same_file(self, source, dest):
+    try:
+      return dest.readlink().samefile(source)
+    except FileNotFoundError:
+      return False
+
   def link(self, source, target):
     source = self.from_root.joinpath(source)
     dest = self.to_root.joinpath(target)
@@ -44,13 +50,17 @@ class Deployer:
     if not self.dry_run:
       dest.parent.mkdir(parents=True, exist_ok=True)
 
-    if dest.exists():
+    # Path.exists returns false when the target of a symlink doesn't exist.
+    if dest.exists() or dest.is_symlink():
       if not dest.is_symlink():
         print("Removing {}".format(dest))
         if not self.dry_run:
           dest.unlink()
-      elif not dest.readlink().samefile(source):
+      elif not self.same_file(source, dest):
         print("Bad link at {} points to {}".format(dest, dest.readlink()))
+        print("Removing {}".format(dest))
+        if not self.dry_run:
+          dest.unlink()
       else:
         print("Already linked {}".format(dest))
         return
