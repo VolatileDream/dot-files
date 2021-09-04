@@ -46,7 +46,7 @@ m(){
     fi
 }
 
-if [ "${FUNCNAME[0]}" = "main" -o "${FUNCNAME[0]}" = "main" ]; then
+if [ "${FUNCNAME[0]}" = "main" -o "${FUNCNAME[0]}" = "" ]; then
 	# this file wasn't sourced, execute.
 	m "$@"
 	exit $?
