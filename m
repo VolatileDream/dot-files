@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
+#
+# m is for media, not just audio.
+#
 
-# media command
-m(){
+main(){
     local options=()
     local inputs=()
     while [ $# -gt 0 ] ; do
@@ -22,7 +24,7 @@ m(){
       return 1
     elif [ ${#inputs[@]} -eq 1 -a -f "${inputs[0]}" ]; then
       echo mpv "${options[@]}" "${inputs[0]}"
-      mpv "${options[@]}" "${inputs[0]}"
+      exec mpv "${options[@]}" "${inputs[0]}"
     else
         # create a playlist out of the files and dirs,
         # attempt to preserve order across inputs.
@@ -46,8 +48,4 @@ m(){
     fi
 }
 
-if [ "${FUNCNAME[0]}" = "main" -o "${FUNCNAME[0]}" = "" ]; then
-	# this file wasn't sourced, execute.
-	m "$@"
-	exit $?
-fi
+main "$@"

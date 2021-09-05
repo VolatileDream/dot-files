@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
+#
+# a is for audio.
+#
 
-source $HOME/bin/m
-
-# a is for audio
-a(){
+main(){
     # run through inputs, if we only have directories, shuffle + loop
     local only_dirs=1
     for thing in "$@" ; do
@@ -16,11 +16,7 @@ a(){
     if [ "$only_dirs" -eq 1 ]; then
         params="$params --shuffle --loop-playlist=inf"
     fi
-    m "$@" $params
+    exec m "$@" $params
 }
 
-if [ "${FUNCNAME[0]}" = "main" -o "${FUNCNAME[0]}" = "" ]; then
-	# this file wasn't sourced, execute.
-	a "$@"
-	exit $?
-fi
+main "$@"
