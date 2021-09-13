@@ -7,10 +7,11 @@ vimrc -> /.vimrc
 xsession -> /.xsession
 xsessionrc -> /.xsessionrc
 
-config/bash/ -> .config/bash/
+bash/ -> .config/bash/
+i3/ -> .config/i3/
+
 config/dunst/ -> .config/dunst/
 config/environment.variables -> .config/
-config/i3/ -> .config/i3/
 config/i3status/ -> .config/i3status/
 config/lxterminal/lxterminal.conf -> .config/lxterminal/
 config/mwiki-journal-config.ini -> .config/
