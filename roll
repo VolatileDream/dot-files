@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-
-source $HOME/bin/submodules/python3-virtual-env/bin/activate
-python $HOME/bin/submodules/roll-dice/roll.py "$@"

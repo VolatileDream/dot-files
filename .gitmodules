@@ -10,9 +10,6 @@
 [submodule "submodules/zzzcron"]
 	path = submodules/zzzcron
 	url = https://github.com/VolatileDream/zzzcron.git
-[submodule "submodules/roll-dice"]
-	path = submodules/roll-dice
-	url = https://github.com/VolatileDream/roll-dice.git
 [submodule "submodules/pick"]
 	path = submodules/pick
 	url = https://github.com/thoughtbot/pick.git
