@@ -51,13 +51,13 @@ history::cat() {
 history::pick () {
     # 1/10_000 error, use count-distinct to approximate the number of elements we expect.
     local approx_count=$(history::cat | count-distinct)
-    local line=$(history::cat | bloom -p 0.00001 -n ${approx_count} -r | pick)
+    local line=$(history::cat | bloom-filter -p 0.00001 -n ${approx_count} -r | pick)
 
     if [ -n "$line" ]; then
         history -s "$line"
         eval "$line"
     fi
 }
-# define an alternative for systems where we may not have 'bloom' and 'pick'
+# define an alternative for systems where we may not have 'bloom-filter' and 'pick'
 history::grep () { grep --recursive --no-filename "$@" ~/.history | uniq ; }
 
