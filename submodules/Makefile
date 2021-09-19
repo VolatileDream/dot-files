@@ -17,9 +17,6 @@ age/age :
 bloom-filter : tup
 	cd bloom-filter ; tup
 
-count-distinct : tup
-	cd count-distinct ; tup
-
 chronos : tup
 	cd chronos ; tup
 
