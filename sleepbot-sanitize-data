@@ -42,25 +42,26 @@ class SleepBotDatum(object):
         return SleepBotDatum(dt_awake, hours_asleep)
 
 
+def dedup():
+  # Sometimes lines are duplicated. Unclear why.
+  prev = None
+  for line in sys.stdin:
+    if line == prev:
+      continue
+    prev = line
+    yield line
+
+
 def sanitize():
-
-    last = None
-
-    for line in sys.stdin:
-
+    for line in dedup():
         if 'Date' in line:
             # first line has headers, skip
             continue
 
         datum = SleepBotDatum.parse(line)
 
-        # For some reason the data is stupid...
-        if last is not None and last.awake.date() == datum.awake.date():
-            continue
-
         dt_asleep = datum.awake - datum.hours_duration
 
-        last = datum
         print("asleep", dt_asleep.strftime(DateTimeFormat))
         print("awake", datum.awake.strftime(DateTimeFormat))
 
