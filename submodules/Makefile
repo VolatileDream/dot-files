@@ -49,6 +49,4 @@ zzzcron : python3-virtual-env
 
 python3-virtual-env : 
 	virtualenv -p python3 python3-virtual-env
-	echo "source python3-virtual-env/bin/activate; \
-    pip install tdigest" | bash
 
