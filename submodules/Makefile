@@ -1,10 +1,10 @@
 
-all : tup chronos bloom-filter no-tup
+all : tup chronos no-tup
 go-build: age gron
 no-tup : zzzcron rel lookup pick scry ondir go-build
 
 .PHONY: all no-tup
-.PHONY: tup chronos scry zzzcron bloom-filter lookup pick 
+.PHONY: tup chronos scry zzzcron lookup pick 
 
 tup :
 	cd tup ; if [ ! -e ./tup ]; then ./bootstrap.sh ; else ./tup ; fi
@@ -13,9 +13,6 @@ age : age/age
 
 age/age :
 	cd age ; go build -o . filippo.io/age/cmd/...
-
-bloom-filter : tup
-	cd bloom-filter ; tup
 
 chronos : tup
 	cd chronos ; tup

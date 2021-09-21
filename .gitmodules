@@ -19,6 +19,3 @@
 [submodule "submodules/ondir"]
 	path = submodules/ondir
 	url = https://github.com/alecthomas/ondir.git
-[submodule "submodules/bloom-filter"]
-	path = submodules/bloom-filter
-	url = https://github.com/VolatileDream/bloom-filter.git
