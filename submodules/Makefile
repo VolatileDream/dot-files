@@ -1,7 +1,7 @@
 
 all : tup chronos bloom-filter no-tup
 go-build: age gron
-no-tup : zzzcron rel lookup pick scry extruder ondir go-build
+no-tup : zzzcron rel lookup pick scry ondir go-build
 
 .PHONY: all no-tup
 .PHONY: tup chronos scry zzzcron bloom-filter lookup pick 
@@ -38,12 +38,6 @@ inotify-tools/libinotify-tools/src/scry : inotify-tools/src/inotifywait
 
 inotify-tools/src/inotifywait :
 	cd inotify-tools ; if [ ! -e Makefile ]; then ./autogen.sh ; ./configure ; fi ; make
-
-extruder : extruder/extruder
-
-extruder/extruder :
-	cd extruder ; git submodule init ; git submodule update
-	cd extruder ; make
 
 ondir : ondir/ondir
 

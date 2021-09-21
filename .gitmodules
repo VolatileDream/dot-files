@@ -16,9 +16,6 @@
 [submodule "submodules/mwiki"]
 	path = submodules/mwiki
 	url = https://github.com/VolatileDream/mwiki.git
-[submodule "submodules/extruder"]
-	path = submodules/extruder
-	url = https://github.com/VolatileDream/extruder.git
 [submodule "submodules/ondir"]
 	path = submodules/ondir
 	url = https://github.com/alecthomas/ondir.git
