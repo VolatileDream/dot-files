@@ -8,7 +8,9 @@ xsession -> /.xsession
 xsessionrc -> /.xsessionrc
 
 bash/ -> .config/bash/
-i3/ -> .config/i3/
+i3/autostart.sh -> .config/i3/autostart.sh
+i3/config -> .config/i3/config
+i3/layouts -> .config/i3/layouts
 
 config/dunst/ -> .config/dunst/
 config/environment.variables -> .config/
