@@ -10,7 +10,7 @@
 [alias]
 	graph = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%C(bold blue)<%an>%Creset' --abbrev-commit
 [fetch]
-	recurseSubmodules = yes
+	recurseSubmodules = on-demand
 [submodule]
 	recurse = true
 [diff]
@@ -20,3 +20,4 @@
 	defaultBranch = main
 [pull]
 	ff = only
+	recurseSubmodules = on-demand
