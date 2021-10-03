@@ -2,7 +2,71 @@
 
 import argparse
 from pathlib import Path
+from socket import gethostname
 import sys
+
+MAP_FILE = "MAPPING"
+HOST_PREFIX = "HOST-"
+
+
+def map_line(line):
+  try:
+    source, target = line.strip().split(" -> ", 1)
+
+    # Work around absolute file weirdness in pathlib
+    if source.startswith("/"):
+      source = "." + source
+    if target.startswith("/"):
+      target = "." + target
+
+    if source.endswith("/") and not target.endswith("/"):
+      raise Exception("Can not link directory to file: {}".format(line))
+
+    # Can link file to directory, implies the name is kept
+    if not source.endswith("/") and target.endswith("/"):
+      *_, src_name = source.rsplit("/", 1)
+      target = target + src_name
+
+    return (source, target)
+  except ValueError as e:
+    raise Exception("Bad line, needs to contain ' -> ': {}".format(line)) from e
+
+
+def load_map(mapping):
+  directory = mapping.parent
+  config = {}
+  with mapping.open() as f:
+    for line in f:
+      line = line.strip()
+      if not line:
+        continue
+
+      source, target = map_line(line)
+      source = directory.joinpath(source)
+      config[target] = source
+
+  return config
+
+
+def load_host_overlay(directory):
+  m = directory.joinpath(MAP_FILE)
+  if not m.exists():
+    raise Exception("Host overlay missing {}".format(MAP_FILE))
+
+  return load_map(m)
+
+
+def load_configs(deploy_from):
+  # Maps target -> source
+  config = load_map(deploy_from.joinpath(MAP_FILE))
+  host_overlays = {}
+
+  for host in deploy_from.glob(HOST_PREFIX + "*"):
+    name = host.name[len(HOST_PREFIX):]
+    host_overlays[name] = load_host_overlay(host)
+
+  return (config, host_overlays)
+
 
 class Deployer:
   slots = ["from_root", "to_root", "dry_run"]
@@ -11,33 +75,20 @@ class Deployer:
     self.to_root = Path(deploy_to_root or Path().home()).resolve()
     self.dry_run = dry_run
 
-  def mapping(self, line):
-    try:
-      source, target = line.strip().split(" -> ", 1)
+  def run(self):
+    config, overlays = load_configs(self.from_root)
+    # Squash the host overlay into the config
+    overlay = overlays.get(gethostname(), dict())
+    for target in overlay:
+      config[target] = overlay[target]
 
-      # Work around absolute file weirdness in pathlib
-      if source.startswith("/"):
-        source = "." + source
-      if target.startswith("/"):
-        target = "." + target
-
-      if source.endswith("/") and not target.endswith("/"):
-        raise Exception("Can not link directory to file: {}".format(line))
-
-      # Can link file to directory, implies the name is kept
-      if not source.endswith("/") and target.endswith("/"):
-        *_, src_name = source.rsplit("/", 1)
-        target = target + src_name
-
+    for target, source in config.items():
       self.link(source, target)
-
-    except ValueError as e:
-      raise Exception("Bad line, needs to contain ' -> ': {}".format(line)) from e
 
   def same_file(self, source, dest):
     try:
       return dest.readlink().samefile(source)
-    except FileNotFoundError:
+    except (NotADirectoryError, FileNotFoundError):
       return False
 
   def link(self, source, target):
@@ -69,6 +120,7 @@ class Deployer:
     if not self.dry_run:
       dest.symlink_to(source, target_is_directory=target.endswith("/"))
 
+
 def parser():
   p = argparse.ArgumentParser()
 
@@ -83,17 +135,7 @@ def parser():
 def main():
   args = parser().parse_args()
 
-  files = [open(f, "r") for f in args.file]
-  if not files:
-    files = [sys.stdin]
-
-  d = Deployer(args.config, args.root, dry_run=args.dry_run)
-  for f in files:
-    for line in f:
-      line = line.strip()
-      if not line:
-        continue
-      d.mapping(line)
+  Deployer(args.config, args.root, dry_run=args.dry_run).run()
 
 
 if __name__ == "__main__":
