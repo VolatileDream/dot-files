@@ -35,7 +35,13 @@ client.focused          #ef2fef #ef2fef #ffffff #2e9ef4   #ef2fef
 
 # Save a few pixels on monitors where there's only one window displayed.
 hide_edge_borders smart
-# I like to not have titles by default.
+# I generally do not like that some windows provide MOTIF_MW_HINTS that cause
+# i3 to give them borders that differ from what I want as a default. I would
+# prefer generally setting it such that no window gets `border none` because I
+# really prefer having a border to show the focused window.
+#
+# However we compromise for the common windows that I have open.
+for_window [class="(Steam|Gnome-disks)"] border pixel 2
 default_border pixel 2
 # Toggle borders, mostly to remove titlebars on "full screen" windows.
 bindsym $mod+Control+b border toggle
