@@ -27,8 +27,8 @@ EOF
 
 start_programs() {
   firefox &
-  lxterminal &
-  lxterminal &
+  i3-sensible-terminal &
+  i3-sensible-terminal &
   gnome-disks &
   discord &
   run_keybase &
