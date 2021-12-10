@@ -1,0 +1,35 @@
+article-sort-order date-asc
+selecttag-format "[%4i] (%3n / %2u) %T"
+
+# Refresh options
+refresh-on-startup no
+reload-threads 10
+
+# Highlights for headings
+highlight feedlist "----.*----" red
+# Need to seen unread feeds to see headings.
+show-read-feeds yes
+
+browser "firefox --new-tab %u"
+notify-format "Newsboat: %d new articles to read"
+notify-program notify-send
+
+##########################
+#        Bindings        #
+##########################
+
+unbind-key R
+bind-key ^R reload-all
+
+# make vim bindings for prev/next lower case
+unbind-key J
+unbind-key K
+bind-key j next
+bind-key k prev
+# unbind n & p
+unbind-key n
+unbind-key p
+
+# Unread navigation
+unbind-key ^K
+unbind-key C # mark-all-feeds-read

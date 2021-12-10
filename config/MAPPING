@@ -23,6 +23,7 @@ gnupg/gpg-agent.conf -> .gnupg/
 gnupg/gpg.conf -> .gnupg/
 irssi -> .irssi/config
 mplayer -> .mplayer/config
+newsboat -> .newsboat/config
 ssh/authorized_keys -> .ssh/
 ssh/config -> .ssh/
 ssh/known_hosts -> .ssh/
