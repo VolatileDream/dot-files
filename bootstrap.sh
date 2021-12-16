@@ -20,7 +20,7 @@ gpg_setup() {
   # use them when we connect via ssh. We need to import & ultimate-trust the
   # imported key.
 
-  curl "$GPG_KEY" | gpg2 --import
+  curl "$GPG_KEY_URL" | gpg2 --import
   echo "${GPG_KEY_FP}:6:" | gpg2 --import-ownertrust
 
   # SSH might have have started an agent, we need to switch over to gpg.
@@ -32,7 +32,6 @@ gpg_setup() {
 }
 
 setup() {
-  readonly tempd=`mktemp --directory`
   install git curl
   install pcscd scdaemon gnupg2 gnupg-agent
 
@@ -42,13 +41,14 @@ setup() {
 
   gpg_setup
 
-  # this is a good test.
-  ssh git@github.com
-
   [[ -d "$HOME/workbench" ]] || git clone "$WORKBENCH_REPO" "$HOME/workbench"
 
-  cd "$HOME/bin/" ; ./dot-init
-  cd "$HOME/workbench" ; tup # tup should be built by dot-files.
+  cd "$HOME/bin/" ; ./dot-init --no-submodules
+  cd "$HOME/workbench"
+  git submodule init
+  git submodule update
+  ./config/ubuntu-setup/install
+  tup # tup should be built by dot-files.
 }
 
 set -o errexit -o errtrace -o pipefail -o nounset

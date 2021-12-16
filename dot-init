@@ -16,4 +16,6 @@ do-linking(){
 }
 
 do-linking
-do-submodules
+if [[ "$1" != "--no-submodules" ]]; then
+  do-submodules
+fi
