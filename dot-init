@@ -4,13 +4,15 @@
 cd "`dirname "$(readlink -f "$0")"`"
 
 do-submodules(){
+    git submodule init
+    git submodule update
     # submodules are symlinked using git
     cd "submodules/" ; make --no-builtin-rules --no-builtin-variables
 }
 
 do-linking(){
     config_dir="config"
-    cat "${config_dir}/MAPPING" | dot-deploy --config "${config_dir}" --root "$HOME"
+    cat "${config_dir}/MAPPING" | ./dot-deploy --config "${config_dir}" --root "$HOME"
 }
 
 do-linking
