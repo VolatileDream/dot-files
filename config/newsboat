@@ -3,7 +3,7 @@ selecttag-format "[%4i] (%3n / %2u) %T"
 
 # Refresh options
 refresh-on-startup no
-reload-threads 10
+reload-threads 25
 
 # Highlights for headings
 highlight feedlist "----.*----" red
