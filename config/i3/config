@@ -212,7 +212,7 @@ bindsym $mod+l exec xautolock -locknow
 # Start on run
 # note that all the commands below fork / explicitly told to fork in /bin/sh
 # this reduces the amount of processes that stay around while this gets set up.
-exec --no-startup-id /usr/bin/xautolock -time 10 -locker /home/jex/bin/screen-lock &
+exec --no-startup-id /usr/bin/xautolock -time 10 -locker $HOME/bin/screen-lock &
 exec --no-startup-id /usr/bin/pulseaudio --start --log-target=syslog
 
 # Setup
