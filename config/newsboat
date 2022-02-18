@@ -42,3 +42,6 @@ ignore-article "*" "title =~ \"#shorts\""
 
 # First We Feast -> Only "Hot Ones"
 ignore-article "https://www.youtube.com/feeds/videos.xml?channel_id=UCPD_bxCRGpmmeQcbe2kpPaA" "title !~ \"Hot Ones\""
+
+# Daily WTF -> no friday "Error'd" posts
+ignore-article "http://syndication.thedailywtf.com/TheDailyWtf" "title =~ \"Error'd\""
