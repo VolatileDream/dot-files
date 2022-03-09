@@ -5,7 +5,7 @@
 #       Instead use \001 and \002, these work correctly in more situations.
 
 # if we don't have awk, enable fast PS1
-[ -x /usr/bin/gawk ] || FAST_PS1="yes"
+which gawk >/dev/null || FAST_PS1="yes"
 
 ps_prompt=""
 prompt(){
