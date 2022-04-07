@@ -17,6 +17,7 @@ set hidden	        " Hide buffers when they are abandoned
 
     set tabstop=2		" number of visual spaces per TAB
     set softtabstop=2	" number of spaces in tab when editing
+    set shiftwidth=2 " Indent amount
     set expandtab		" tabs are spaces
 
 " Fancy formatting things
@@ -36,4 +37,11 @@ set hidden	        " Hide buffers when they are abandoned
 
     " On commit, spellcheck
     autocmd FileType gitcommit setlocal spell
+
+" Settings provided by debian defaults, but need to be imported for other systems.
+
+set nocompatible
+set nomodeline
+set backspace=indent,eol,start
+set ruler
 
