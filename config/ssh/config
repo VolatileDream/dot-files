@@ -18,5 +18,7 @@ Host *
   Protocol 2
   # Don't care about the record of where, it's more useful for manipulating key checking
   HashKnownHosts no
+  # Don't put IPs in known_hosts, they're not super useful.
+  CheckHostIP no
   StrictHostKeyChecking ask
 
