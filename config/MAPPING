@@ -13,6 +13,7 @@ i3/config -> .config/i3/config
 i3/layouts -> .config/i3/layouts
 
 config/dunst/ -> .config/dunst/
+config/alacritty.yml -> .config/
 config/environment.variables -> .config/
 config/i3status.config -> .config/i3status/config
 config/lxterminal/lxterminal.conf -> .config/lxterminal/
