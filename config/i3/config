@@ -130,6 +130,10 @@ bindsym $mod+8 workspace 8
 bindsym $mod+9 workspace 9
 bindsym $mod+0 workspace 10
 
+# Enable going back to the previous workspace by
+# using the same workspace shortcut again.
+workspace_auto_back_and_forth on
+
 # move focused container to workspace
 bindsym $mod+Control+grave move scratchpad
 bindsym $mod+Control+1 move container to workspace 1
