@@ -25,7 +25,8 @@
             "percent": 0.5,
             "swallows": [
                {
-               "class": "terminal"
+                "class": "tabbed",
+                "instance": "Alacritty"
                }
             ],
             "type": "con"
@@ -41,7 +42,8 @@
     "percent": 0.5,
     "swallows": [
        {
-        "class": "terminal"
+        "class": "tabbed",
+        "instance": "Alacritty"
        }
     ],
     "type": "con"

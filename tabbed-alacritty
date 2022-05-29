@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+#
+# This is a wrapper around Alacritty & suckless tabbed.
+#
+# Meant to be invoked without arguments, or with `--embed <id>`.
+#
+# This sets up tabbed & alacritty such that there's a single alacritty
+# instance running inside of tabbed (by using `msg create-window`) and
+# `--embed`. By default, this might not work because running the msg
+# command will search for an Alacritty socket, and find the wrong one.
+
+main() {
+  case "$1" in
+    "")
+      export ALACRITTY_SOCKET="/run/user/${UID}/alacritty-$$.sock"
+      exec tabbed \
+        -n Alacritty \
+        -c tabbed-alacritty --embed
+      ;;
+
+    --embed)
+      shift
+      if [ -z "$ALACRITTY_SOCKET" ]; then
+        echo "Unable to create new alacritty tab 'ALACRITTY_SOCKET' not set" >> /dev/stderr
+        return 1
+      elif [ ! -S "$ALACRITTY_SOCKET" ]; then
+        exec alacritty --socket "$ALACRITTY_SOCKET" --embed "$@"
+      else
+        exec alacritty msg --socket "$ALACRITTY_SOCKET" create-window
+      fi
+      ;;
+
+    *)
+      echo "Unknown arguments: $@" >> /dev/stderr
+      echo "Expected '--embed <id>' or no arguments" >> /dev/stderr
+      return 1
+      ;;
+  esac
+  # All branches end in exec, clearly there was a failure.
+}
+
+main "$@"

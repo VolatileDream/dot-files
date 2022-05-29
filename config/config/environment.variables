@@ -1,5 +1,5 @@
 source ~/.selected_editor
-export TERMINAL=alacritty
+export TERMINAL=tabbed-alacritty
 export EDITOR=$SELECTED_EDITOR
 export BROWSER=w3m
 export PAGER="less"
