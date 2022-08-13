@@ -130,9 +130,11 @@ bindsym $mod+8 workspace 8
 bindsym $mod+9 workspace 9
 bindsym $mod+0 workspace 10
 
-# Enable going back to the previous workspace by
-# using the same workspace shortcut again.
-workspace_auto_back_and_forth on
+# This is not ideal.
+# Really what I want is to enable auto_back_and_forth temporarily when i change
+# workspace, and then disable it after a timeout. This ensures that when I
+# forget where I came from, the back_and_forth has expired. This approximates
+bindsym $mod+Tab workspace back_and_forth
 
 # move focused container to workspace
 bindsym $mod+Control+grave move scratchpad
