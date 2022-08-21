@@ -6,36 +6,63 @@
 import contextlib
 import http.server
 import os
+import socket
 
 from functools import partial
+
+def main(args):
+  all_interfaces = set([s[1] for s in socket.if_nameindex()])
+
+  if args.list_interfaces:
+    for iface in all_interfaces:
+      print(iface)
+    return 0
+
+  bind_addr = args.interface
+  bind_interface = args.interface
+
+  if args.all_interfaces:
+    bind_addr = None
+    bind_interface = None
+    print("binding all interfaces...")
+  elif bind_interface not in all_interfaces:
+    print(f"binding to addr {bind_addr}")
+    bind_interface = None
+  else:
+    print(f"binding to interface {bind_interface}")
+    bind_addr = None
+
+  # ensure dual-stack is not disabled; ref #38907
+  class DualStackServer(http.server.ThreadingHTTPServer):
+    def server_bind(self):
+      if bind_interface:
+        print(f"Binding {bind_interface}...")
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_BINDTODEVICE,
+                               bytes(bind_interface, "utf8"))
+      # suppress exception when protocol is IPv4
+      with contextlib.suppress(Exception):
+        self.socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
+      return super().server_bind()
+
+  http.server.test(
+      HandlerClass=partial(http.server.SimpleHTTPRequestHandler, directory=os.getcwd()),
+      ServerClass=DualStackServer,
+      port=args.port,
+      bind=bind_addr,
+  )
 
 if __name__ == '__main__':
   import argparse
 
   parser = argparse.ArgumentParser()
+  parser.add_argument('-l', '--list-interfaces', action='store_true', default=False,
+                      help='Convenience function to list the names of all interfaces.')
+  parser.add_argument('-i', '--interface', default='127.0.0.1',
+                      help='Interface to bind on, by default localhost')
   parser.add_argument('--all-interfaces', action='store_true', default=False,
                       help='Bind to all interfaces (default: only localhost)')
   parser.add_argument('port', action='store', default=8000, type=int,
                       nargs='?', help='Specify alternate port (default: 8000)')
   args = parser.parse_args()
 
-
-  # ensure dual-stack is not disabled; ref #38907
-  class DualStackServer(http.server.ThreadingHTTPServer):
-    def server_bind(self):
-      # suppress exception when protocol is IPv4
-      with contextlib.suppress(Exception):
-        self.socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
-      return super().server_bind()
-
-  bind = 'localhost'
-  if args.all_interfaces:
-    bind = None
-
-  http.server.test(
-      HandlerClass=partial(http.server.SimpleHTTPRequestHandler, directory=os.getcwd()),
-      ServerClass=DualStackServer,
-      port=args.port,
-      bind=bind,
-  )
-
+  main(args)
