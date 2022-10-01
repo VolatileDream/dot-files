@@ -1,1 +1,4 @@
 alias ungron='gron -u'
+# Need to pass '-v' to subrepo to see which remotes it's talking to.
+# Otherwise it outputs nothing, and the yubikey blinks a bunch.
+alias subrepo='git subrepo -v'
