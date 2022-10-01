@@ -10,4 +10,4 @@ export LESS="--HILITE-UNREAD --RAW-CONTROL-CHARS"
 # hint: it's a symbolic link.
 export PASSWORD_STORE_DIR="$HOME/passwords"
 
-export PATH="$HOME/bin:$HOME/workbench/bin:$PATH"
+export PATH="$HOME/bin:$HOME/workbench/bin:$HOME/.cargo/bin:$PATH"
