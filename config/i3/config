@@ -210,7 +210,7 @@ bindsym XF86AudioMute exec pactl set-sink-mute @DEFAULT_SINK@ toggle
 bindsym Print exec scrot
 # Brightness
 bindsym XF86MonBrightnessUp exec brightnessctl set 5%+
-bindsym XF86MonBrightnessDown exec brightnessctl set 5%-
+bindsym XF86MonBrightnessDown exec brightnessctl --min-value=1 set 5%-
 
 # Start the screensaver
 bindsym $mod+l exec xautolock -locknow
