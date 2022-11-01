@@ -1,6 +1,6 @@
 # don't put duplicate lines or lines starting with space in the history.
 # See bash(1) for more options
-HISTCONTROL=ignoreboth
+HISTCONTROL=ignorespace
 
 # Set the time format to empty, to force bash to write the timestamp to storage.
 HISTTIMEFORMAT=" "
