@@ -9,6 +9,12 @@ path-reset(){
 	# reset the path to whatever it was before
 	export PATH="$BASE_PATH"
 }
+path-diff() {
+  # Use side-by-side to see the list of paths to determine the
+  # ordering of the change, since ordering of path segments
+  # will affect resolution on top the addition of new segments.
+  diff --side-by-side <(echo "$PATH" | tr : '\n') <(echo "$BASE_PATH" | tr : '\n')
+}
 path-include(){
 	if [ $# -gt 0 ]; then
 		while [ $# -gt 0 ]; do
