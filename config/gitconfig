@@ -13,6 +13,8 @@
 	recurseSubmodules = on-demand
 [submodule]
 	recurse = true
+[log]
+  first-parent = true
 [diff]
 	submodule = log
 	ignoreSubmodules = dirty
