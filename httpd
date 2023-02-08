@@ -36,7 +36,6 @@ def main(args):
   class DualStackServer(http.server.ThreadingHTTPServer):
     def server_bind(self):
       if bind_interface:
-        print(f"Binding {bind_interface}...")
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_BINDTODEVICE,
                                bytes(bind_interface, "utf8"))
       # suppress exception when protocol is IPv4
