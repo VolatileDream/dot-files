@@ -1,17 +1,17 @@
-enter /home/jex/workspace/([^/]+)
+enter /home/gianni/workspace/([^/]+)
     if [ -d "$ONDIRWD/.venv" ]; then
         source "$ONDIRWD/.venv/bin/activate"
     fi
-enter /home/jex/workspace/scratch/([^/]+)
+enter /home/gianni/workspace/scratch/([^/]+)
     if [ -d "$ONDIRWD/.venv" ]; then
         source "$ONDIRWD/.venv/bin/activate"
     fi
 
-leave /home/jex/workspace/([^/]+)
+leave /home/gianni/workspace/([^/]+)
     if [ -d "$ONDIRWD/.venv" ]; then
         deactivate
     fi
-leave /home/jex/workspace/scratch/([^/]+)
+leave /home/gianni/workspace/scratch/([^/]+)
     if [ -d "$ONDIRWD/.venv" ]; then
         deactivate
     fi
