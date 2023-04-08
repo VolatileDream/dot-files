@@ -7,95 +7,46 @@
 // appear and disappear very quickly).
 {
     "floating": "auto_off",
-    "layout": "splitv",
-    "percent": 0.5,
-    "type": "con",
-    "nodes": [
-        // Discord
-        {
-            "floating": "auto_off",
-            "geometry": {
-            },
-            "name": "- Discord$",
-            "percent": 1,
-            "swallows": [
-               {
-                "class": "^discord$",
-                "instance": "^discord$",
-                "window_role": "^browser\\-window$"
-               }
-            ],
-            "type": "con"
-        },
-        {
-            "floating": "auto_off",
-            "geometry": {
-            },
-            "name": " - Discord",
-            "percent": 0.5,
-            "swallows": [
-               {
-                "class": "^discord$",
-                "instance": "^discord$",
-                "window_role": "^browser\\-window$"
-               }
-            ],
-            "type": "con"
-        },
-        {
-            "floating": "auto_off",
-            "geometry": {
-            },
-            "name": "Keybase",
-            "percent": 0.5,
-            "swallows": [
-               {
-                "class": "^Keybase$",
-                "instance": "^keybase$",
-                "title": "^Keybase$"
-               }
-            ],
-            "type": "con"
-        }
-    ]
-}
-
-// Steam is also poorly behaved.
-{
-  "floating": "auto_off",
-  "layout": "splitv",
-  "percent": 0.5,
-  "type": "con",
-  "nodes": [
-    {
-        "floating": "auto_off",
-        "geometry": {
-        },
-        "name": "Friends List",
-        "percent": 0.5,
-        "swallows": [
-           {
-            "class": "^Steam$",
-            "instance": "^Steam$",
-            "title": "^Friends\\ List"
-           }
-        ],
-        "type": "con"
+    "geometry": {
     },
-    {
-        "floating": "auto_off",
-        "geometry": {
-        },
-        "name": "Friends List",
-        "percent": 0.5,
-        "swallows": [
-           {
-            "class": "^Steam$",
-            "instance": "^Steam$",
-            "title": "^Friends\\ List"
-           }
-        ],
-        "type": "con"
-    }
-  ]
+    "name": "- Discord$",
+    "percent": 1,
+    "swallows": [
+       {
+        "class": "^discord$",
+        "instance": "^discord$",
+        "window_role": "^browser\\-window$"
+       }
+    ],
+    "type": "con"
+}
+{
+    "floating": "auto_off",
+    "geometry": {
+    },
+    "name": " - Discord",
+    "percent": 0.5,
+    "swallows": [
+       {
+        "class": "^discord$",
+        "instance": "^discord$",
+        "window_role": "^browser\\-window$"
+       }
+    ],
+    "type": "con"
+}
+{
+    "floating": "auto_off",
+    "geometry": {
+    },
+    "name": "Keybase",
+    "percent": 0.5,
+    "swallows": [
+       {
+        "class": "^Keybase$",
+        "instance": "^keybase$",
+        "title": "^Keybase$"
+       }
+    ],
+    "type": "con"
 }
