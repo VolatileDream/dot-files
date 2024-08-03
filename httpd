@@ -9,6 +9,7 @@ import os
 import socket
 
 from functools import partial
+from http import HTTPStatus
 
 def main(args):
   all_interfaces = set([s[1] for s in socket.if_nameindex()])
@@ -43,8 +44,15 @@ def main(args):
         self.socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
       return super().server_bind()
 
+  class LoggingHandler(http.server.SimpleHTTPRequestHandler):
+    def log_request(self, code='-', size='-'):
+      if isinstance(code, HTTPStatus):
+          code = code.value
+      self.log_message('"%s" \'%s\' %s %s',
+                         self.requestline, self.headers["User-Agent"] or "-", str(code), str(size))
+
   http.server.test(
-      HandlerClass=partial(http.server.SimpleHTTPRequestHandler, directory=os.getcwd()),
+      HandlerClass=partial(LoggingHandler, directory=os.getcwd()),
       ServerClass=DualStackServer,
       port=args.port,
       bind=bind_addr,
