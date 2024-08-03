@@ -222,7 +222,7 @@ exec --no-startup-id /usr/bin/xautolock -time 10 -locker $HOME/bin/screen-lock &
 exec --no-startup-id /usr/bin/pulseaudio --start --log-target=syslog
 
 # Setup
-exec --no-startup-id /usr/bin/feh --bg-fill --draw-filename --randomize --recursive ~/wallpaper
+exec --no-startup-id /usr/bin/feh --bg-fill --nofehbg --randomize --recursive ~/wallpaper
 
 # Call the autostart program, that sets up all the normal apps I have open.
 exec --no-startup-id $HOME/.config/i3/autostart.sh &
