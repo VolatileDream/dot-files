@@ -1,6 +1,6 @@
 [user]
 	name = Gianni Gambetti
-	email = gianni@gambetti.ca
+	email = git@gianni.cubecubed.xyz
 	signingkey = AD880C27
 [push]
 	default = simple
@@ -18,6 +18,7 @@
 [diff]
 	submodule = log
 	ignoreSubmodules = dirty
+	external = difft
 [init]
 	defaultBranch = main
 [pull]
