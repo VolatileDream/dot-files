@@ -1,6 +1,7 @@
 noremap t l
 set wildmode=longest,list,full
 set wildmenu
+set number
 
 set showcmd         " Show (partial) command in status line.
 set autowrite		" Automatically save before commands like :next and :make
