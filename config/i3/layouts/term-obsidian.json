@@ -1,0 +1,30 @@
+{
+    "floating": "auto_off",
+    "geometry": {
+    },
+    "name": "terminal",
+    "percent": 0.5,
+    "swallows": [
+       {
+        "class": "obsidian",
+        "instance": "obsidian"
+       }
+    ],
+    "type": "con"
+}
+
+{
+    "floating": "auto_off",
+    "geometry": {
+    },
+    "name": "terminal",
+    "percent": 0.5,
+    "swallows": [
+       {
+        "class": "tabbed",
+        "instance": "Alacritty"
+       }
+    ],
+    "type": "con"
+}
+

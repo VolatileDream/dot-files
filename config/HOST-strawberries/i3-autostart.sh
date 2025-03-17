@@ -3,7 +3,7 @@
 i3_setup() {
   # Single monitor default.
   read -d '' i3_set << EOF
-    workspace 1; append_layout $HOME/.config/i3/layouts/term-disks.json;
+    workspace 1; append_layout $HOME/.config/i3/layouts/term-obsidian.json;
     workspace 2; append_layout $HOME/.config/i3/layouts/firefox.json;
     workspace 3; append_layout $HOME/.config/i3/layouts/discord.json;
 EOF
@@ -13,9 +13,8 @@ EOF
 
 start_programs() {
   firefox &
+  obsidian.AppImage &
   i3-sensible-terminal &
-  i3-sensible-terminal &
-  gnome-disks &
   discord &
   run_keybase &
 }
