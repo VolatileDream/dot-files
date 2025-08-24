@@ -1,0 +1,55 @@
+#!/bin/bash
+
+find_dir() {
+  local WALLPAPER="$HOME/wallpaper"
+  if [ -d "$1" ]; then
+    WALLPAPER="$1"
+  fi
+  echo "$WALLPAPER"
+}
+
+set() {
+  local WALLPAPER=`find_dir "$1"` ; shift
+  local OUTPUT="$WALLPAPER/.used"
+  local FILE="$(
+  find "$WALLPAPER" -type f -not -iname '.*' \
+    | ~/workbench/bin/random-sample --size 1 )"
+  echo "$FILE" > "$OUTPUT"
+  exec /usr/bin/feh --bg-fill --no-fehbg "$FILE"
+}
+
+remove() {
+  local WALLPAPER=`find_dir "$1"` ; shift
+  local OUTPUT="$WALLPAPER/.used"
+  if [ ! -f "$OUTPUT" ]; then
+    echo "Could not find $OUTPUT" > /dev/stderr
+    return 1
+  fi
+
+  local FILE="$(cat "$OUTPUT")"
+  if [ ! -f "$FILE" ]; then
+    echo "Could not find $FILE" > /dev/stderr
+    return 1
+  fi
+
+  echo "$FILE"
+}
+
+unloadable() {
+  local WALLPAPER=`find_dir "$1"` ; shift
+  /usr/bin/feh --recursive --unloadable "$WALLPAPER"
+}
+
+main() {
+  local cmd="$1"; shift
+  case "$cmd" in
+    --set) set "$@" ;;
+    --remove) remove "$@" ;;
+    --unloadable) unloadable "$@" ;;
+    *)
+      echo "wallpaper needs to be given a command: --set, --remove, or --unloadable"
+      ;;
+  esac
+}
+
+main "$@"
