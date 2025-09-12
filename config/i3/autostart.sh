@@ -18,6 +18,7 @@ start_programs() {
   gnome-disks &
   discord &
   run_keybase &
+  signal-desktop &
   # steam-wrapper &
 }
 

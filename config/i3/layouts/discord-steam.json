@@ -96,6 +96,21 @@
            }
         ],
         "type": "con"
+    },
+    {
+        "floating": "auto_off",
+        "geometry": {
+        },
+        "name": "Signal",
+        "percent": 0.5,
+        "swallows": [
+           {
+            "class": "^Signal$",
+            "instance": "^signal$",
+            "title": "^Signal$"
+           }
+        ],
+        "type": "con"
     }
   ]
 }

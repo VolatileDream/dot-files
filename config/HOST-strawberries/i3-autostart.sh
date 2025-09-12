@@ -17,6 +17,7 @@ start_programs() {
   i3-sensible-terminal &
   discord &
   run_keybase &
+  signal-desktop &
 }
 
 i3_setup && start_programs && i3-msg "workspace 1;"
