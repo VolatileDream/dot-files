@@ -39,9 +39,13 @@ ignore-mode "display"
 
 # Try to filter out anything from youtube with shorts
 ignore-article "*" "title =~ \"#shorts\""
+ignore-article "*" "link =~ \"youtube.com/shorts/\""
 
 # First We Feast -> Only "Hot Ones"
-ignore-article "https://www.youtube.com/feeds/videos.xml?channel_id=UCPD_bxCRGpmmeQcbe2kpPaA" "title !~ \"Hot Ones\""
+ignore-article "https://www.youtube.com/feeds/videos.xml?channel_id=UCPD_bxCRGpmmeQcbe2kpPaA" "title !~ \"\\| Hot Ones\""
+
+# The Escapist -> Only "Zero Punctuation"
+ignore-article "https://www.youtube.com/feeds/videos.xml?channel_id=UCqg5FCR7NrpvlBWMXdt-5Vg" "title !~ \"Zero Punctuation\""
 
 # Daily WTF -> no friday "Error'd" posts
 ignore-article "http://syndication.thedailywtf.com/TheDailyWtf" "title =~ \"Error'd\""
