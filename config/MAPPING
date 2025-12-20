@@ -28,3 +28,4 @@ newsboat -> .newsboat/config
 ssh/authorized_keys -> .ssh/
 ssh/config -> .ssh/
 ssh/known_hosts -> .ssh/
+fonts/ -> .local/share/fonts/
