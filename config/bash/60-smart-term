@@ -10,11 +10,3 @@ if which dircolors >/dev/null ; then
     alias egrep='egrep --color=auto'
 fi
 
-# If this is an xterm set the title to user@host:dir
-case "$TERM" in
-xterm*|rxvt*|screen)
-    PS1="\[\e]0;\$(prompt)\u@\h: \w\a\]$PS1"
-    ;;
-*)
-    ;;
-esac

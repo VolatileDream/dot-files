@@ -19,88 +19,25 @@ prompt(){
 }
 
 prompt-sigil(){
-  # VIM is set when the shell is started from inside vim
-	[ -n "$VIM" ] && echo -n "[vim] "
 	[ "$PATH" != "$BASE_PATH" ] && echo -en "\001\e[0;31m\002*\001\e[m\002"
 	echo ">"
 }
 
-move-to-ps1() {
-  # Problem: we want to go to the beginning of the PS1 string.
-  # All we know, is that we're executed as part of PS0: after the
-  # command is entered, but before it's executed.
-  #
-  # We need to reconstruct the number of lines that have been printed based
-  # on the prompt & the input provided by the user.
-
-  # Evaluate the PS1 command, and strip out most of the special characters
-  # to get only the printed characters from the prompt.
-  #
-  # Also handles multi-line prompts and time positioning off from the
-  # beginning.
-  read -d '' prompt_awk <<- EOF
-    BEGIN {lines=0;row=0;col=0;last=0;}
-    {lines+=1;last=length();}
-    /--:--/ {
-      if (row) { next; }
-      gsub(/--:--.*\$/, "");
-      col=length();
-      row=lines;
-    }
-    END {
-      print(col " " (lines - row) " " last);
-    }
-EOF
-  readonly -a pos=(`echo "${PS1@P}" | sed "s/\x01[^\x02]*\x02//g" | gawk -- "$prompt_awk" `)
-  # Rework the array indicies
-  readonly time_offset="${pos[0]}"
-  readonly prompt_line="${pos[1]}"
-  readonly prompt_len="${pos[2]}"
-
-  # Convert the history into a series of line lengths.
-  # Convert the line lengths into the number of rendered lines.
-  # Output the sum of rendered lines.
-  read -d '' linelength_awk <<- EOF
-    function ceil(val) {
-      return (val == int(val)) ? val : int(val) + 1;
-    }
-    BEGIN { first=1; sum=0;}
-    {
-      l=length();
-      if (first) {
-        first=0;
-        # Strip out the history entry text from the line.
-        gsub(/^\\\\s*[0-9]*\\\\s*/, "");
-        # We have to add the length of the prompt to the first line.
-        l=length() + ${prompt_len};
-        sum += $prompt_line;
-      }
-      # Lines wrap after $COLUMNS characters.
-      lines=ceil(l / $COLUMNS);
-      sum += lines;
-    }
-    END { print(sum);}
-EOF
-  readonly rows=`HISTTIMEFORMAT= history 1 | gawk -- "$linelength_awk"`
-  # Since the input flows down, we have to move up.
-  echo -en "\e[${rows}A"
-
-  # Move if time isn't at the beginning.
-  if [ ${time_offset} -gt 0 ]; then
-    echo -en "\e[${time_offset}C"
-  fi
-}
-
 if [ -n "${FAST_PS1}" ]; then
     path_bits="\w"
-    time_bit="xx:xx"
 else
     source "$HOME/bin/path-bits"
     path_bits='$(path-bits)'
-    time_bit="--:--"
-    PS0="\001\e[s\002\$(move-to-ps1)\A\001\e[u\002"
 fi
-PS1="${time_bit} \$(prompt)\u@\h:${path_bits} \$(prompt-sigil) "
+PS1="\$(prompt)\u@\h:${path_bits} \$(prompt-sigil) "
 
 unset path_bits
-unset time_bit
+
+# If this is an xterm set the title to user@host:dir
+case "$TERM" in
+xterm*|rxvt*|screen)
+    PS1="\[\e]0;\$(prompt)\u@\h: \w\a\]$PS1"
+    ;;
+*)
+    ;;
+esac
