@@ -29,3 +29,4 @@ ssh/authorized_keys -> .ssh/
 ssh/config -> .ssh/
 ssh/known_hosts -> .ssh/
 fonts/ -> .local/share/fonts/
+starship.toml -> .config/starship.toml

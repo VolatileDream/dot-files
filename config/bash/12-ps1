@@ -41,3 +41,5 @@ xterm*|rxvt*|screen)
 *)
     ;;
 esac
+
+which starship > /dev/null && eval "$(starship init bash)"
