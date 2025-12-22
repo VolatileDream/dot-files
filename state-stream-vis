@@ -79,7 +79,7 @@ def state_gap_decider(strategy):
     def decider(last_state, last_time, next_time=None):
         if next_time == None:
             # Invoked after a time skip
-            if strategy is "continue":
+            if strategy == "continue":
                 return last_state
             return "unknown"
 
