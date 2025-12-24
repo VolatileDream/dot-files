@@ -12,6 +12,7 @@ EOF
 }
 
 start_programs() {
+  x-server-config
   firefox &
   obsidian.AppImage &
   i3-sensible-terminal &

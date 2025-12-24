@@ -1,0 +1,7 @@
+#!/bin/sh
+# Change capslock to backspace
+setxkbmap -option caps:backspace
+# needed to get capslock key repeat to work right.
+setxkbmap -option shift:both_capslock
+setxkbmap -option compose:ralt
+xmodmap -e "clear Lock"

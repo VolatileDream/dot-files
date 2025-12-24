@@ -12,6 +12,7 @@ EOF
 }
 
 start_programs() {
+  x-server-config
   firefox &
   i3-sensible-terminal &
   i3-sensible-terminal &

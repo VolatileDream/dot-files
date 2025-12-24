@@ -1,0 +1,8 @@
+# this file is sourced by X11 startup
+
+# GPG is started by systemd --user, so find it.
+# It ... might happen before this runs?
+export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
+
+# All of the environment variables.
+. "$HOME/.config/environment.variables"

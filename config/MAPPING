@@ -2,10 +2,9 @@ bash_logout -> /.bash_logout
 bashrc -> /.bashrc
 gitconfig -> /.gitconfig
 ondirrc -> /.ondirrc
+profile -> /.profile
 selected_editor -> /.selected_editor
 vimrc -> /.vimrc
-xsession -> /.xsession
-xsessionrc -> /.xsessionrc
 
 bash/ -> .config/bash/
 i3/autostart.sh -> .config/i3/autostart.sh
